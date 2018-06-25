@@ -45,6 +45,7 @@
     "appId": "org.develar.ElectronReact",
     "files": [
       "dist/",
+      "app/assets/",
       "node_modules/",
       "app.html",
       "main.prod.js",
