@@ -1,4 +1,7 @@
 .container {
+  border-style: solid;
+  border-color: rgb(123, 113, 202);
+  border-width: 32px;
 }
 
 .pixelated {

@@ -5,8 +5,7 @@
     "allowImportExportEverywhere": true
   },
   "extends": [
-    "airbnb",
-    "prettier"
+    "react-app",
   ],
   "env": {
     "browser": true,

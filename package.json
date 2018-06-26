@@ -45,7 +45,6 @@
     "appId": "org.develar.ElectronReact",
     "files": [
       "dist/",
-      "app/assets/",
       "node_modules/",
       "app.html",
       "main.prod.js",
@@ -81,7 +80,10 @@
     "directories": {
       "buildResources": "resources",
       "output": "release"
-    }
+    },
+    "extraFiles": [
+      "app/assets/*"
+    ]
   },
   "repository": {
     "type": "git",
@@ -204,9 +206,11 @@
   "dependencies": {
     "devtron": "^1.4.0",
     "electron-debug": "^2.0.0",
+    "eslint-config-react-app": "^2.1.0",
     "font-awesome": "^4.7.0",
     "history": "^4.7.2",
     "react": "^16.4.1",
+    "react-cursor-position": "^2.5.0",
     "react-dom": "^16.4.1",
     "react-hot-loader": "^4.3.3",
     "react-redux": "^5.0.7",

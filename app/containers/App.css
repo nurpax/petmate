@@ -1,31 +1,41 @@
 
-.topmenu {
-  grid-area: topmenu;
-  background-color: #a7a;
+.topPadding {
+  background-color: #000;
   padding-top: 10px;
   padding-bottom: 10px;
+}
+
+.empty {
+  composes: topPadding;
+  grid-area: empty;
+}
+
+.topmenu {
+  composes: topPadding;
+  grid-area: topmenu;
 }
 
 .leftmenubar {
   grid-area: leftmenu;
   background-color: rgb(51, 51, 51);
-  height: 100vh;
 }
 
 .editor {
   grid-area: editor;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .appGrid {
-  width: 100%;
-  height: 100%;
   display: grid;
 
+  height:100vh;
   grid-template-columns: 50px auto;
-  grid-template-rows: auto auto;
+  grid-template-rows: auto 1fr;
 
   grid-template-areas:
-    "topmenu topmenu"
+    "empty topmenu"
     "leftmenu editor";
 }
 

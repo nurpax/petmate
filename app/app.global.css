@@ -11,6 +11,7 @@ body {
   background-color: rgb(25,25,25);
   font-family: Arial, Helvetica, Helvetica Neue, serif;
   overflow-y: hidden;
+  overflow-x: hidden;
   margin:0px;
 }
 

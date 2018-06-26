@@ -1,5 +1,6 @@
 // @flow
-import React, { Component } from 'react';
+import React, { Component, PureComponent } from 'react';
+import ReactCursorPosition from 'react-cursor-position';
 import styles from './Editor.css';
 
 var fs = require('fs')
@@ -9,7 +10,7 @@ type Props = {};
 
 class CharsetCache {
   constructor () {
-    const data = fs.readFileSync('app/assets/system-charset.bin')
+    const data = fs.readFileSync('./app/assets/system-charset.bin')
 
     this.chars = []
     this.dataURIs = []
@@ -22,10 +23,12 @@ class CharsetCache {
         const p = data[boffs+y]
         for (let i = 0; i < 8; i++) {
           const v = ((128 >> i) & p) ? 255 : 0
+          const dark  = { r:71, g:55, b:172 }
+          const light = { r:123, g:113, b:202 }
+          char.push(light.b)
+          char.push(light.g)
+          char.push(light.r)
           char.push(v)
-          char.push(v)
-          char.push(v)
-          char.push(255)
         }
       }
       this.chars.push(char)
@@ -41,20 +44,64 @@ class CharsetCache {
 
 const charset = new CharsetCache()
 
+class Char extends PureComponent {
+  render () {
+    const { x, y, screencode } = this.props
+    const s = {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      transform: `translate(${x*8}px, ${y*8}px)`
+    }
+    return <img draggable={false} style={s} className={styles.pixelated} width={8} height={8} src={charset.getDataURI(screencode)} />
+  }
+}
+
+class Framebuffer extends Component {
+  render () {
+    const W = 40
+    const H = 25
+    const colIdx = Math.floor(this.props.position.x / 16)
+    const rowIdx = Math.floor(this.props.position.y / 16)
+    let imgs = []
+    for (var y = 0; y < H; y++) {
+      for (var x = 0; x < W; x++) {
+        const idx = y*W + x
+        let screencode = (x + y*W) & 255
+        if (colIdx === x && rowIdx === y) {
+          screencode = 32
+        }
+        imgs.push(<Char key={idx} x={x} y={y} screencode={screencode} />)
+      }
+    }
+    const divStyle = {
+      position: 'relative',
+      transform: 'scale(2,2)',
+      transformOrigin: '0% 0%',
+    }
+    return (
+      <div style={divStyle}>
+        {imgs}
+      </div>
+    )
+  }
+}
+
 export default class Editor extends Component<Props> {
   props: Props;
 
   render() {
-    const imgs = Array(256).fill(0).map((elt,idx) => {
-      return <img key={idx} className={styles.pixelated} width={16} height={16} src={charset.getDataURI(idx)} />
-    })
+    // Editor needs to specify a fixed width/height because the contents use
+    // relative/absolute positioning and thus seem to break out of the CSS
+    // grid.
+    const s = {width: '640px', height:'400px', backgroundColor: 'rgb(71,55,172)'}
     return (
-      <div>
-        <div className={styles.container} data-tid="container">
-          <h2>EDITOR</h2>
-          {imgs}
-        </div>
+      <div className={styles.container} style={s}>
+        <ReactCursorPosition>
+          <Framebuffer />
+        </ReactCursorPosition>
       </div>
     );
   }
 }
+
