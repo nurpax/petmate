@@ -1,7 +1,20 @@
-.container {
+.editorLayoutContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.fbContainer {
   border-style: solid;
   border-color: rgb(123, 113, 202);
   border-width: 32px;
+  cursor: default;
+}
+
+.csContainer {
+  border-style: none;
+  cursor: crosshair;
+  margin-left: 5px;
 }
 
 .pixelated {

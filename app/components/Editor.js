@@ -57,10 +57,10 @@ class Char extends PureComponent {
   }
 }
 
-class Framebuffer extends Component {
+class CharGrid extends Component {
   render () {
-    const W = 40
-    const H = 25
+    const W = this.props.width
+    const H = this.props.height
     const colIdx = Math.floor(this.props.position.x / 16)
     const rowIdx = Math.floor(this.props.position.y / 16)
     let imgs = []
@@ -87,21 +87,48 @@ class Framebuffer extends Component {
   }
 }
 
-export default class Editor extends Component<Props> {
-  props: Props;
-
-  render() {
+class Framebuffer extends Component {
+  render () {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
     const s = {width: '640px', height:'400px', backgroundColor: 'rgb(71,55,172)'}
     return (
-      <div className={styles.container} style={s}>
+      <div className={styles.fbContainer} style={s}>
         <ReactCursorPosition>
-          <Framebuffer />
+          <CharGrid width={40} height={25} />
         </ReactCursorPosition>
       </div>
-    );
+    )
+  }
+}
+
+class CharSelect extends Component {
+  render () {
+    // Editor needs to specify a fixed width/height because the contents use
+    // relative/absolute positioning and thus seem to break out of the CSS
+    // grid.
+    const s = {width: '256px', height:'256px', backgroundColor: 'rgb(71,55,172)'}
+    return (
+      <div className={styles.csContainer} style={s}>
+        <ReactCursorPosition>
+          <CharGrid width={16} height={16} />
+        </ReactCursorPosition>
+      </div>
+    )
+  }
+}
+
+export default class Editor extends Component<Props> {
+  props: Props;
+
+  render() {
+    return (
+      <div className={styles.editorLayoutContainer}>
+        <Framebuffer />
+        <CharSelect />
+      </div>
+    )
   }
 }
 
