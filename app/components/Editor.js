@@ -1,6 +1,8 @@
 // @flow
 import React, { Component, PureComponent } from 'react';
 import ReactCursorPosition from 'react-cursor-position';
+import classnames from 'classnames'
+
 import styles from './Editor.css';
 
 var fs = require('fs')
@@ -53,25 +55,37 @@ class Char extends PureComponent {
       left: 0,
       transform: `translate(${x*8}px, ${y*8}px)`
     }
-    return <img draggable={false} style={s} className={styles.pixelated} width={8} height={8} src={charset.getDataURI(screencode)} />
+    const cls = classnames(this.props.hoverClass, styles.pixelated)
+    return <img draggable={false} style={s} className={cls} width={8} height={8} src={charset.getDataURI(screencode)} />
   }
 }
 
 class CharGrid extends Component {
+  constructor (props) {
+    super(props)
+    this.images  = Array(props.width*props.height).fill(null)
+    this.classes = Array(props.width*props.height).fill(null)
+  }
+
   render () {
-    const W = this.props.width
-    const H = this.props.height
+    const w = this.props.width
+    const h = this.props.height
     const colIdx = Math.floor(this.props.position.x / 16)
     const rowIdx = Math.floor(this.props.position.y / 16)
-    let imgs = []
-    for (var y = 0; y < H; y++) {
-      for (var x = 0; x < W; x++) {
-        const idx = y*W + x
-        let screencode = (x + y*W) & 255
+    for (var y = 0; y < h; y++) {
+      for (var x = 0; x < w; x++) {
+        const idx = y*w + x
+        let screencode = (x + y*w) & 255
+        let cls = null
         if (colIdx === x && rowIdx === y) {
-          screencode = 32
+          cls = styles.charHover
         }
-        imgs.push(<Char key={idx} x={x} y={y} screencode={screencode} />)
+
+        if (this.images[idx] == null ||
+            this.classes[idx] !== cls) {
+          this.images[idx] = <Char key={idx} hoverClass={cls} x={x} y={y} screencode={screencode} />
+        this.classes[idx] = cls
+        }
       }
     }
     const divStyle = {
@@ -81,7 +95,7 @@ class CharGrid extends Component {
     }
     return (
       <div style={divStyle}>
-        {imgs}
+        {this.images}
       </div>
     )
   }

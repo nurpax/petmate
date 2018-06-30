@@ -5,16 +5,23 @@
 }
 
 .fbContainer {
+  cursor: default;
   border-style: solid;
   border-color: rgb(123, 113, 202);
   border-width: 32px;
-  cursor: default;
 }
 
 .csContainer {
+  cursor: default;
   border-style: none;
-  cursor: crosshair;
   margin-left: 5px;
+}
+
+.charHover {
+  border-style: solid;
+  border-color: rgb(255, 255, 255);
+  border-width: 1px;
+  z-index: 1;
 }
 
 .pixelated {
