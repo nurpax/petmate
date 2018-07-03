@@ -65,26 +65,46 @@ class CharGrid extends Component {
     super(props)
     this.images  = Array(props.width*props.height).fill(null)
     this.classes = Array(props.width*props.height).fill(null)
+    this.screencodes = Array(props.width*props.height).fill(0)
+  }
+
+  getMouseRowCol () {
+    const col = Math.floor(this.props.position.x / 16)
+    const row = Math.floor(this.props.position.y / 16)
+    return { row, col }
+  }
+
+  handleClick = (e) => {
+    this.props.onClickChar(this.getMouseRowCol())
   }
 
   render () {
     const w = this.props.width
     const h = this.props.height
-    const colIdx = Math.floor(this.props.position.x / 16)
-    const rowIdx = Math.floor(this.props.position.y / 16)
+    const rowcol = this.getMouseRowCol()
+    const colIdx = rowcol.col
+    const rowIdx = rowcol.row
     for (var y = 0; y < h; y++) {
       for (var x = 0; x < w; x++) {
         const idx = y*w + x
-        let screencode = (x + y*w) & 255
+        let screencode = this.props.screencodes[x + y*w]
         let cls = null
         if (colIdx === x && rowIdx === y) {
           cls = styles.charHover
         }
+        if (this.props.selected !== undefined) {
+          const { row, col } = this.props.selected
+          if (y === row && x === col) {
+            cls = styles.charSelected
+          }
+        }
 
         if (this.images[idx] == null ||
-            this.classes[idx] !== cls) {
+            this.classes[idx] !== cls ||
+            this.screencodes[idx] !== screencode) {
           this.images[idx] = <Char key={idx} hoverClass={cls} x={x} y={y} screencode={screencode} />
-        this.classes[idx] = cls
+          this.screencodes[idx] = screencode
+          this.classes[idx] = cls
         }
       }
     }
@@ -94,7 +114,7 @@ class CharGrid extends Component {
       transformOrigin: '0% 0%',
     }
     return (
-      <div style={divStyle}>
+      <div onClick={this.handleClick} style={divStyle}>
         {this.images}
       </div>
     )
@@ -102,15 +122,33 @@ class CharGrid extends Component {
 }
 
 class Framebuffer extends Component {
+
+  handleClickChar = (clickLoc) => {
+    this.props.setPixel({...clickLoc, screencode:this.props.curScreencode})
+  }
+
   render () {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
     const s = {width: '640px', height:'400px', backgroundColor: 'rgb(71,55,172)'}
+    const W = 40
+    const H = 25
+    console.log(this.props)
+    const screencodes = Array(W*H)
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        screencodes[y*W + x] = this.props.framebuf[y][x]
+      }
+    }
     return (
       <div className={styles.fbContainer} style={s}>
         <ReactCursorPosition>
-          <CharGrid width={40} height={25} />
+          <CharGrid
+            width={40}
+            height={25}
+            onClickChar={this.handleClickChar}
+            screencodes={screencodes}/>
         </ReactCursorPosition>
       </div>
     )
@@ -123,10 +161,24 @@ class CharSelect extends Component {
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
     const s = {width: '256px', height:'256px', backgroundColor: 'rgb(71,55,172)'}
+    const W = 16
+    const H = 16
+    const screencodes = Array(W*H)
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        screencodes[y*W + x] = (y*W+x) & 255
+      }
+    }
     return (
       <div className={styles.csContainer} style={s}>
         <ReactCursorPosition>
-          <CharGrid width={16} height={16} />
+          <CharGrid
+            width={16}
+            height={16}
+            screencodes={screencodes}
+            selected={this.props.selected}
+            onClickChar={this.props.setSelectedChar}
+          />
         </ReactCursorPosition>
       </div>
     )
@@ -134,13 +186,17 @@ class CharSelect extends Component {
 }
 
 export default class Editor extends Component<Props> {
-  props: Props;
-
   render() {
     return (
       <div className={styles.editorLayoutContainer}>
-        <Framebuffer />
-        <CharSelect />
+        <Framebuffer
+          setPixel={this.props.setPixel}
+          curScreencode={this.props.curScreencode}
+          framebuf={this.props.framebuf} />
+        <CharSelect
+          selected={this.props.selected}
+          setSelectedChar={this.props.setSelectedChar}
+        />
       </div>
     )
   }

@@ -19,6 +19,13 @@
 
 .charHover {
   border-style: solid;
+  border-color: rgba(255, 255, 255, 0.5);
+  border-width: 1px;
+  z-index: 1;
+}
+
+.charSelected {
+  border-style: solid;
   border-color: rgb(255, 255, 255);
   border-width: 1px;
   z-index: 1;
