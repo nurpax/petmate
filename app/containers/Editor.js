@@ -1,14 +1,19 @@
-// @flow
+
 import React, { Component, PureComponent } from 'react';
-import ReactCursorPosition from 'react-cursor-position';
+import { connect } from 'react-redux'
+import ReactCursorPosition from 'react-cursor-position'
 import classnames from 'classnames'
 
+import { Framebuffer } from '../redux/editor'
+import { selectChar } from '../actions/editor'
 import styles from './Editor.css';
+
+const selectedCharScreencode = ({row, col}) => {
+  return row*16 + col
+}
 
 var fs = require('fs')
 const nativeImage = require('electron').nativeImage
-
-type Props = {};
 
 class CharsetCache {
   constructor () {
@@ -25,7 +30,6 @@ class CharsetCache {
         const p = data[boffs+y]
         for (let i = 0; i < 8; i++) {
           const v = ((128 >> i) & p) ? 255 : 0
-          const dark  = { r:71, g:55, b:172 }
           const light = { r:123, g:113, b:202 }
           char.push(light.b)
           char.push(light.g)
@@ -121,10 +125,10 @@ class CharGrid extends Component {
   }
 }
 
-class Framebuffer extends Component {
+class FramebufferView extends Component {
 
   handleClickChar = (clickLoc) => {
-    this.props.setPixel({...clickLoc, screencode:this.props.curScreencode})
+    this.props.Framebuffer.setPixel({...clickLoc, screencode:this.props.curScreencode})
   }
 
   render () {
@@ -185,12 +189,12 @@ class CharSelect extends Component {
   }
 }
 
-export default class Editor extends Component<Props> {
+class Editor extends Component {
   render() {
     return (
       <div className={styles.editorLayoutContainer}>
-        <Framebuffer
-          setPixel={this.props.setPixel}
+        <FramebufferView
+          Framebuffer={this.props.Framebuffer}
           curScreencode={this.props.curScreencode}
           framebuf={this.props.framebuf} />
         <CharSelect
@@ -201,4 +205,26 @@ export default class Editor extends Component<Props> {
     )
   }
 }
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setSelectedChar: rowcol => {
+      dispatch(selectChar(rowcol))
+    },
+    Framebuffer: Framebuffer.bindDispatch(dispatch)
+  }
+}
+
+const mapStateToProps = state => {
+  const selected = state.editor.selected
+  return {
+    framebuf: state.framebuf.framebuf,
+    selected,
+    curScreencode: selectedCharScreencode(selected)
+  }
+}
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Editor)
 

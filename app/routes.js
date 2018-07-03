@@ -2,12 +2,12 @@
 import React from 'react';
 import { Switch, Route } from 'react-router';
 import App from './containers/App';
-import EditorPage from './containers/EditorPage';
+import Editor from './containers/Editor';
 
 export default () => (
   <App>
     <Switch>
-      <Route path="/" component={EditorPage} />
+      <Route path="/" component={Editor} />
     </Switch>
   </App>
 );
