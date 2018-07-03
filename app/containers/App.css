@@ -17,7 +17,7 @@
 
 .leftmenubar {
   grid-area: leftmenu;
-  background-color: rgb(51, 51, 51);
+/*  background-color: rgb(51, 51, 51);*/
 }
 
 .editor {

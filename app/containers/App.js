@@ -9,7 +9,7 @@ export default class App extends React.Component {
       <div className={s.appGrid}>
         <div className={s.empty} />
         <div className={s.topmenu}><h2>PETSCII EDITOR</h2></div>
-        <div className={s.leftmenubar}>Foo
+        <div className={s.leftmenubar}>
         </div>
         <div className={s.editor}>
           {this.props.children}
