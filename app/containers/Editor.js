@@ -99,13 +99,14 @@ class CharGrid extends Component {
       this.props.onSetChar(rowcol)
     }
   }
+
   handleMouseUp = (e) => {
     this.setState({dragging: false})
   }
+
   handleMouseMove = (e) => {
     if (this.state.dragging) {
       const rowcol = this.getMouseRowCol()
-      console.log(this.state.prevRowCol, rowcol)
       if (this.state.prevRowCol.row !== rowcol.row ||
           this.state.prevRowCol.col !== rowcol.col) {
         this.setState({prevRowCol: rowcol})
@@ -119,15 +120,13 @@ class CharGrid extends Component {
   render () {
     const w = this.props.width
     const h = this.props.height
-    const rowcol = this.getMouseRowCol()
-    const colIdx = rowcol.col
-    const rowIdx = rowcol.row
+    const mousepos = this.getMouseRowCol()
     for (var y = 0; y < h; y++) {
       for (var x = 0; x < w; x++) {
         const idx = y*w + x
         let screencode = this.props.screencodes[x + y*w]
         let cls = null
-        if (colIdx === x && rowIdx === y) {
+        if (this.props.isActive && mousepos.col === x && mousepos.row === y) {
           cls = styles.charHover
         }
         if (this.props.selected !== undefined) {

@@ -1,6 +1,8 @@
 
 import { bindActionCreators } from 'redux'
 
+import { Toolbar } from './toolbar'
+
 const FB_WIDTH = 40
 const FB_HEIGHT = 25
 
@@ -18,6 +20,10 @@ function setChar(framebuf, {row, col, screencode}) {
   })
 }
 
+function emptyFramebuf () {
+  return Array(FB_HEIGHT).fill(Array(FB_WIDTH).fill(32))
+}
+
 export class Framebuffer {
   static SET_PIXEL = `${Framebuffer.name}/SET_PIXEL`
 
@@ -31,13 +37,18 @@ export class Framebuffer {
   }
 
   static reducer(state = {
-      framebuf: Array(FB_HEIGHT).fill(Array(FB_WIDTH).fill(32))
+      framebuf: emptyFramebuf()
     }, action) {
     switch (action.type) {
       case Framebuffer.SET_PIXEL:
         return {
           ...state,
           framebuf: setChar(state.framebuf, action.data)
+        }
+      case Toolbar.CLEAR_CANVAS:
+        return {
+          ...state,
+          framebuf: emptyFramebuf()
         }
       default:
         return state;
