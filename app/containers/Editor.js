@@ -70,6 +70,11 @@ class CharGrid extends Component {
     this.images  = Array(props.width*props.height).fill(null)
     this.classes = Array(props.width*props.height).fill(null)
     this.screencodes = Array(props.width*props.height).fill(0)
+
+    this.state = {
+      dragging: false,
+      prevRowCol: null
+    }
   }
 
   getMouseRowCol () {
@@ -79,7 +84,36 @@ class CharGrid extends Component {
   }
 
   handleClick = (e) => {
-    this.props.onClickChar(this.getMouseRowCol())
+    if (this.props.onClickChar !== undefined) {
+      this.props.onClickChar(this.getMouseRowCol())
+    }
+  }
+
+  handleMouseDown = (e) => {
+    const rowcol = this.getMouseRowCol()
+    this.setState({
+      dragging: true,
+      prevRowCol: rowcol
+    })
+    if (this.props.onSetChar !== undefined) {
+      this.props.onSetChar(rowcol)
+    }
+  }
+  handleMouseUp = (e) => {
+    this.setState({dragging: false})
+  }
+  handleMouseMove = (e) => {
+    if (this.state.dragging) {
+      const rowcol = this.getMouseRowCol()
+      console.log(this.state.prevRowCol, rowcol)
+      if (this.state.prevRowCol.row !== rowcol.row ||
+          this.state.prevRowCol.col !== rowcol.col) {
+        this.setState({prevRowCol: rowcol})
+        if (this.props.onSetChar !== undefined) {
+          this.props.onSetChar(rowcol)
+        }
+      }
+    }
   }
 
   render () {
@@ -118,7 +152,12 @@ class CharGrid extends Component {
       transformOrigin: '0% 0%',
     }
     return (
-      <div onClick={this.handleClick} style={divStyle}>
+      <div
+        onMouseDown={this.handleMouseDown}
+        onMouseUp={this.handleMouseUp}
+        onMouseMove={this.handleMouseMove}
+        onClick={this.handleClick}
+        style={divStyle}>
         {this.images}
       </div>
     )
@@ -127,7 +166,7 @@ class CharGrid extends Component {
 
 class FramebufferView extends Component {
 
-  handleClickChar = (clickLoc) => {
+  handleSetChar = (clickLoc) => {
     this.props.Framebuffer.setPixel({...clickLoc, screencode:this.props.curScreencode})
   }
 
@@ -138,7 +177,6 @@ class FramebufferView extends Component {
     const s = {width: '640px', height:'400px', backgroundColor: 'rgb(71,55,172)'}
     const W = 40
     const H = 25
-    console.log(this.props)
     const screencodes = Array(W*H)
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
@@ -151,7 +189,7 @@ class FramebufferView extends Component {
           <CharGrid
             width={40}
             height={25}
-            onClickChar={this.handleClickChar}
+            onSetChar={this.handleSetChar}
             screencodes={screencodes}/>
         </ReactCursorPosition>
       </div>
