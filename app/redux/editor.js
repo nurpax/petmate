@@ -28,10 +28,11 @@ export class Framebuffer {
   static SET_PIXEL = `${Framebuffer.name}/SET_PIXEL`
 
   static actions = {
-    setPixel: ({row, col, screencode}) => {
+    setPixel: ({row, col, screencode, undoId}) => {
       return {
         type: Framebuffer.SET_PIXEL,
-        data: { row, col, screencode }
+        data: { row, col, screencode },
+        undoId
       }
     }
   }

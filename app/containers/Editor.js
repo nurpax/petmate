@@ -5,6 +5,7 @@ import ReactCursorPosition from 'react-cursor-position'
 import classnames from 'classnames'
 
 import { Framebuffer } from '../redux/editor'
+import { Toolbar } from '../redux/toolbar'
 import { selectChar } from '../actions/editor'
 import styles from './Editor.css';
 
@@ -73,11 +74,11 @@ class CharGrid extends Component {
 
     this.state = {
       dragging: false,
-      prevRowCol: null
+      prevCoord: null
     }
   }
 
-  getMouseRowCol () {
+  getMouseCoord () {
     const col = Math.floor(this.props.position.x / 16)
     const row = Math.floor(this.props.position.y / 16)
     return { row, col }
@@ -85,33 +86,36 @@ class CharGrid extends Component {
 
   handleClick = (e) => {
     if (this.props.onClickChar !== undefined) {
-      this.props.onClickChar(this.getMouseRowCol())
+      this.props.onClickChar(this.getMouseCoord())
     }
   }
 
   handleMouseDown = (e) => {
-    const rowcol = this.getMouseRowCol()
+    const coord = this.getMouseCoord()
     this.setState({
       dragging: true,
-      prevRowCol: rowcol
+      prevCoord: coord
     })
-    if (this.props.onSetChar !== undefined) {
-      this.props.onSetChar(rowcol)
+    if (this.props.onDragStart !== undefined) {
+      this.props.onDragStart(coord)
     }
   }
 
   handleMouseUp = (e) => {
     this.setState({dragging: false})
+    if (this.props.onDragEnd !== undefined) {
+      this.props.onDragEnd()
+    }
   }
 
   handleMouseMove = (e) => {
     if (this.state.dragging) {
-      const rowcol = this.getMouseRowCol()
-      if (this.state.prevRowCol.row !== rowcol.row ||
-          this.state.prevRowCol.col !== rowcol.col) {
-        this.setState({prevRowCol: rowcol})
-        if (this.props.onSetChar !== undefined) {
-          this.props.onSetChar(rowcol)
+      const coord = this.getMouseCoord()
+      if (this.state.prevCoord.row !== coord.row ||
+          this.state.prevCoord.col !== coord.col) {
+        this.setState({prevCoord: coord})
+        if (this.props.onDragMove !== undefined) {
+          this.props.onDragMove(coord)
         }
       }
     }
@@ -120,7 +124,7 @@ class CharGrid extends Component {
   render () {
     const w = this.props.width
     const h = this.props.height
-    const mousepos = this.getMouseRowCol()
+    const mousepos = this.getMouseCoord()
     for (var y = 0; y < h; y++) {
       for (var x = 0; x < w; x++) {
         const idx = y*w + x
@@ -165,8 +169,24 @@ class CharGrid extends Component {
 
 class FramebufferView extends Component {
 
-  handleSetChar = (clickLoc) => {
-    this.props.Framebuffer.setPixel({...clickLoc, screencode:this.props.curScreencode})
+  setChar = (clickLoc) => {
+    this.props.Framebuffer.setPixel({
+      ...clickLoc,
+      screencode:this.props.curScreencode,
+      undoId: this.props.undoId
+    })
+  }
+
+  handleDragStart = (coord) => {
+    this.setChar(coord)
+  }
+
+  handleDragMove = (coord) => {
+    this.setChar(coord)
+  }
+
+  handleDragEnd = () => {
+    this.props.Toolbar.incUndoId()
   }
 
   render () {
@@ -188,8 +208,11 @@ class FramebufferView extends Component {
           <CharGrid
             width={40}
             height={25}
-            onSetChar={this.handleSetChar}
-            screencodes={screencodes}/>
+            onDragStart={this.handleDragStart}
+            onDragMove={this.handleDragMove}
+            onDragEnd={this.handleDragEnd}
+            screencodes={screencodes}
+          />
         </ReactCursorPosition>
       </div>
     )
@@ -232,6 +255,8 @@ class Editor extends Component {
       <div className={styles.editorLayoutContainer}>
         <FramebufferView
           Framebuffer={this.props.Framebuffer}
+          Toolbar={this.props.Toolbar}
+          undoId={this.props.undoId}
           curScreencode={this.props.curScreencode}
           framebuf={this.props.framebuf} />
         <CharSelect
@@ -248,15 +273,17 @@ const mapDispatchToProps = dispatch => {
     setSelectedChar: rowcol => {
       dispatch(selectChar(rowcol))
     },
-    Framebuffer: Framebuffer.bindDispatch(dispatch)
+    Framebuffer: Framebuffer.bindDispatch(dispatch),
+    Toolbar: Toolbar.bindDispatch(dispatch)
   }
 }
 
 const mapStateToProps = state => {
   const selected = state.editor.selected
   return {
-    framebuf: state.framebuf.framebuf,
+    framebuf: state.framebuf.present.framebuf,
     selected,
+    undoId: state.toolbar.undoId,
     curScreencode: selectedCharScreencode(selected)
   }
 }
