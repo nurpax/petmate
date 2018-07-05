@@ -6,12 +6,12 @@ import { Toolbar } from './toolbar'
 const FB_WIDTH = 40
 const FB_HEIGHT = 25
 
-function setChar(framebuf, {row, col, screencode}) {
+function setChar(framebuf, {row, col, screencode, color}) {
   return framebuf.map((rowPixels,idx) => {
     if (row === idx) {
       return rowPixels.map((pix, x) => {
         if (col === x) {
-          return screencode
+          return { code:screencode, color }
         }
         return pix
       })
@@ -21,23 +21,25 @@ function setChar(framebuf, {row, col, screencode}) {
 }
 
 function emptyFramebuf () {
-  return Array(FB_HEIGHT).fill(Array(FB_WIDTH).fill(32))
+  return Array(FB_HEIGHT).fill(Array(FB_WIDTH).fill({code: 32, color:14}))
 }
 
 export class Framebuffer {
   static SET_PIXEL = `${Framebuffer.name}/SET_PIXEL`
 
   static actions = {
-    setPixel: ({row, col, screencode, undoId}) => {
+    setPixel: ({row, col, screencode, color, undoId}) => {
       return {
         type: Framebuffer.SET_PIXEL,
-        data: { row, col, screencode },
+        data: { row, col, screencode, color },
         undoId
       }
     }
   }
 
   static reducer(state = {
+      borderColor: 14,
+      backgroundColor: 6,
       framebuf: emptyFramebuf()
     }, action) {
     switch (action.type) {

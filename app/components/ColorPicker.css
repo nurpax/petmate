@@ -1,0 +1,22 @@
+.container {
+    display: flex;
+    flex-direction: row;
+}
+
+.box {
+    outline-style: solid;
+    outline-color: rgba(255, 255, 255, 0);
+    outline-width: 2px;
+}
+
+.box:hover {
+    outline-style: solid;
+    outline-color: rgba(255, 255, 255, 0.5);
+    outline-width: 2px;
+}
+
+.boxSelected {
+    outline-style: solid;
+    outline-color: rgba(255, 255, 255, 1);
+    outline-width: 2px;
+}

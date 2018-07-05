@@ -7,14 +7,16 @@
 .fbContainer {
   cursor: default;
   border-style: solid;
-  border-color: rgb(123, 113, 202);
   border-width: 32px;
 }
 
 .csContainer {
   cursor: default;
   border-style: none;
-  margin-left: 5px;
+}
+
+.pixelated {
+  image-rendering: pixelated;
 }
 
 .charHover {
@@ -29,8 +31,4 @@
   outline-color: rgb(255, 255, 255);
   outline-width: 1px;
   z-index: 1;
-}
-
-.pixelated {
-  image-rendering: pixelated;
 }

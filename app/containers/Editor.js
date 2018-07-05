@@ -4,10 +4,13 @@ import { connect } from 'react-redux'
 import ReactCursorPosition from 'react-cursor-position'
 import classnames from 'classnames'
 
+import ColorPicker from '../components/ColorPicker'
+
 import { Framebuffer } from '../redux/editor'
 import { Toolbar } from '../redux/toolbar'
 import { selectChar } from '../actions/editor'
 import styles from './Editor.css';
+import * as utils from '../utils';
 
 const selectedCharScreencode = ({row, col}) => {
   return row*16 + col
@@ -16,36 +19,39 @@ const selectedCharScreencode = ({row, col}) => {
 var fs = require('fs')
 const nativeImage = require('electron').nativeImage
 
+// TODO use blob URIs instead of data URIs
 class CharsetCache {
   constructor () {
     const data = fs.readFileSync('./app/assets/system-charset.bin')
 
-    this.chars = []
-    this.dataURIs = []
+    this.dataURIs = Array(16)
 
-    for (let c = 0; c < 256; c++) {
-      const boffs = c*8;
-      const char = []
+    for (let colorIdx = 0; colorIdx < 16; colorIdx++) {
+      const color = utils.palette[colorIdx]
+      this.dataURIs[colorIdx] = []
 
-      for (let y = 0; y < 8; y++) {
-        const p = data[boffs+y]
-        for (let i = 0; i < 8; i++) {
-          const v = ((128 >> i) & p) ? 255 : 0
-          const light = { r:123, g:113, b:202 }
-          char.push(light.b)
-          char.push(light.g)
-          char.push(light.r)
-          char.push(v)
+      for (let c = 0; c < 256; c++) {
+        const boffs = c*8;
+        const char = []
+
+        for (let y = 0; y < 8; y++) {
+          const p = data[boffs+y]
+          for (let i = 0; i < 8; i++) {
+            const v = ((128 >> i) & p) ? 255 : 0
+            char.push(color.b)
+            char.push(color.g)
+            char.push(color.r)
+            char.push(v)
+          }
         }
+        const img = nativeImage.createFromBuffer(Buffer.from(char), {width: 8, height: 8})
+        this.dataURIs[colorIdx].push(img.toDataURL())
       }
-      this.chars.push(char)
-      const img = nativeImage.createFromBuffer(Buffer.from(char), {width: 8, height: 8})
-      this.dataURIs.push(img.toDataURL())
     }
   }
 
-  getDataURI(screencode) {
-    return this.dataURIs[screencode]
+  getDataURI(screencode, color) {
+    return this.dataURIs[color][screencode]
   }
 }
 
@@ -53,7 +59,7 @@ const charset = new CharsetCache()
 
 class Char extends PureComponent {
   render () {
-    const { x, y, screencode } = this.props
+    const { x, y, screencode, color } = this.props
     const s = {
       position: 'absolute',
       top: 0,
@@ -61,7 +67,7 @@ class Char extends PureComponent {
       transform: `translate(${x*8}px, ${y*8}px)`
     }
     const cls = classnames(this.props.hoverClass, styles.pixelated)
-    return <img draggable={false} style={s} className={cls} width={8} height={8} src={charset.getDataURI(screencode)} />
+    return <img draggable={false} style={s} className={cls} width={8} height={8} src={charset.getDataURI(screencode, color)} />
   }
 }
 
@@ -71,6 +77,7 @@ class CharGrid extends Component {
     this.images  = Array(props.width*props.height).fill(null)
     this.classes = Array(props.width*props.height).fill(null)
     this.screencodes = Array(props.width*props.height).fill(0)
+    this.colors = Array(props.width*props.height).fill(14)
 
     this.state = {
       dragging: false,
@@ -128,7 +135,8 @@ class CharGrid extends Component {
     for (var y = 0; y < h; y++) {
       for (var x = 0; x < w; x++) {
         const idx = y*w + x
-        let screencode = this.props.screencodes[x + y*w]
+        const screencode = this.props.screencodes[x + y*w]
+        const color = this.props.colors[x + y*w]
         let cls = null
         if (this.props.isActive && mousepos.col === x && mousepos.row === y) {
           cls = styles.charHover
@@ -142,9 +150,11 @@ class CharGrid extends Component {
 
         if (this.images[idx] == null ||
             this.classes[idx] !== cls ||
-            this.screencodes[idx] !== screencode) {
-          this.images[idx] = <Char key={idx} hoverClass={cls} x={x} y={y} screencode={screencode} />
+            this.screencodes[idx] !== screencode ||
+            this.colors[idx] !== color) {
+          this.images[idx] = <Char key={idx} hoverClass={cls} x={x} y={y} screencode={screencode} color={color} />
           this.screencodes[idx] = screencode
+          this.colors[idx] = color
           this.classes[idx] = cls
         }
       }
@@ -173,6 +183,7 @@ class FramebufferView extends Component {
     this.props.Framebuffer.setPixel({
       ...clickLoc,
       screencode:this.props.curScreencode,
+      color:this.props.curTextColor,
       undoId: this.props.undoId
     })
   }
@@ -193,13 +204,23 @@ class FramebufferView extends Component {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
-    const s = {width: '640px', height:'400px', backgroundColor: 'rgb(71,55,172)'}
+    const backg = utils.colorIndexToCssRgb(this.props.backgroundColor)
+    const border = utils.colorIndexToCssRgb(this.props.borderColor)
+    const s = {
+      width: '640px', height:'400px',
+      backgroundColor: backg,
+      borderColor: border
+    }
     const W = 40
     const H = 25
     const screencodes = Array(W*H)
+    const colors = Array(W*H)
+
+    // TODO get rid of this temp array, render this.props.framebuf directly
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
-        screencodes[y*W + x] = this.props.framebuf[y][x]
+        screencodes[y*W + x] = this.props.framebuf[y][x].code
+        colors[y*W + x] = this.props.framebuf[y][x].color
       }
     }
     return (
@@ -212,6 +233,7 @@ class FramebufferView extends Component {
             onDragMove={this.handleDragMove}
             onDragEnd={this.handleDragEnd}
             screencodes={screencodes}
+            colors={colors}
           />
         </ReactCursorPosition>
       </div>
@@ -224,13 +246,16 @@ class CharSelect extends Component {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
-    const s = {width: '256px', height:'256px', backgroundColor: 'rgb(71,55,172)'}
+    const backg = utils.colorIndexToCssRgb(this.props.backgroundColor)
+    const s = {width: '256px', height:'256px', backgroundColor: backg}
     const W = 16
     const H = 16
     const screencodes = Array(W*H)
+    const colors = Array(W*H)
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
         screencodes[y*W + x] = (y*W+x) & 255
+        colors[y*W + x] = this.props.textColor
       }
     }
     return (
@@ -240,6 +265,7 @@ class CharSelect extends Component {
             width={16}
             height={16}
             screencodes={screencodes}
+            colors={colors}
             selected={this.props.selected}
             onClickChar={this.props.setSelectedChar}
           />
@@ -258,11 +284,25 @@ class Editor extends Component {
           Toolbar={this.props.Toolbar}
           undoId={this.props.undoId}
           curScreencode={this.props.curScreencode}
-          framebuf={this.props.framebuf} />
-        <CharSelect
-          selected={this.props.selected}
-          setSelectedChar={this.props.setSelectedChar}
+          curTextColor={this.props.textColor}
+          framebuf={this.props.framebuf}
+          backgroundColor={this.props.backgroundColor}
+          borderColor={this.props.borderColor}
         />
+        <div style={{marginLeft: '5px'}}>
+          <CharSelect
+            selected={this.props.selected}
+            setSelectedChar={this.props.setSelectedChar}
+            textColor={this.props.textColor}
+            backgroundColor={this.props.backgroundColor}
+          />
+          <div style={{marginTop: '5px'}}>
+            <ColorPicker
+              selected={this.props.textColor}
+              onSelectColor={this.props.Toolbar.setTextColor}
+            />
+          </div>
+        </div>
       </div>
     )
   }
@@ -280,11 +320,15 @@ const mapDispatchToProps = dispatch => {
 
 const mapStateToProps = state => {
   const selected = state.editor.selected
+  const framebuf = state.framebuf.present
   return {
-    framebuf: state.framebuf.present.framebuf,
+    framebuf: framebuf.framebuf,
+    backgroundColor: framebuf.backgroundColor,
+    borderColor: framebuf.borderColor,
     selected,
     undoId: state.toolbar.undoId,
-    curScreencode: selectedCharScreencode(selected)
+    curScreencode: selectedCharScreencode(selected),
+    textColor: state.toolbar.textColor
   }
 }
 export default connect(
