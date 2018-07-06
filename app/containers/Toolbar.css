@@ -8,6 +8,9 @@
 .tooltip {
     position: relative;
     display: inline-block;
+    display: flex;
+    justify-content: center;
+    width: 80%;
 }
 
 /* Tooltip text */
@@ -23,11 +26,24 @@
     /* Position the tooltip text - see examples below! */
     position: absolute;
     top: 14px;
-    left: 32px;
+    left: 50px;
     z-index: 1;
 }
 
 .tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+/* Tooltip text */
+.tooltip .colorpicker {
+    visibility: hidden;
+    position: absolute;
+    top: 14px;
+    left: 50px;
+    z-index: 1;
+}
+
+.tooltip .colorpicker.active {
     visibility: visible;
 }
 

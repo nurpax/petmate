@@ -26,6 +26,8 @@ function emptyFramebuf () {
 
 export class Framebuffer {
   static SET_PIXEL = `${Framebuffer.name}/SET_PIXEL`
+  static SET_BACKGROUND_COLOR = `${Framebuffer.name}/SET_BACKGROUND_COLOR`
+  static SET_BORDER_COLOR = `${Framebuffer.name}/SET_BORDER_COLOR`
 
   static actions = {
     setPixel: ({row, col, screencode, color, undoId}) => {
@@ -33,6 +35,22 @@ export class Framebuffer {
         type: Framebuffer.SET_PIXEL,
         data: { row, col, screencode, color },
         undoId
+      }
+    },
+
+    setBackgroundColor: (color) => {
+      return {
+        type: Framebuffer.SET_BACKGROUND_COLOR,
+        data: { color },
+        undoId: null
+      }
+    },
+
+    setBorderColor: (color) => {
+      return {
+        type: Framebuffer.SET_BORDER_COLOR,
+        data: { color },
+        undoId: null
       }
     }
   }
@@ -52,6 +70,16 @@ export class Framebuffer {
         return {
           ...state,
           framebuf: emptyFramebuf()
+        }
+      case Framebuffer.SET_BORDER_COLOR:
+        return {
+          ...state,
+          borderColor: action.data.color
+        }
+      case Framebuffer.SET_BACKGROUND_COLOR:
+        return {
+          ...state,
+          backgroundColor: action.data.color
         }
       default:
         return state;
