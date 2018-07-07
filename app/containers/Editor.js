@@ -57,18 +57,24 @@ class CharsetCache {
 
 const charset = new CharsetCache()
 
-class Char extends PureComponent {
-  render () {
-    const { x, y, screencode, color } = this.props
-    const s = {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      transform: `translate(${x*8}px, ${y*8}px)`
-    }
-    const cls = classnames(this.props.hoverClass, styles.pixelated)
-    return <img draggable={false} style={s} className={cls} width={8} height={8} src={charset.getDataURI(screencode, color)} />
+function renderChar (key, cls, x, y, code, color) {
+  const s = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    transform: `translate(${x*8}px, ${y*8}px)`
   }
+  return (
+    <img
+      key={key}
+      draggable={false}
+      style={s}
+      className={classnames(styles.pixelated, cls)}
+      width={8}
+      height={8}
+      src={charset.getDataURI(code, color)}
+    />
+  )
 }
 
 class CharGrid extends Component {
@@ -153,7 +159,7 @@ class CharGrid extends Component {
             this.classes[idx] !== cls ||
             this.screencodes[idx] !== screencode ||
             this.colors[idx] !== color) {
-          this.images[idx] = <Char key={idx} hoverClass={cls} x={x} y={y} screencode={screencode} color={color} />
+          this.images[idx] = renderChar(idx, cls, x, y, screencode, color)
           this.screencodes[idx] = screencode
           this.colors[idx] = color
           this.classes[idx] = cls
