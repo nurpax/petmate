@@ -13,10 +13,12 @@
     outline-style: solid;
     outline-color: rgba(255, 255, 255, 0.5);
     outline-width: 2px;
+    z-index: 1;
 }
 
 .boxSelected {
     outline-style: solid;
     outline-color: rgba(255, 255, 255, 1);
     outline-width: 2px;
+    z-index: 1;
 }
