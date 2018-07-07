@@ -1,6 +1,7 @@
 
 import { bindActionCreators } from 'redux'
 
+import { settable, reduxSettables } from './settable'
 import { Toolbar } from './toolbar'
 
 const FB_WIDTH = 40
@@ -24,40 +25,27 @@ function emptyFramebuf () {
   return Array(FB_HEIGHT).fill(Array(FB_WIDTH).fill({code: 32, color:14}))
 }
 
+const settables = reduxSettables([
+  settable('Framebuffer', 'backgroundColor', 6),
+  settable('Framebuffer', 'borderColor', 14)
+])
+
 export class Framebuffer {
   static SET_PIXEL = `${Framebuffer.name}/SET_PIXEL`
-  static SET_BACKGROUND_COLOR = `${Framebuffer.name}/SET_BACKGROUND_COLOR`
-  static SET_BORDER_COLOR = `${Framebuffer.name}/SET_BORDER_COLOR`
 
   static actions = {
+    ...settables.actions,
     setPixel: ({row, col, screencode, color, undoId}) => {
       return {
         type: Framebuffer.SET_PIXEL,
         data: { row, col, screencode, color },
         undoId
       }
-    },
-
-    setBackgroundColor: (color) => {
-      return {
-        type: Framebuffer.SET_BACKGROUND_COLOR,
-        data: { color },
-        undoId: null
-      }
-    },
-
-    setBorderColor: (color) => {
-      return {
-        type: Framebuffer.SET_BORDER_COLOR,
-        data: { color },
-        undoId: null
-      }
     }
   }
 
   static reducer(state = {
-      borderColor: 14,
-      backgroundColor: 6,
+      ...settables.initialValues,
       framebuf: emptyFramebuf()
     }, action) {
     switch (action.type) {
@@ -71,18 +59,8 @@ export class Framebuffer {
           ...state,
           framebuf: emptyFramebuf()
         }
-      case Framebuffer.SET_BORDER_COLOR:
-        return {
-          ...state,
-          borderColor: action.data.color
-        }
-      case Framebuffer.SET_BACKGROUND_COLOR:
-        return {
-          ...state,
-          backgroundColor: action.data.color
-        }
       default:
-        return state;
+        return settables.reducer(state, action)
     }
   }
 

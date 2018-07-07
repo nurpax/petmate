@@ -2,9 +2,7 @@
 import { combineReducers } from 'redux';
 import undoable from 'redux-undo';
 import { routerReducer as router } from 'react-router-redux';
-import editor from './editor';
-import { Framebuffer } from '../redux/editor';
-import { Toolbar } from '../redux/toolbar';
+import { Toolbar, Framebuffer } from '../redux';
 
 const groupByUndoId = (action) => {
   if (action.undoId !== undefined) {
@@ -14,7 +12,6 @@ const groupByUndoId = (action) => {
 }
 
 const rootReducer = combineReducers({
-  editor,
   framebuf: undoable(Framebuffer.reducer, {
     groupBy: groupByUndoId
   }),

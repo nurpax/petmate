@@ -292,7 +292,7 @@ class Editor extends Component {
         <div style={{marginLeft: '5px'}}>
           <CharSelect
             selected={this.props.selected}
-            setSelectedChar={this.props.setSelectedChar}
+            setSelectedChar={this.props.Toolbar.setSelectedChar}
             textColor={this.props.textColor}
             backgroundColor={this.props.backgroundColor}
           />
@@ -310,16 +310,13 @@ class Editor extends Component {
 
 const mapDispatchToProps = dispatch => {
   return {
-    setSelectedChar: rowcol => {
-      dispatch(selectChar(rowcol))
-    },
     Framebuffer: Framebuffer.bindDispatch(dispatch),
     Toolbar: Toolbar.bindDispatch(dispatch)
   }
 }
 
 const mapStateToProps = state => {
-  const selected = state.editor.selected
+  const selected = state.toolbar.selectedChar
   const framebuf = state.framebuf.present
   return {
     framebuf: framebuf.framebuf,

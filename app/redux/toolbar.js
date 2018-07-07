@@ -1,12 +1,19 @@
 
 import { bindActionCreators } from 'redux'
 
+import { settable, reduxSettables} from './settable'
+
+const settables = reduxSettables([
+  settable('Toolbar', 'textColor', 14),
+  settable('Toolbar', 'selectedChar', {row: 0, col: 0})
+])
+
 export class Toolbar {
   static CLEAR_CANVAS = `${Toolbar.name}/CLEAR_CANVAS`
   static INC_UNDO_ID = `${Toolbar.name}/INC_UNDO_ID`
-  static SET_TEXT_COLOR = `${Toolbar.name}/SET_TEXT_COLOR`
 
   static actions = {
+    ...settables.actions,
     incUndoId: () => {
       return {
         type: Toolbar.INC_UNDO_ID
@@ -17,18 +24,12 @@ export class Toolbar {
         type: Toolbar.CLEAR_CANVAS,
         data: {}
       }
-    },
-    setTextColor: (idx) => {
-      return {
-        type: Toolbar.SET_TEXT_COLOR,
-        data: { color: idx }
-      }
     }
   }
 
   static reducer(state = {
-      undoId: 0,
-      textColor: 14
+      ...settables.initialValues,
+      undoId: 0
     }, action) {
     switch (action.type) {
       case Toolbar.INC_UNDO_ID:
@@ -36,14 +37,9 @@ export class Toolbar {
           ...state,
           undoId: state.undoId+1
         }
-      case Toolbar.SET_TEXT_COLOR:
-        return {
-          ...state,
-          textColor: action.data.color
-        }
       // CLEAR_CANVAS is routed to the framebuf reducer
       default:
-        return state;
+        return settables.reducer(state, action)
     }
   }
 
