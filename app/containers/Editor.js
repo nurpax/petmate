@@ -135,8 +135,9 @@ class CharGrid extends Component {
     for (var y = 0; y < h; y++) {
       for (var x = 0; x < w; x++) {
         const idx = y*w + x
-        const screencode = this.props.screencodes[x + y*w]
-        const color = this.props.colors[x + y*w]
+        const pix = this.props.framebuf[y][x]
+        const screencode = pix.code
+        const color = pix.color
         let cls = null
         if (this.props.isActive && mousepos.col === x && mousepos.row === y) {
           cls = styles.charHover
@@ -211,18 +212,6 @@ class FramebufferView extends Component {
       backgroundColor: backg,
       borderColor: border
     }
-    const W = 40
-    const H = 25
-    const screencodes = Array(W*H)
-    const colors = Array(W*H)
-
-    // TODO get rid of this temp array, render this.props.framebuf directly
-    for (let y = 0; y < H; y++) {
-      for (let x = 0; x < W; x++) {
-        screencodes[y*W + x] = this.props.framebuf[y][x].code
-        colors[y*W + x] = this.props.framebuf[y][x].color
-      }
-    }
     return (
       <div className={styles.fbContainer} style={s}>
         <ReactCursorPosition>
@@ -232,8 +221,7 @@ class FramebufferView extends Component {
             onDragStart={this.handleDragStart}
             onDragMove={this.handleDragMove}
             onDragEnd={this.handleDragEnd}
-            screencodes={screencodes}
-            colors={colors}
+            framebuf={this.props.framebuf}
           />
         </ReactCursorPosition>
       </div>
@@ -242,30 +230,41 @@ class FramebufferView extends Component {
 }
 
 class CharSelect extends Component {
+  constructor (props) {
+    super(props)
+    this.computeCachedFb(0)
+  }
+
+  computeCachedFb(textColor) {
+    this.fb = Array(16).fill({}).map((_, y) => {
+      return Array(16).fill({}).map((_, x) => {
+        return {
+          code: (y*16+x) & 255,
+          color: textColor
+        }
+      })
+    })
+    this.prevTextColor = textColor
+  }
+
   render () {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
     const backg = utils.colorIndexToCssRgb(this.props.backgroundColor)
     const s = {width: '256px', height:'256px', backgroundColor: backg}
-    const W = 16
-    const H = 16
-    const screencodes = Array(W*H)
-    const colors = Array(W*H)
-    for (let y = 0; y < H; y++) {
-      for (let x = 0; x < W; x++) {
-        screencodes[y*W + x] = (y*W+x) & 255
-        colors[y*W + x] = this.props.textColor
-      }
+
+    if (this.prevTextColor !== this.props.textColor) {
+      this.computeCachedFb(this.props.textColor)
     }
+
     return (
       <div className={styles.csContainer} style={s}>
         <ReactCursorPosition>
           <CharGrid
             width={16}
             height={16}
-            screencodes={screencodes}
-            colors={colors}
+            framebuf={this.fb}
             selected={this.props.selected}
             onClickChar={this.props.setSelectedChar}
           />
