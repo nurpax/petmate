@@ -57,7 +57,7 @@ class CharsetCache {
 
 const charset = new CharsetCache()
 
-function renderChar (key, cls, x, y, code, color) {
+function renderChar (key, cls, x, y, pix) {
   const s = {
     position: 'absolute',
     top: 0,
@@ -72,7 +72,7 @@ function renderChar (key, cls, x, y, code, color) {
       className={classnames(styles.pixelated, cls)}
       width={8}
       height={8}
-      src={charset.getDataURI(code, color)}
+      src={charset.getDataURI(pix.code, pix.color)}
     />
   )
 }
@@ -82,8 +82,7 @@ class CharGrid extends Component {
     super(props)
     this.images  = Array(props.width*props.height).fill(null)
     this.classes = Array(props.width*props.height).fill(null)
-    this.screencodes = Array(props.width*props.height).fill(0)
-    this.colors = Array(props.width*props.height).fill(14)
+    this.pix = Array(props.width*props.height).fill(null)
 
     this.state = {
       dragging: false,
@@ -135,33 +134,31 @@ class CharGrid extends Component {
   }
 
   render () {
-    const w = this.props.width
-    const h = this.props.height
-    const mousepos = this.getMouseCoord()
-    for (var y = 0; y < h; y++) {
-      for (var x = 0; x < w; x++) {
-        const idx = y*w + x
-        const pix = this.props.framebuf[y][x]
-        const screencode = pix.code
-        const color = pix.color
+    const mousePos = this.getMouseCoord()
+    const { width, height, isActive, selected} = this.props
+
+    for (var y = 0; y < height; y++) {
+      const fbRow = this.props.framebuf[y]
+      for (var x = 0; x < width; x++) {
         let cls = null
-        if (this.props.isActive && mousepos.col === x && mousepos.row === y) {
+        if (isActive && mousePos.col === x && mousePos.row === y) {
           cls = styles.charHover
         }
-        if (this.props.selected !== undefined) {
-          const { row, col } = this.props.selected
+        if (selected !== undefined) {
+          const { row, col } = selected
           if (y === row && x === col) {
             cls = styles.charSelected
           }
         }
 
+        const idx = y*width + x
+        const pix = fbRow[x]
+
         if (this.images[idx] == null ||
             this.classes[idx] !== cls ||
-            this.screencodes[idx] !== screencode ||
-            this.colors[idx] !== color) {
-          this.images[idx] = renderChar(idx, cls, x, y, screencode, color)
-          this.screencodes[idx] = screencode
-          this.colors[idx] = color
+            this.pix[idx] !== pix) {
+          this.images[idx] = renderChar(idx, cls, x, y, pix)
+          this.pix[idx] = pix
           this.classes[idx] = cls
         }
       }
