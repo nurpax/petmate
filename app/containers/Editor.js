@@ -12,6 +12,29 @@ import { selectChar } from '../actions/editor'
 import styles from './Editor.css';
 import * as utils from '../utils';
 
+const withMouseCharPosition = (C) => {
+  class ToCharRowCol extends Component {
+    constructor (props) {
+      super(props)
+    }
+    render () {
+      const { position, ...props} = this.props
+      const col = Math.floor(this.props.position.x / 16)
+      const row = Math.floor(this.props.position.y / 16)
+      return <C charPos={{row, col}} {...props} />
+    }
+  }
+  return class extends Component {
+    render () {
+      return (
+        <ReactCursorPosition>
+          <ToCharRowCol {...this.props}/>
+        </ReactCursorPosition>
+      )
+    }
+  }
+}
+
 const selectedCharScreencode = ({row, col}) => {
   return row*16 + col
 }
@@ -60,8 +83,6 @@ const charset = new CharsetCache()
 function renderChar (key, cls, x, y, pix) {
   const s = {
     position: 'absolute',
-    top: 0,
-    left: 0,
     transform: `translate(${x*8}px, ${y*8}px)`
   }
   return (
@@ -77,55 +98,55 @@ function renderChar (key, cls, x, y, pix) {
   )
 }
 
-class CharGrid extends Component {
+class CharGrid_ extends Component {
   constructor (props) {
     super(props)
     this.images  = Array(props.width*props.height).fill(null)
     this.classes = Array(props.width*props.height).fill(null)
     this.pix = Array(props.width*props.height).fill(null)
 
-    this.state = {
-      dragging: false,
-      prevCoord: null
-    }
+    this.dragging = false
+    this.prevCoord = null
   }
 
-  getMouseCoord () {
-    const col = Math.floor(this.props.position.x / 16)
-    const row = Math.floor(this.props.position.y / 16)
-    return { row, col }
+  shouldComponentUpdate (nextProps, nextState) {
+    return  (
+      this.props.charPos.row !== nextProps.charPos.row ||
+      this.props.charPos.col !== nextProps.charPos.col ||
+      this.props.charPos.isActive !== nextProps.charPos.isActive ||
+      this.props.framebuf !== nextProps.framebuf ||
+      this.props.selected !== nextProps.selected
+    )
   }
 
   handleClick = (e) => {
     if (this.props.onClickChar !== undefined) {
-      this.props.onClickChar(this.getMouseCoord())
+      this.props.onClickChar(this.props.charPos)
     }
   }
 
   handleMouseDown = (e) => {
-    const coord = this.getMouseCoord()
-    this.setState({
-      dragging: true,
-      prevCoord: coord
-    })
+    const { charPos } = this.props
+    this.dragging = true
+    this.prevCoord = charPos
     if (this.props.onDragStart !== undefined) {
-      this.props.onDragStart(coord)
+      this.props.onDragStart(charPos)
     }
   }
 
   handleMouseUp = (e) => {
-    this.setState({dragging: false})
+    this.dragging = false
     if (this.props.onDragEnd !== undefined) {
       this.props.onDragEnd()
     }
   }
 
   handleMouseMove = (e) => {
-    if (this.state.dragging) {
-      const coord = this.getMouseCoord()
-      if (this.state.prevCoord.row !== coord.row ||
-          this.state.prevCoord.col !== coord.col) {
-        this.setState({prevCoord: coord})
+    if (this.dragging) {
+      const coord = this.props.charPos
+      if (this.prevCoord.row !== coord.row ||
+          this.prevCoord.col !== coord.col) {
+        this.prevCoord = coord
         if (this.props.onDragMove !== undefined) {
           this.props.onDragMove(coord)
         }
@@ -134,7 +155,7 @@ class CharGrid extends Component {
   }
 
   render () {
-    const mousePos = this.getMouseCoord()
+    const mousePos = this.props.charPos
     const { width, height, isActive, selected} = this.props
 
     for (var y = 0; y < height; y++) {
@@ -181,13 +202,14 @@ class CharGrid extends Component {
   }
 }
 
-class FramebufferView extends Component {
+const CharGrid = withMouseCharPosition(CharGrid_)
 
+class FramebufferView extends Component {
   setChar = (clickLoc) => {
     this.props.Framebuffer.setPixel({
       ...clickLoc,
-      screencode:this.props.curScreencode,
-      color:this.props.curTextColor,
+      screencode: this.props.curScreencode,
+      color: this.props.curTextColor,
       undoId: this.props.undoId
     })
   }
@@ -217,16 +239,14 @@ class FramebufferView extends Component {
     }
     return (
       <div className={styles.fbContainer} style={s}>
-        <ReactCursorPosition>
-          <CharGrid
-            width={40}
-            height={25}
-            onDragStart={this.handleDragStart}
-            onDragMove={this.handleDragMove}
-            onDragEnd={this.handleDragEnd}
-            framebuf={this.props.framebuf}
-          />
-        </ReactCursorPosition>
+        <CharGrid
+          width={40}
+          height={25}
+          onDragStart={this.handleDragStart}
+          onDragMove={this.handleDragMove}
+          onDragEnd={this.handleDragEnd}
+          framebuf={this.props.framebuf}
+        />
       </div>
     )
   }
@@ -263,15 +283,13 @@ class CharSelect extends Component {
 
     return (
       <div className={styles.csContainer} style={s}>
-        <ReactCursorPosition>
-          <CharGrid
-            width={16}
-            height={16}
-            framebuf={this.fb}
-            selected={this.props.selected}
-            onClickChar={this.props.setSelectedChar}
-          />
-        </ReactCursorPosition>
+        <CharGrid
+          width={16}
+          height={16}
+          framebuf={this.fb}
+          selected={this.props.selected}
+          onClickChar={this.props.setSelectedChar}
+        />
       </div>
     )
   }
