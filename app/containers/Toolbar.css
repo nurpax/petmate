@@ -34,17 +34,11 @@
     visibility: visible;
 }
 
-/* Tooltip text */
 .tooltip .colorpicker {
-    visibility: hidden;
     position: absolute;
-    top: 14px;
-    left: 50px;
+    top: 15px;
+    left: 48px;
     z-index: 1;
-}
-
-.tooltip .colorpicker.active {
-    visibility: visible;
 }
 
 .icon {
