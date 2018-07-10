@@ -111,9 +111,6 @@ class CharGrid_ extends Component {
 
   shouldComponentUpdate (nextProps, nextState) {
     return  (
-      this.props.charPos.row !== nextProps.charPos.row ||
-      this.props.charPos.col !== nextProps.charPos.col ||
-      this.props.charPos.isActive !== nextProps.charPos.isActive ||
       this.props.framebuf !== nextProps.framebuf ||
       this.props.selected !== nextProps.selected
     )
@@ -155,16 +152,12 @@ class CharGrid_ extends Component {
   }
 
   render () {
-    const mousePos = this.props.charPos
-    const { width, height, isActive, selected} = this.props
+    const { width, height, selected} = this.props
 
     for (var y = 0; y < height; y++) {
       const fbRow = this.props.framebuf[y]
       for (var x = 0; x < width; x++) {
-        let cls = null
-        if (isActive && mousePos.col === x && mousePos.row === y) {
-          cls = styles.charHover
-        }
+        let cls = styles.char
         if (selected !== undefined) {
           const { row, col } = selected
           if (y === row && x === col) {

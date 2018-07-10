@@ -19,16 +19,19 @@
   image-rendering: pixelated;
 }
 
-.charHover {
+.charSelected {
   outline-style: solid;
-  outline-color: rgba(255, 255, 255, 0.5);
+  outline-color: rgb(255, 255, 255);
   outline-width: 1px;
   z-index: 1;
 }
 
-.charSelected {
+.char {
+}
+
+.char:hover {
   outline-style: solid;
-  outline-color: rgb(255, 255, 255);
+  outline-color: rgba(255, 255, 255, 0.5);
   outline-width: 1px;
   z-index: 1;
 }
