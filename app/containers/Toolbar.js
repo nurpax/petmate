@@ -30,6 +30,9 @@ class FbColorPicker extends Component {
   constructor (props) {
     super(props)
     this.timerId = null
+    this.state = {
+      fadeOut: false
+    }
   }
 
   componentWillUnmount () {
@@ -54,11 +57,13 @@ class FbColorPicker extends Component {
   }
 
   handleMouseEnter = () => {
+    this.setState({fadeOut: false})
     this.clearHoverTimer()
   }
 
   handleMouseLeave = () => {
     clearTimeout(this.timerId)
+    this.setState({fadeOut: true})
     this.timerId = setTimeout(() => {
       this.props.onActivatePicker(this.props.pickerId, false)
     }, 500)
@@ -79,7 +84,7 @@ class FbColorPicker extends Component {
     let picker = null
     if (this.props.active) {
       picker =
-        <div className={styles.colorpicker}>
+        <div className={classnames(styles.colorpicker, this.state.fadeOut ? styles.fadeOut : null)}>
           <div style={{transform: 'scale(2,2)', transformOrigin:'0% 0%'}}>
             <ColorPicker color={this.props.color} onSelectColor={this.handleSelectColor} />
           </div>

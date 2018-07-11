@@ -49,3 +49,20 @@
 .icon:hover {
     color: rgb(255,255,255);
 }
+
+.fadeOut {
+  animation-name: fadeout;
+  animation-duration: 0.25s;
+  animation-fill-mode: forwards;
+  animation-delay: 0.25s;
+  animation-timing-function: ease-in;
+}
+
+@keyframes fadeout {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
