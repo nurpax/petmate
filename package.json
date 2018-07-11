@@ -130,6 +130,7 @@
     ]
   },
   "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.1.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.3",
     "babel-jest": "^23.0.1",
@@ -208,7 +209,6 @@
     "devtron": "^1.4.0",
     "electron-debug": "^2.0.0",
     "eslint-config-react-app": "^2.1.0",
-    "font-awesome": "^4.7.0",
     "history": "^4.7.2",
     "react": "^16.4.1",
     "react-cursor-position": "^2.5.0",

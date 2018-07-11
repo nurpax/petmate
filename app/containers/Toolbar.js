@@ -17,7 +17,7 @@ class Icon extends Component {
       <div className={styles.tooltip}>
         <i
           onClick={this.props.onIconClick}
-          className={classnames(styles.icon, `fa ${this.props.iconName} fa-2x`)}
+          className={classnames(styles.icon, `fas ${this.props.iconName}`)}
         />
         <span className={styles.tooltiptext}>{this.props.tooltip}</span>
       </div>
@@ -144,7 +144,13 @@ class ToolbarView extends Component {
           iconName='fa-undo' tooltip='Undo'/>
         <Icon
           onIconClick={this.props.redo}
-          iconName='fa-repeat' tooltip='Redo'/>
+          iconName='fa-redo' tooltip='Redo'/>
+        <Icon
+          onIconClick={this.props.redo}
+          iconName='fa-pencil-alt' tooltip='Draw'/>
+        <Icon
+          onIconClick={this.props.redo}
+          iconName='fa-highlighter' tooltip='Colorize'/>
         <FbColorPicker
           pickerId='border'
           active={this.state.colorPickerActive.border}

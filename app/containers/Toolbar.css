@@ -43,7 +43,8 @@
 
 .icon {
     color: rgb(173,173,173);
-    padding-top: 10px;
+    padding-top: 15px;
+    font-size: 25px;
 }
 
 .icon:hover {
