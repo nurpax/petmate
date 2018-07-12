@@ -1,4 +1,6 @@
 
+const fs = require('fs')
+
 // TODO import VICE VPL files
 
 export const palette = [
@@ -33,4 +35,45 @@ const charOrder = [ 32, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1
 export const charScreencodeFromRowCol = ({row, col}) => {
   const idx = row*16 + col
   return charOrder[idx]
+}
+
+const FILE_VERSION = 1
+
+export const saveFramebuf = (filename, framebuf) => {
+  const content = JSON.stringify({
+    version: FILE_VERSION,
+    width: framebuf.width,
+    height: framebuf.height,
+    backgroundColor: framebuf.backgroundColor,
+    borderColor: framebuf.borderColor,
+    framebuf: framebuf.framebuf
+  })
+  try {
+    fs.writeFileSync(filename, content, 'utf-8');
+  }
+  catch(e) {
+    alert(`Failed to save file '${filename}'!`)
+  }
+}
+
+export const loadFramebuf = (filename, importFile) => {
+  try {
+    const content = fs.readFileSync(filename, 'utf-8')
+    const c = JSON.parse(content)
+    console.log(c)
+    if (c.version === 1) {
+      importFile({
+        width: c.width,
+        height: c.height,
+        backgroundColor: c.backgroundColor,
+        borderColor: c.borderColor,
+        framebuf: c.framebuf
+      })
+    } else {
+      alert(`Unknown file format version ${c.version}!`)
+    }
+  }
+  catch(e) {
+    alert(`Failed to load file '${filename}'!`)
+  }
 }

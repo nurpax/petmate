@@ -126,7 +126,6 @@ class FbColorPicker extends Component {
 }
 
 class ToolbarView extends Component {
-
   state = {
     colorPickerActive: {
       border: false,
@@ -153,6 +152,34 @@ class ToolbarView extends Component {
   handleSelectBorderColor = (color) => {
     this.setColorPickerActive('border', false)
     this.props.Framebuffer.setBorderColor(color)
+  }
+
+  handleSaveFile = () => {
+    const {dialog} = require('electron').remote
+    const filters = [
+      {name: 'PETSCII file', extensions: ['petski']}
+    ]
+    const filename = dialog.showSaveDialog({properties: ['openFile'], filters})
+    if (filename === undefined) {
+      return
+    }
+    utils.saveFramebuf(filename, this.props.framebuf)
+  }
+
+  handleLoadFile = () => {
+    const {dialog} = require('electron').remote
+    const filters = [
+      {name: 'PETSCII file', extensions: ['petski']}
+    ]
+    const filename = dialog.showOpenDialog({properties: ['openFile'], filters})
+    if (filename === undefined) {
+      return
+    }
+    if (filename.length === 1) {
+      utils.loadFramebuf(filename[0], this.props.Framebuffer.importFile)
+    } else {
+      console.error('wtf?!')
+    }
   }
 
   render() {
@@ -184,6 +211,12 @@ class ToolbarView extends Component {
           onIconClick={this.props.Toolbar.clearCanvas}
           iconName='fa-trash' tooltip='Clear canvas'/>
         <Icon
+          onIconClick={this.handleLoadFile}
+          iconName='fa-folder-open' tooltip='Load file'/>
+        <Icon
+          onIconClick={this.handleSaveFile}
+          iconName='fa-save' tooltip='Save file'/>
+        <Icon
           onIconClick={this.props.undo}
           iconName='fa-undo' tooltip='Undo'/>
         <Icon
@@ -193,7 +226,7 @@ class ToolbarView extends Component {
         <FbColorPicker
           pickerId='border'
           active={this.state.colorPickerActive.border}
-          color={this.props.borderColor}
+          color={this.props.framebuf.borderColor}
           onActivatePicker={this.setColorPickerActive}
           onSelectColor={this.handleSelectBorderColor}
           tooltip='Border'
@@ -201,7 +234,7 @@ class ToolbarView extends Component {
         <FbColorPicker
           pickerId='background'
           active={this.state.colorPickerActive.background}
-          color={this.props.backgroundColor}
+          color={this.props.framebuf.backgroundColor}
           onActivatePicker={this.setColorPickerActive}
           onSelectColor={this.handleSelectBgColor}
           tooltip='Background'
@@ -227,8 +260,7 @@ const mdtp = dispatch => {
 const mapStateToProps = state => {
   const framebuf = state.framebuf.present
   return {
-    borderColor: framebuf.borderColor,
-    backgroundColor: framebuf.backgroundColor,
+    framebuf: framebuf,
     selectedTool: state.toolbar.selectedTool
   }
 }

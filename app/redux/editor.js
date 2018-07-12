@@ -35,6 +35,7 @@ const settables = reduxSettables([
 
 export class Framebuffer {
   static SET_PIXEL = `${Framebuffer.name}/SET_PIXEL`
+  static IMPORT_FILE = `${Framebuffer.name}/IMPORT_FILE`
 
   static actions = {
     ...settables.actions,
@@ -44,12 +45,20 @@ export class Framebuffer {
         data: { row, col, screencode, color },
         undoId
       }
+    },
+    importFile: (contents) => {
+      return {
+        type: Framebuffer.IMPORT_FILE,
+        data: contents
+      }
     }
   }
 
   static reducer(state = {
       ...settables.initialValues,
-      framebuf: emptyFramebuf()
+      framebuf: emptyFramebuf(),
+      width: 40,
+      height: 25
     }, action) {
     switch (action.type) {
       case Framebuffer.SET_PIXEL:
@@ -61,6 +70,15 @@ export class Framebuffer {
         return {
           ...state,
           framebuf: emptyFramebuf()
+        }
+      case Framebuffer.IMPORT_FILE:
+        const c = action.data
+        return {
+          framebuf: c.framebuf,
+          width: c.width,
+          height: c.height,
+          backgroundColor: c.backgroundColor,
+          borderColor: c.borderColor
         }
       default:
         return settables.reducer(state, action)
