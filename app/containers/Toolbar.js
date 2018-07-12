@@ -98,6 +98,7 @@ class FbColorPicker extends Component {
       flex: 1
     }
     let picker = null
+    let tooltip = null
     if (this.props.active) {
       picker =
         <div className={classnames(styles.colorpicker, this.state.fadeOut ? styles.fadeOut : null)}>
@@ -105,6 +106,10 @@ class FbColorPicker extends Component {
             <ColorPicker color={this.props.color} onSelectColor={this.handleSelectColor} />
           </div>
         </div>
+      tooltip = null
+    } else {
+      tooltip =
+        <span className={styles.tooltiptext}>{this.props.tooltip}</span>
     }
     return (
       <div
@@ -114,6 +119,7 @@ class FbColorPicker extends Component {
       >
         <div style={s} onClick={this.handleColorPickActive} />
         {picker}
+        {tooltip}
       </div>
     )
   }
@@ -190,6 +196,7 @@ class ToolbarView extends Component {
           color={this.props.borderColor}
           onActivatePicker={this.setColorPickerActive}
           onSelectColor={this.handleSelectBorderColor}
+          tooltip='Border'
         />
         <FbColorPicker
           pickerId='background'
@@ -197,6 +204,7 @@ class ToolbarView extends Component {
           color={this.props.backgroundColor}
           onActivatePicker={this.setColorPickerActive}
           onSelectColor={this.handleSelectBgColor}
+          tooltip='Background'
         />
       </div>
     )
