@@ -18,10 +18,11 @@ const withMouseCharPosition = (C) => {
       super(props)
     }
     render () {
-      const { position, ...props} = this.props
-      const col = Math.floor(this.props.position.x / 16)
-      const row = Math.floor(this.props.position.y / 16)
-      return <C charPos={{row, col}} {...props} />
+      const { position, grid, ...props} = this.props
+      const scl = grid ? 17 : 16
+      const col = Math.floor(this.props.position.x / scl)
+      const row = Math.floor(this.props.position.y / scl)
+      return <C charPos={{row, col}} grid={grid} {...props} />
     }
   }
   return class extends Component {
@@ -77,7 +78,7 @@ class CharsetCache {
 const charset = new CharsetCache()
 
 function renderChar (key, cls, x, y, pix, grid, bg) {
-  const scl = grid !== undefined ? 8.5 : 8
+  const scl = grid ? 8.5 : 8
   const s = {
     position: 'absolute',
     transform: `translate(${x*scl}px, ${y*scl}px)`,
@@ -243,6 +244,7 @@ class FramebufferView extends Component {
         <CharGrid
           width={40}
           height={25}
+          grid={false}
           backgroundColor={backg}
           onDragStart={this.handleDragStart}
           onDragMove={this.handleDragMove}
