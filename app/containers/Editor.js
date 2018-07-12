@@ -76,10 +76,12 @@ class CharsetCache {
 
 const charset = new CharsetCache()
 
-function renderChar (key, cls, x, y, pix) {
+function renderChar (key, cls, x, y, pix, grid, bg) {
+  const scl = grid !== undefined ? 8.5 : 8
   const s = {
     position: 'absolute',
-    transform: `translate(${x*8}px, ${y*8}px)`
+    transform: `translate(${x*scl}px, ${y*scl}px)`,
+    backgroundColor: bg
   }
   return (
     <img
@@ -101,6 +103,7 @@ class CharGrid_ extends Component {
     this.classes = Array(props.width*props.height).fill(null)
     this.pix = Array(props.width*props.height).fill(null)
 
+    this.prevBackgroundColor = null
     this.dragging = false
     this.prevCoord = null
   }
@@ -108,6 +111,7 @@ class CharGrid_ extends Component {
   shouldComponentUpdate (nextProps, nextState) {
     return  (
       this.props.framebuf !== nextProps.framebuf ||
+      this.props.backgroundColor !== nextProps.backgroundColor ||
       this.props.selected !== nextProps.selected
     )
   }
@@ -166,17 +170,19 @@ class CharGrid_ extends Component {
 
         if (this.images[idx] == null ||
             this.classes[idx] !== cls ||
+            this.prevBackgroundColor !== this.props.backgroundColor ||
             this.pix[idx] !== pix) {
-          this.images[idx] = renderChar(idx, cls, x, y, pix)
+          this.images[idx] = renderChar(idx, cls, x, y, pix, this.props.grid, this.props.backgroundColor)
           this.pix[idx] = pix
           this.classes[idx] = cls
         }
       }
     }
+    this.prevBackgroundColor = this.props.backgroundColor
     const divStyle = {
       position: 'relative',
       transform: 'scale(2,2)',
-      transformOrigin: '0% 0%',
+      transformOrigin: '0% 0%'
     }
     return (
       <div
@@ -230,7 +236,6 @@ class FramebufferView extends Component {
     const border = utils.colorIndexToCssRgb(this.props.borderColor)
     const s = {
       width: '640px', height:'400px',
-      backgroundColor: backg,
       borderColor: border
     }
     return (
@@ -238,6 +243,7 @@ class FramebufferView extends Component {
         <CharGrid
           width={40}
           height={25}
+          backgroundColor={backg}
           onDragStart={this.handleDragStart}
           onDragMove={this.handleDragMove}
           onDragEnd={this.handleDragEnd}
@@ -270,8 +276,10 @@ class CharSelect extends Component {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
+    const w = `${2*8*16+16}px`
+    const h = `${2*8*16+16}px`
     const backg = utils.colorIndexToCssRgb(this.props.backgroundColor)
-    const s = {width: '256px', height:'256px', backgroundColor: backg}
+    const s = {width: w, height:h}
 
     if (this.prevTextColor !== this.props.textColor) {
       this.computeCachedFb(this.props.textColor)
@@ -282,6 +290,8 @@ class CharSelect extends Component {
         <CharGrid
           width={16}
           height={16}
+          backgroundColor={backg}
+          grid={true}
           framebuf={this.fb}
           selected={this.props.selected}
           onClickChar={this.props.setSelectedChar}
