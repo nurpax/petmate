@@ -7,7 +7,7 @@ import classnames from 'classnames'
 import ColorPicker from '../components/ColorPicker'
 
 import { Framebuffer } from '../redux/editor'
-import { Toolbar } from '../redux/toolbar'
+import { Toolbar, TOOL_DRAW, TOOL_COLORIZE } from '../redux/toolbar'
 import { selectChar } from '../actions/editor'
 import styles from './Editor.css';
 import * as utils from '../utils';
@@ -199,12 +199,19 @@ const CharGrid = withMouseCharPosition(CharGrid_)
 
 class FramebufferView extends Component {
   setChar = (clickLoc) => {
-    this.props.Framebuffer.setPixel({
+    const params = {
       ...clickLoc,
-      screencode: this.props.curScreencode,
       color: this.props.curTextColor,
       undoId: this.props.undoId
-    })
+    }
+    if (this.props.selectedTool === TOOL_DRAW) {
+      this.props.Framebuffer.setPixel({
+        ...params,
+        screencode: this.props.curScreencode
+      })
+    } else if (this.props.selectedTool === TOOL_COLORIZE) {
+      this.props.Framebuffer.setPixel(params)
+    }
   }
 
   handleDragStart = (coord) => {
@@ -298,6 +305,7 @@ class Editor extends Component {
           undoId={this.props.undoId}
           curScreencode={this.props.curScreencode}
           curTextColor={this.props.textColor}
+          selectedTool={this.props.selectedTool}
           framebuf={this.props.framebuf}
           backgroundColor={this.props.backgroundColor}
           borderColor={this.props.borderColor}
@@ -338,6 +346,7 @@ const mapStateToProps = state => {
     selected,
     undoId: state.toolbar.undoId,
     curScreencode: selectedCharScreencode(selected),
+    selectedTool: state.toolbar.selectedTool,
     textColor: state.toolbar.textColor
   }
 }

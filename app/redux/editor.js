@@ -12,6 +12,9 @@ function setChar(framebuf, {row, col, screencode, color}) {
     if (row === idx) {
       return rowPixels.map((pix, x) => {
         if (col === x) {
+          if (screencode === undefined) {
+            return { ...pix, color }
+          }
           return { code:screencode, color }
         }
         return pix

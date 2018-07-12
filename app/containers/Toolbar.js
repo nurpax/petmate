@@ -7,14 +7,15 @@ import { ActionCreators } from 'redux-undo';
 
 import ColorPicker from '../components/ColorPicker'
 import * as utils from '../utils'
-import { Toolbar } from '../redux/toolbar'
+import { Toolbar, TOOL_DRAW, TOOL_COLORIZE } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
 import styles from './Toolbar.css';
 
 class Icon extends Component {
   render () {
+    const selectedClass = this.props.selected !== undefined && this.props.selected ? styles.selectedTool : null
     return (
-      <div className={styles.tooltip}>
+      <div className={classnames(styles.tooltip, selectedClass)}>
         <i
           onClick={this.props.onIconClick}
           className={classnames(styles.icon, `fas ${this.props.iconName}`)}
@@ -25,8 +26,23 @@ class Icon extends Component {
   }
 }
 
-class FbColorPicker extends Component {
+class SelectableTool extends Component {
+  handleClick = () => {
+    this.props.setSelectedTool(this.props.tool)
+  }
+  render () {
+    const { tool, ...props } = this.props
+    return (
+      <Icon
+        onIconClick={this.handleClick}
+        selected={tool === this.props.selectedTool}
+        {...props}
+      />
+    )
+  }
+}
 
+class FbColorPicker extends Component {
   constructor (props) {
     super(props)
     this.timerId = null
@@ -134,6 +150,28 @@ class ToolbarView extends Component {
   }
 
   render() {
+    const tools = [
+      {
+        tool: TOOL_DRAW,
+        iconName: 'fa-pencil-alt',
+        tooltip: 'Draw'
+      },
+      {
+        tool: TOOL_COLORIZE,
+        iconName: 'fa-highlighter',
+        tooltip: 'Colorize'
+      }
+    ].map(t => {
+      return (
+        <SelectableTool
+          key={t.tool}
+          tool={t.tool}
+          setSelectedTool={this.props.Toolbar.setSelectedTool}
+          selectedTool={this.props.selectedTool}
+          iconName={t.iconName} tooltip={t.tooltip}
+        />
+      )
+    })
     return (
       <div className={styles.toolbar}>
         <Icon
@@ -145,12 +183,7 @@ class ToolbarView extends Component {
         <Icon
           onIconClick={this.props.redo}
           iconName='fa-redo' tooltip='Redo'/>
-        <Icon
-          onIconClick={this.props.redo}
-          iconName='fa-pencil-alt' tooltip='Draw'/>
-        <Icon
-          onIconClick={this.props.redo}
-          iconName='fa-highlighter' tooltip='Colorize'/>
+        {tools}
         <FbColorPicker
           pickerId='border'
           active={this.state.colorPickerActive.border}
@@ -187,11 +220,11 @@ const mapStateToProps = state => {
   const framebuf = state.framebuf.present
   return {
     borderColor: framebuf.borderColor,
-    backgroundColor: framebuf.backgroundColor
+    backgroundColor: framebuf.backgroundColor,
+    selectedTool: state.toolbar.selectedTool
   }
 }
 export default connect(
   mapStateToProps,
   mdtp
 )(ToolbarView)
-

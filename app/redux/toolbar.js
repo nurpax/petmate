@@ -3,9 +3,13 @@ import { bindActionCreators } from 'redux'
 
 import { settable, reduxSettables} from './settable'
 
+export const TOOL_DRAW = 0
+export const TOOL_COLORIZE = 1
+
 const settables = reduxSettables([
   settable('Toolbar', 'textColor', 14),
-  settable('Toolbar', 'selectedChar', {row: 0, col: 0})
+  settable('Toolbar', 'selectedChar', {row: 0, col: 0}),
+  settable('Toolbar', 'selectedTool', TOOL_DRAW)
 ])
 
 export class Toolbar {
