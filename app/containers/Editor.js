@@ -35,10 +35,6 @@ const withMouseCharPosition = (C) => {
   }
 }
 
-const selectedCharScreencode = ({row, col}) => {
-  return row*16 + col
-}
-
 var fs = require('fs')
 const nativeImage = require('electron').nativeImage
 
@@ -262,7 +258,7 @@ class CharSelect extends Component {
     this.fb = Array(16).fill({}).map((_, y) => {
       return Array(16).fill({}).map((_, x) => {
         return {
-          code: (y*16+x) & 255,
+          code: utils.charScreencodeFromRowCol({row:y, col:x}),
           color: textColor
         }
       })
@@ -345,7 +341,7 @@ const mapStateToProps = state => {
     borderColor: framebuf.borderColor,
     selected,
     undoId: state.toolbar.undoId,
-    curScreencode: selectedCharScreencode(selected),
+    curScreencode: utils.charScreencodeFromRowCol(selected),
     selectedTool: state.toolbar.selectedTool,
     textColor: state.toolbar.textColor
   }
