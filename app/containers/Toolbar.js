@@ -63,7 +63,7 @@ const withHoverFade = (C, options) => {
     render () {
       return (
         <div
-          className={options.containerClassName}
+          className={this.props.containerClassName}
           onMouseLeave={this.handleMouseLeave}
           onMouseEnter={this.handleMouseEnter}
         >
@@ -81,13 +81,16 @@ const withHoverFade = (C, options) => {
 class Icon extends Component {
   render () {
     const selectedClass = this.props.selected !== undefined && this.props.selected ? styles.selectedTool : null
+    const tooltip = this.props.tooltip !== null ?
+      <span className={styles.tooltiptext}>{this.props.tooltip}</span> :
+      null
     return (
       <div className={classnames(styles.tooltip, selectedClass)}>
         <i
           onClick={this.props.onIconClick}
           className={classnames(styles.icon, `fas ${this.props.iconName}`)}
         />
-        <span className={styles.tooltiptext}>{this.props.tooltip}</span>
+        {tooltip}
       </div>
     )
   }
@@ -145,23 +148,57 @@ class FbColorPicker_ extends Component {
     )
   }
 }
-const FbColorPicker = withHoverFade(FbColorPicker_, {
-  containerClassName: styles.tooltip
-})
+const FbColorPicker = withHoverFade(FbColorPicker_)
+
+class BrushMenu_ extends Component {
+  handleClick = () => {
+    this.props.setSelectedTool(this.props.tool)
+    this.props.onToggleActive()
+  }
+
+  handleClickBrushSelect = () => {
+    this.props.onClickBrushSelect('select')
+  }
+
+  render () {
+    const { tool, active, ...props } = this.props
+    const buttons =
+      <div className={styles.brushMenuContainer}>
+        <i
+          className={classnames(styles.icon, styles.brushButton, 'fas fa-crop-alt')}
+          onClick={this.handleClickBrushSelect}
+        />
+      </div>
+    // tooltip    {active ? null : 'Brush'}
+    return (
+      <Fragment>
+        <Icon
+          iconName='fa-brush'
+          tooltip={null}
+          onIconClick={this.handleClick}
+          {...props}
+        />
+        {active ? buttons : null}
+      </Fragment>
+    )
+  }
+}
+const BrushMenu = withHoverFade(BrushMenu_)
 
 class ToolbarView extends Component {
   state = {
-    colorPickerActive: {
+    pickerActive: {
       border: false,
-      background: false
+      background: false,
+      brush: false
     }
   }
 
-  setColorPickerActive = (pickerId, val) => {
+  setPickerActive = (pickerId, val) => {
     this.setState(prevState => {
       return {
-        colorPickerActive: {
-          ...prevState.colorPickerActive,
+        pickerActive: {
+          ...prevState.pickerActive,
           [pickerId]: val
         }
       }
@@ -169,13 +206,20 @@ class ToolbarView extends Component {
   }
 
   handleSelectBgColor = (color) => {
-    this.setColorPickerActive('background', false)
+    this.setPickerActive('background', false)
     this.props.Framebuffer.setBackgroundColor(color)
   }
 
   handleSelectBorderColor = (color) => {
-    this.setColorPickerActive('border', false)
+    this.setPickerActive('border', false)
     this.props.Framebuffer.setBorderColor(color)
+  }
+
+  handleClickBrushSelect = (sub) => {
+    this.setPickerActive('brush', false)
+    if (sub === 'select') {
+      this.props.Toolbar.setBrush(null)
+    }
   }
 
   handleSaveFile = () => {
@@ -207,33 +251,47 @@ class ToolbarView extends Component {
   }
 
   render() {
+    const brushMenu = (key) => {
+      const selectedClass = this.props.selectedTool === TOOL_BRUSH ? styles.selectedTool : null
+      return (
+        <BrushMenu
+          key={key}
+          pickerId='brush'
+          containerClassName={classnames(styles.tooltip, selectedClass)}
+          tool={TOOL_BRUSH}
+          setSelectedTool={this.props.Toolbar.setSelectedTool}
+          selectedTool={this.props.selectedTool}
+          active={this.state.pickerActive.brush}
+          onSetActive={this.setPickerActive}
+          onClickBrushSelect={this.handleClickBrushSelect}
+        />
+      )
+    }
+    const mkTool = ({ tool, iconName, tooltip }) => {
+      return (
+        <SelectableTool
+          key={tool}
+          tool={tool}
+          setSelectedTool={this.props.Toolbar.setSelectedTool}
+          selectedTool={this.props.selectedTool}
+          iconName={iconName}
+          tooltip={tooltip}
+        />
+      )
+    }
     const tools = [
-      {
+      mkTool({
         tool: TOOL_DRAW,
         iconName: 'fa-pencil-alt',
         tooltip: 'Draw'
-      },
-      {
+      }),
+      mkTool({
         tool: TOOL_COLORIZE,
         iconName: 'fa-highlighter',
         tooltip: 'Colorize'
-      },
-      {
-        tool: TOOL_BRUSH,
-        iconName: 'fa-brush',
-        tooltip: 'Select brush'
-      }
-    ].map(t => {
-      return (
-        <SelectableTool
-          key={t.tool}
-          tool={t.tool}
-          setSelectedTool={this.props.Toolbar.setSelectedTool}
-          selectedTool={this.props.selectedTool}
-          iconName={t.iconName} tooltip={t.tooltip}
-        />
-      )
-    })
+      }),
+      brushMenu(TOOL_BRUSH)
+    ]
     return (
       <div className={styles.toolbar}>
         <Icon
@@ -254,17 +312,19 @@ class ToolbarView extends Component {
         {tools}
         <FbColorPicker
           pickerId='border'
-          active={this.state.colorPickerActive.border}
+          containerClassName={styles.tooltip}
+          active={this.state.pickerActive.border}
           color={this.props.framebuf.borderColor}
-          onSetActive={this.setColorPickerActive}
+          onSetActive={this.setPickerActive}
           onSelectColor={this.handleSelectBorderColor}
           tooltip='Border'
         />
         <FbColorPicker
           pickerId='background'
-          active={this.state.colorPickerActive.background}
+          containerClassName={styles.tooltip}
+          active={this.state.pickerActive.background}
           color={this.props.framebuf.backgroundColor}
-          onSetActive={this.setColorPickerActive}
+          onSetActive={this.setPickerActive}
           onSelectColor={this.handleSelectBgColor}
           tooltip='Background'
         />

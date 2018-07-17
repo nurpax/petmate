@@ -257,16 +257,28 @@ class FramebufferView_ extends Component {
     }
   }
 
+  brushDraw = (coord) => {
+    this.props.Framebuffer.setBrush({
+      ...coord,
+      brush: this.props.brush,
+      undoId: this.props.undoId
+    })
+  }
+
   dragStart = (coord) => {
     const { selectedTool } = this.props
     if (selectedTool === TOOL_DRAW ||
         selectedTool === TOOL_COLORIZE) {
       this.setChar(coord)
     } else if (selectedTool === TOOL_BRUSH) {
-      this.props.Toolbar.setBrushRegion({
-        min: coord,
-        max: {row: coord.row, col: coord.col}
-      })
+      if (this.props.brush === null) {
+        this.props.Toolbar.setBrushRegion({
+          min: coord,
+          max: coord
+        })
+      } else {
+        this.brushDraw(coord)
+      }
     }
   }
 
@@ -276,10 +288,14 @@ class FramebufferView_ extends Component {
         selectedTool === TOOL_COLORIZE) {
       this.setChar(coord)
     } else if (selectedTool === TOOL_BRUSH) {
-      this.props.Toolbar.setBrushRegion({
-        ...this.props.brushRegion,
-        max: {row: coord.row, col: coord.col}
-      })
+      if (this.props.brush === null) {
+        this.props.Toolbar.setBrushRegion({
+          ...this.props.brushRegion,
+          max: coord
+        })
+      } else {
+        this.brushDraw(coord)
+      }
     } else {
       console.error('not implemented')
     }
@@ -287,7 +303,7 @@ class FramebufferView_ extends Component {
 
   dragEnd = () => {
     const { selectedTool } = this.props
-    if (selectedTool === TOOL_BRUSH) {
+    if (selectedTool === TOOL_BRUSH && this.props.brush === null) {
       this.props.Toolbar.captureBrush(this.props.framebuf, this.props.brushRegion)
     }
     this.props.Toolbar.incUndoId()
@@ -417,7 +433,6 @@ class CharSelect_ extends Component {
   }
 }
 const CharSelect = withMouseCharPosition(CharSelect_)
-
 
 class Editor extends Component {
   render() {

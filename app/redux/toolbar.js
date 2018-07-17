@@ -38,13 +38,20 @@ export class Toolbar {
     captureBrush: (framebuf, brushRegion) => {
       const { min, max } = utils.sortRegion(brushRegion)
       const h = max.row - min.row + 1
+      const w = max.col - min.col + 1
       const capfb = Array(h)
       for (var y = 0; y < h; y++) {
         capfb[y] = framebuf[y + min.row].slice(min.col, max.col+1)
       }
       return {
         type: Toolbar.CAPTURE_BRUSH,
-        data: {framebuf:capfb, brushRegion}
+        data: {
+          framebuf:capfb,
+          brushRegion: {
+            min: {row: 0, col: 0},
+            max: {row: h-1, col: w-1}
+          }
+        }
       }
     }
   }

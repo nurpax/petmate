@@ -56,9 +56,9 @@
 }
 
 .tooltip.selectedTool {
-    border-style: solid;
-    border-width: 1px;
-    border-color: rgba(255,255,255,0.4);
+ border-style: solid;
+ border-width: 1px;
+ border-color: rgba(255,255,255,0.4);
 }
 
 .fadeOut {
@@ -67,6 +67,19 @@
   animation-fill-mode: forwards;
   animation-delay: 0.25s;
   animation-timing-function: ease-in;
+}
+
+.brushMenuContainer {
+  position: absolute;
+  top: 0px;
+  left: 54px;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.brushButton {
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 @keyframes fadeout {
