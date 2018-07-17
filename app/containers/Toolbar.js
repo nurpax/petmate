@@ -1,5 +1,5 @@
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import classnames from 'classnames'
@@ -15,6 +15,68 @@ import {
 } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
 import styles from './Toolbar.css';
+
+const withHoverFade = (C, options) => {
+  return class extends Component {
+    constructor (props) {
+      super(props)
+      this.timerId = null
+      this.state = {
+        fadeOut: false
+      }
+    }
+
+    componentWillUnmount () {
+      if (this.timerId !== null) {
+        clearTimeout(this.timerId)
+      }
+    }
+
+    clearHoverTimer = () => {
+      if (this.timerId !== null) {
+        clearTimeout(this.timerId)
+        this.timerId = null
+      }
+    }
+
+    handleMouseEnter = () => {
+      this.setState({fadeOut: false})
+      this.clearHoverTimer()
+    }
+
+    handleMouseLeave = () => {
+      clearTimeout(this.timerId)
+      this.setState({fadeOut: true})
+      this.timerId = setTimeout(() => {
+        this.props.onSetActive(this.props.pickerId, false)
+      }, 500)
+    }
+
+    handleToggleActive = () => {
+      const newIsActive = !this.props.active
+      this.props.onSetActive(this.props.pickerId, newIsActive)
+      if (this.timerId !== null) {
+        this.clearHoverTimer()
+      }
+    }
+
+    render () {
+      return (
+        <div
+          className={options.containerClassName}
+          onMouseLeave={this.handleMouseLeave}
+          onMouseEnter={this.handleMouseEnter}
+        >
+          <C
+            onToggleActive={this.handleToggleActive}
+            fadeOut={this.state.fadeOut}
+            {...this.props}
+          />
+        </div>
+      )
+    }
+  }
+}
 
 class Icon extends Component {
   render () {
@@ -47,49 +109,7 @@ class SelectableTool extends Component {
   }
 }
 
-class FbColorPicker extends Component {
-  constructor (props) {
-    super(props)
-    this.timerId = null
-    this.state = {
-      fadeOut: false
-    }
-  }
-
-  componentWillUnmount () {
-    if (this.timerId !== null) {
-      clearTimeout(this.timerId)
-    }
-  }
-
-  handleColorPickActive = () => {
-    const newIsActive = !this.props.active
-    this.props.onActivatePicker(this.props.pickerId, newIsActive)
-    if (this.timerId !== null) {
-      this.clearHoverTimer()
-    }
-  }
-
-  clearHoverTimer = () => {
-    if (this.timerId !== null) {
-      clearTimeout(this.timerId)
-      this.timerId = null
-    }
-  }
-
-  handleMouseEnter = () => {
-    this.setState({fadeOut: false})
-    this.clearHoverTimer()
-  }
-
-  handleMouseLeave = () => {
-    clearTimeout(this.timerId)
-    this.setState({fadeOut: true})
-    this.timerId = setTimeout(() => {
-      this.props.onActivatePicker(this.props.pickerId, false)
-    }, 500)
-  }
-
+class FbColorPicker_ extends Component {
   handleSelectColor = (idx) => {
     this.props.onSelectColor(idx, null)
   }
@@ -106,7 +126,7 @@ class FbColorPicker extends Component {
     let tooltip = null
     if (this.props.active) {
       picker =
-        <div className={classnames(styles.colorpicker, this.state.fadeOut ? styles.fadeOut : null)}>
+        <div className={classnames(styles.colorpicker, this.props.fadeOut ? styles.fadeOut : null)}>
           <div style={{transform: 'scale(2,2)', transformOrigin:'0% 0%'}}>
             <ColorPicker color={this.props.color} onSelectColor={this.handleSelectColor} />
           </div>
@@ -117,18 +137,17 @@ class FbColorPicker extends Component {
         <span className={styles.tooltiptext}>{this.props.tooltip}</span>
     }
     return (
-      <div
-        className={classnames(styles.tooltip)}
-        onMouseLeave={this.handleMouseLeave}
-        onMouseEnter={this.handleMouseEnter}
-      >
-        <div style={s} onClick={this.handleColorPickActive} />
+      <Fragment>
+        <div style={s} onClick={this.props.onToggleActive} />
         {picker}
         {tooltip}
-      </div>
+      </Fragment>
     )
   }
 }
+const FbColorPicker = withHoverFade(FbColorPicker_, {
+  containerClassName: styles.tooltip
+})
 
 class ToolbarView extends Component {
   state = {
@@ -237,7 +256,7 @@ class ToolbarView extends Component {
           pickerId='border'
           active={this.state.colorPickerActive.border}
           color={this.props.framebuf.borderColor}
-          onActivatePicker={this.setColorPickerActive}
+          onSetActive={this.setColorPickerActive}
           onSelectColor={this.handleSelectBorderColor}
           tooltip='Border'
         />
@@ -245,7 +264,7 @@ class ToolbarView extends Component {
           pickerId='background'
           active={this.state.colorPickerActive.background}
           color={this.props.framebuf.backgroundColor}
-          onActivatePicker={this.setColorPickerActive}
+          onSetActive={this.setColorPickerActive}
           onSelectColor={this.handleSelectBgColor}
           tooltip='Background'
         />
