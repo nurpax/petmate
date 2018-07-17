@@ -1,5 +1,5 @@
 
-import React, { Component, PureComponent } from 'react';
+import React, { Component, Fragment, PureComponent } from 'react';
 import { connect } from 'react-redux'
 import ReactCursorPosition from 'react-cursor-position'
 import classnames from 'classnames'
@@ -7,10 +7,21 @@ import classnames from 'classnames'
 import ColorPicker from '../components/ColorPicker'
 
 import { Framebuffer } from '../redux/editor'
-import { Toolbar, TOOL_DRAW, TOOL_COLORIZE } from '../redux/toolbar'
+import {
+  Toolbar,
+  TOOL_DRAW,
+  TOOL_COLORIZE,
+  TOOL_BRUSH
+} from '../redux/toolbar'
 import { selectChar } from '../actions/editor'
 import styles from './Editor.css';
 import * as utils from '../utils';
+
+const charGridScaleStyle = {
+  position: 'relative',
+  transform: 'scale(2,2)',
+  transformOrigin: '0% 0%'
+}
 
 const withMouseCharPosition = (C) => {
   class ToCharRowCol extends Component {
@@ -97,63 +108,37 @@ function renderChar (key, cls, x, y, pix, grid, bg) {
   )
 }
 
-class CharGrid_ extends Component {
+class CharGrid extends Component {
   constructor (props) {
     super(props)
-    this.images  = Array(props.width*props.height).fill(null)
-    this.classes = Array(props.width*props.height).fill(null)
-    this.pix = Array(props.width*props.height).fill(null)
-
-    this.prevBackgroundColor = null
-    this.dragging = false
-    this.prevCoord = null
+    this.resetCache(props)
   }
 
   shouldComponentUpdate (nextProps, nextState) {
     return  (
+      this.props.width !== nextProps.width ||
+      this.props.height !== nextProps.height ||
       this.props.framebuf !== nextProps.framebuf ||
       this.props.backgroundColor !== nextProps.backgroundColor ||
       this.props.selected !== nextProps.selected
     )
   }
 
-  handleClick = (e) => {
-    if (this.props.onClickChar !== undefined) {
-      this.props.onClickChar(this.props.charPos)
-    }
-  }
-
-  handleMouseDown = (e) => {
-    const { charPos } = this.props
-    this.dragging = true
-    this.prevCoord = charPos
-    if (this.props.onDragStart !== undefined) {
-      this.props.onDragStart(charPos)
-    }
-  }
-
-  handleMouseUp = (e) => {
-    this.dragging = false
-    if (this.props.onDragEnd !== undefined) {
-      this.props.onDragEnd()
-    }
-  }
-
-  handleMouseMove = (e) => {
-    if (this.dragging) {
-      const coord = this.props.charPos
-      if (this.prevCoord.row !== coord.row ||
-          this.prevCoord.col !== coord.col) {
-        this.prevCoord = coord
-        if (this.props.onDragMove !== undefined) {
-          this.props.onDragMove(coord)
-        }
-      }
-    }
+  resetCache (props) {
+    this.cachedWidth = props.width
+    this.cachedHeight = props.height
+    this.images  = Array(props.width*props.height).fill(null)
+    this.classes = Array(props.width*props.height).fill(null)
+    this.pix = Array(props.width*props.height).fill(null)
+    this.prevBackgroundColor = null
   }
 
   render () {
-    const { width, height, selected} = this.props
+    const { width, height, selected } = this.props
+
+    if (width !== this.cachedWidth || height !== this.cachedHeight) {
+      this.resetCache(this.props)
+    }
 
     for (var y = 0; y < height; y++) {
       const fbRow = this.props.framebuf[y]
@@ -180,27 +165,80 @@ class CharGrid_ extends Component {
       }
     }
     this.prevBackgroundColor = this.props.backgroundColor
-    const divStyle = {
-      position: 'relative',
-      transform: 'scale(2,2)',
-      transformOrigin: '0% 0%'
+    return this.images
+  }
+}
+
+class BrushSelectOverlay extends Component {
+  render () {
+    if (this.props.brushRegion === null) {
+      return null
+    }
+    const { min, max } = utils.sortRegion(this.props.brushRegion)
+    const s = {
+      outlineColor: 'rgba(128, 255, 128, 0.5)',
+      outlineStyle: 'solid',
+      outlineWidth: 0.5,
+      position: 'absolute',
+      left: min.col*8,
+      top: min.row*8,
+      width: `${(max.col-min.col+1)*8}px`,
+      height: `${(max.row-min.row+1)*8}px`,
+      backgroundColor: 'rgba(255,255,255,0)',
+      zIndex: 1,
+      pointerEvents:'none'
     }
     return (
-      <div
-        onMouseDown={this.handleMouseDown}
-        onMouseUp={this.handleMouseUp}
-        onMouseMove={this.handleMouseMove}
-        onClick={this.handleClick}
-        style={divStyle}>
-        {this.images}
+      <div style={s}>
       </div>
     )
   }
 }
 
-const CharGrid = withMouseCharPosition(CharGrid_)
+class BrushOverlay extends Component {
+  render () {
+    if (this.props.brush === null) {
+      return null
+    }
+    const { charPos, backgroundColor } = this.props
+    const { min, max } = utils.sortRegion(this.props.brush.brushRegion)
+    const bw = max.col - min.col + 1
+    const bh = max.row - min.row + 1
+    const s = {
+      outlineColor: 'rgba(128, 255, 128, 0.5)',
+      outlineStyle: 'solid',
+      outlineWidth: 0.5,
+      position: 'absolute',
+      left: charPos.col*8,
+      top: charPos.row*8,
+      width: `${(bw)*8}px`,
+      height: `${(bh)*8}px`,
+      backgroundColor: 'rgba(255,255,255,0)',
+      zIndex: 1,
+      pointerEvents:'none'
+    }
+    return (
+      <div style={s}>
+        <CharGrid
+          width={bw}
+          height={bh}
+          grid={false}
+          backgroundColor={backgroundColor}
+          framebuf={this.props.brush.framebuf}
+        />
+      </div>
+    )
+  }
+}
 
-class FramebufferView extends Component {
+class FramebufferView_ extends Component {
+
+  constructor (props) {
+    super(props)
+    this.dragging = false
+    this.prevCoord = null
+  }
+
   setChar = (clickLoc) => {
     const params = {
       ...clickLoc,
@@ -214,49 +252,117 @@ class FramebufferView extends Component {
       })
     } else if (this.props.selectedTool === TOOL_COLORIZE) {
       this.props.Framebuffer.setPixel(params)
+    } else {
+      console.error('shouldn\'t get here')
     }
   }
 
-  handleDragStart = (coord) => {
-    this.setChar(coord)
+  dragStart = (coord) => {
+    const { selectedTool } = this.props
+    if (selectedTool === TOOL_DRAW ||
+        selectedTool === TOOL_COLORIZE) {
+      this.setChar(coord)
+    } else if (selectedTool === TOOL_BRUSH) {
+      this.props.Toolbar.setBrushRegion({
+        min: coord,
+        max: {row: coord.row, col: coord.col}
+      })
+    }
   }
 
-  handleDragMove = (coord) => {
-    this.setChar(coord)
+  dragMove = (coord) => {
+    const { selectedTool } = this.props
+    if (selectedTool === TOOL_DRAW ||
+        selectedTool === TOOL_COLORIZE) {
+      this.setChar(coord)
+    } else if (selectedTool === TOOL_BRUSH) {
+      this.props.Toolbar.setBrushRegion({
+        ...this.props.brushRegion,
+        max: {row: coord.row, col: coord.col}
+      })
+    } else {
+      console.error('not implemented')
+    }
   }
 
-  handleDragEnd = () => {
+  dragEnd = () => {
+    const { selectedTool } = this.props
+    if (selectedTool === TOOL_BRUSH) {
+      this.props.Toolbar.captureBrush(this.props.framebuf, this.props.brushRegion)
+    }
     this.props.Toolbar.incUndoId()
+  }
+
+  handleMouseDown = (e) => {
+    console.log('mouse down')
+    const { charPos } = this.props
+    this.dragging = true
+    this.prevCoord = charPos
+    this.dragStart(charPos)
+  }
+
+  handleMouseUp = (e) => {
+    console.log('mouse up')
+    const { charPos } = this.props
+    this.dragging = false
+    this.dragEnd()
+  }
+
+  handleMouseMove = (e) => {
+    if (this.dragging) {
+      const coord = this.props.charPos
+      if (this.prevCoord.row !== coord.row ||
+          this.prevCoord.col !== coord.col) {
+        this.prevCoord = coord
+        this.dragMove(coord)
+      }
+    }
   }
 
   render () {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
+    const W = 40
+    const H = 25
     const backg = utils.colorIndexToCssRgb(this.props.backgroundColor)
-    const border = utils.colorIndexToCssRgb(this.props.borderColor)
-    const s = {
-      width: '640px', height:'400px',
-      borderColor: border
+    const { selectedTool } = this.props
+    let brushOverlays = null
+    if (selectedTool === TOOL_BRUSH) {
+      brushOverlays =
+        <Fragment>
+          <BrushSelectOverlay
+            brushRegion={this.props.brushRegion}
+          />
+          <BrushOverlay
+            charPos={this.props.charPos}
+            backgroundColor={backg}
+            brush={this.props.brush}
+          />
+        </Fragment>
     }
     return (
-      <div className={styles.fbContainer} style={s}>
+      <div
+        style={charGridScaleStyle}
+        onMouseMove={this.handleMouseMove}
+        onMouseDown={this.handleMouseDown}
+        onMouseUp={this.handleMouseUp}
+      >
         <CharGrid
-          width={40}
-          height={25}
+          width={W}
+          height={H}
           grid={false}
           backgroundColor={backg}
-          onDragStart={this.handleDragStart}
-          onDragMove={this.handleDragMove}
-          onDragEnd={this.handleDragEnd}
           framebuf={this.props.framebuf}
         />
+        {brushOverlays}
       </div>
     )
   }
 }
+const FramebufferView = withMouseCharPosition(FramebufferView_)
 
-class CharSelect extends Component {
+class CharSelect_ extends Component {
   constructor (props) {
     super(props)
     this.computeCachedFb(0)
@@ -274,6 +380,10 @@ class CharSelect extends Component {
     this.prevTextColor = textColor
   }
 
+  handleClick = () => {
+    this.props.setSelectedChar(this.props.charPos)
+  }
+
   render () {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
@@ -289,35 +399,50 @@ class CharSelect extends Component {
 
     return (
       <div className={styles.csContainer} style={s}>
-        <CharGrid
-          width={16}
-          height={16}
-          backgroundColor={backg}
-          grid={true}
-          framebuf={this.fb}
-          selected={this.props.selected}
-          onClickChar={this.props.setSelectedChar}
-        />
+        <div
+          style={charGridScaleStyle}
+          onClick={this.handleClick}
+        >
+          <CharGrid
+            width={16}
+            height={16}
+            backgroundColor={backg}
+            grid={true}
+            framebuf={this.fb}
+            selected={this.props.selected}
+          />
+        </div>
       </div>
     )
   }
 }
+const CharSelect = withMouseCharPosition(CharSelect_)
+
 
 class Editor extends Component {
   render() {
+    const borderColor = utils.colorIndexToCssRgb(this.props.borderColor)
+    const framebufStyle = {
+      width: '640px', height:'400px',
+      borderColor: borderColor
+    }
     return (
       <div className={styles.editorLayoutContainer}>
-        <FramebufferView
-          Framebuffer={this.props.Framebuffer}
-          Toolbar={this.props.Toolbar}
-          undoId={this.props.undoId}
-          curScreencode={this.props.curScreencode}
-          curTextColor={this.props.textColor}
-          selectedTool={this.props.selectedTool}
-          framebuf={this.props.framebuf}
-          backgroundColor={this.props.backgroundColor}
-          borderColor={this.props.borderColor}
-        />
+        <div className={styles.fbContainer} style={framebufStyle}>
+          <FramebufferView
+            Framebuffer={this.props.Framebuffer}
+            Toolbar={this.props.Toolbar}
+            undoId={this.props.undoId}
+            curScreencode={this.props.curScreencode}
+            curTextColor={this.props.textColor}
+            selectedTool={this.props.selectedTool}
+            framebuf={this.props.framebuf}
+            backgroundColor={this.props.backgroundColor}
+            brushRegion={this.props.brushRegion}
+            brush={this.props.brush}
+            captureBrush={this.props.captureBrush}
+          />
+        </div>
         <div style={{marginLeft: '5px'}}>
           <CharSelect
             selected={this.props.selected}
@@ -355,7 +480,9 @@ const mapStateToProps = state => {
     undoId: state.toolbar.undoId,
     curScreencode: utils.charScreencodeFromRowCol(selected),
     selectedTool: state.toolbar.selectedTool,
-    textColor: state.toolbar.textColor
+    textColor: state.toolbar.textColor,
+    brush: state.toolbar.brush,
+    brushRegion: state.toolbar.brushRegion
   }
 }
 export default connect(

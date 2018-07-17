@@ -77,3 +77,14 @@ export const loadFramebuf = (filename, importFile) => {
     alert(`Failed to load file '${filename}'!`)
   }
 }
+
+export const sortRegion = ({min, max}) => {
+  const minx = Math.min(min.col, max.col)
+  const miny = Math.min(min.row, max.row)
+  const maxx = Math.max(min.col, max.col)
+  const maxy = Math.max(min.row, max.row)
+  return {
+    min: {row: miny, col: minx},
+    max: {row: maxy, col: maxx},
+  }
+}

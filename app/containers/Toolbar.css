@@ -28,7 +28,7 @@
 
     /* Position the tooltip text - see examples below! */
     position: absolute;
-    top: 14px;
+    top: 7px;
     left: 50px;
     z-index: 1;
 }

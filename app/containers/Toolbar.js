@@ -7,7 +7,12 @@ import { ActionCreators } from 'redux-undo';
 
 import ColorPicker from '../components/ColorPicker'
 import * as utils from '../utils'
-import { Toolbar, TOOL_DRAW, TOOL_COLORIZE } from '../redux/toolbar'
+import {
+  Toolbar,
+  TOOL_DRAW,
+  TOOL_COLORIZE,
+  TOOL_BRUSH
+} from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
 import styles from './Toolbar.css';
 
@@ -193,6 +198,11 @@ class ToolbarView extends Component {
         tool: TOOL_COLORIZE,
         iconName: 'fa-highlighter',
         tooltip: 'Colorize'
+      },
+      {
+        tool: TOOL_BRUSH,
+        iconName: 'fa-brush',
+        tooltip: 'Select brush'
       }
     ].map(t => {
       return (
