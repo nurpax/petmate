@@ -8,6 +8,7 @@
   cursor: default;
   border-style: solid;
   border-width: 32px;
+  overflow: hidden;
 }
 
 .csContainer {
