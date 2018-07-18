@@ -88,3 +88,15 @@ export const sortRegion = ({min, max}) => {
     max: {row: maxy, col: maxx},
   }
 }
+
+const path = require('path')
+const electron = require('electron')
+const isDev = require('electron-is-dev');
+
+export const loadAppFile = (filename) => {
+  const appPath = electron.remote.app.getAppPath()
+  let abspath = isDev ?
+    path.resolve(__dirname, filename) :
+    path.resolve(appPath, filename)
+  return fs.readFileSync(abspath)
+}

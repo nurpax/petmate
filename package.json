@@ -1,8 +1,8 @@
 {
-  "name": "electron-react-boilerplate",
-  "productName": "ElectronReact",
+  "name": "petski",
+  "productName": "Petski",
   "version": "0.14.0",
-  "description": "Electron application boilerplate based on React, React Router, Webpack, React Hot Loader for rapid application development",
+  "description": "C64 PETSCII Editor",
   "scripts": {
     "build": "concurrently \"npm run build-main\" \"npm run build-renderer\"",
     "build-dll": "cross-env NODE_ENV=development node --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.renderer.dev.dll.js --colors",
@@ -41,10 +41,11 @@
     ]
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.develar.ElectronReact",
+    "productName": "Petski",
+    "appId": "com.nurpax.petski",
     "files": [
       "dist/",
+      "assets/",
       "node_modules/",
       "app.html",
       "main.prod.js",
@@ -80,10 +81,7 @@
     "directories": {
       "buildResources": "resources",
       "output": "release"
-    },
-    "extraFiles": [
-      "app/assets/*"
-    ]
+    }
   },
   "repository": {
     "type": "git",
@@ -208,6 +206,7 @@
     "classnames": "^2.2.6",
     "devtron": "^1.4.0",
     "electron-debug": "^2.0.0",
+    "electron-is-dev": "^0.3.0",
     "eslint-config-react-app": "^2.1.0",
     "history": "^4.7.2",
     "react": "^16.4.1",

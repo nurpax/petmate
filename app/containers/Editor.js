@@ -47,14 +47,12 @@ const withMouseCharPosition = (C) => {
   }
 }
 
-var fs = require('fs')
 const nativeImage = require('electron').nativeImage
 
 // TODO use blob URIs instead of data URIs
 class CharsetCache {
   constructor () {
-    const data = fs.readFileSync('./app/assets/system-charset.bin')
-
+    const data = utils.loadAppFile('./assets/system-charset.bin')
     this.dataURIs = Array(16)
 
     for (let colorIdx = 0; colorIdx < 16; colorIdx++) {
