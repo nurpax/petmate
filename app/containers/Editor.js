@@ -23,14 +23,16 @@ const charGridScaleStyle = {
   transformOrigin: '0% 0%'
 }
 
-const withMouseCharPosition = (C) => {
+const withMouseCharPosition = (C, options) => {
   class ToCharRowCol extends Component {
     constructor (props) {
       super(props)
     }
     render () {
-      const { position, grid, ...props} = this.props
+      const grid = options !== undefined ? options.grid : false
+      const { position, ...props } = this.props
       const scl = grid ? 17 : 16
+      console.log(scl)
       const col = Math.floor(this.props.position.x / scl)
       const row = Math.floor(this.props.position.y / scl)
       return <C charPos={{row, col}} grid={grid} {...props} />
@@ -430,7 +432,9 @@ class CharSelect_ extends Component {
     )
   }
 }
-const CharSelect = withMouseCharPosition(CharSelect_)
+const CharSelect = withMouseCharPosition(CharSelect_, {
+  grid: true
+})
 
 class Editor extends Component {
   render() {
