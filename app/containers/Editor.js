@@ -32,7 +32,6 @@ const withMouseCharPosition = (C, options) => {
       const grid = options !== undefined ? options.grid : false
       const { position, ...props } = this.props
       const scl = grid ? 17 : 16
-      console.log(scl)
       const col = Math.floor(this.props.position.x / scl)
       const row = Math.floor(this.props.position.y / scl)
       return <C charPos={{row, col}} grid={grid} {...props} />
@@ -118,6 +117,8 @@ class CharGrid extends Component {
     return  (
       this.props.width !== nextProps.width ||
       this.props.height !== nextProps.height ||
+      this.props.srcX !== nextProps.srcX ||
+      this.props.srcY !== nextProps.srcY ||
       this.props.framebuf !== nextProps.framebuf ||
       this.props.backgroundColor !== nextProps.backgroundColor ||
       this.props.selected !== nextProps.selected
@@ -135,13 +136,15 @@ class CharGrid extends Component {
 
   render () {
     const { width, height, selected } = this.props
+    const srcX = this.props.srcX !== undefined ? this.props.srcX : 0
+    const srcY = this.props.srcY !== undefined ? this.props.srcY : 0
 
     if (width !== this.cachedWidth || height !== this.cachedHeight) {
       this.resetCache(this.props)
     }
 
     for (var y = 0; y < height; y++) {
-      const fbRow = this.props.framebuf[y]
+      const fbRow = this.props.framebuf[y + srcY]
       for (var x = 0; x < width; x++) {
         let cls = styles.char
         if (selected !== undefined) {
@@ -152,7 +155,7 @@ class CharGrid extends Component {
         }
 
         const idx = y*width + x
-        const pix = fbRow[x]
+        const pix = fbRow[x + srcX]
 
         if (this.images[idx] == null ||
             this.classes[idx] !== cls ||
@@ -169,6 +172,15 @@ class CharGrid extends Component {
   }
 }
 
+const brushOverlayStyleBase = {
+  outlineColor: 'rgba(128, 255, 128, 0.5)',
+  outlineStyle: 'solid',
+  outlineWidth: 0.5,
+  backgroundColor: 'rgba(255,255,255,0)',
+  zIndex: 1,
+  pointerEvents:'none'
+}
+
 class BrushSelectOverlay extends Component {
   render () {
     if (this.props.brushRegion === null) {
@@ -176,17 +188,12 @@ class BrushSelectOverlay extends Component {
     }
     const { min, max } = utils.sortRegion(this.props.brushRegion)
     const s = {
-      outlineColor: 'rgba(128, 255, 128, 0.5)',
-      outlineStyle: 'solid',
-      outlineWidth: 0.5,
+      ...brushOverlayStyleBase,
       position: 'absolute',
       left: min.col*8,
       top: min.row*8,
       width: `${(max.col-min.col+1)*8}px`,
-      height: `${(max.row-min.row+1)*8}px`,
-      backgroundColor: 'rgba(255,255,255,0)',
-      zIndex: 1,
-      pointerEvents:'none'
+      height: `${(max.row-min.row+1)*8}px`
     }
     return (
       <div style={s}>
@@ -195,33 +202,63 @@ class BrushSelectOverlay extends Component {
   }
 }
 
+function computeBrushDstPos (charPos, { width, height }) {
+  return {
+    col: charPos.col - Math.floor(width/2),
+    row: charPos.row - Math.floor(height/2)
+  }
+}
+
 class BrushOverlay extends Component {
   render () {
     if (this.props.brush === null) {
       return null
     }
-    const { charPos, backgroundColor } = this.props
+    const { charPos, backgroundColor, framebufWidth, framebufHeight } = this.props
     const { min, max } = utils.sortRegion(this.props.brush.brushRegion)
-    const bw = max.col - min.col + 1
-    const bh = max.row - min.row + 1
+    const brushw = max.col - min.col + 1
+    const brushh = max.row - min.row + 1
+    let bw = brushw
+    let bh = brushh
+    const destPos = computeBrushDstPos(charPos, { width: bw, height: bh})
+    let dstx = destPos.col
+    let dsty = destPos.row
+    if (bw + dstx > framebufWidth) {
+      bw = framebufWidth - dstx
+    }
+    if (bh + dsty > framebufHeight) {
+      bh = framebufHeight - dsty
+    }
+    let srcX = 0
+    let srcY = 0
+    if (dstx < 0) {
+      srcX = -dstx
+      bw -= srcX
+      dstx = 0
+    }
+    if (dsty < 0) {
+      srcY = -dsty
+      bh -= srcY
+      dsty = 0
+    }
+    if (bw <= 0 || bh <= 0) {
+      return null
+    }
     const s = {
-      outlineColor: 'rgba(128, 255, 128, 0.5)',
-      outlineStyle: 'solid',
-      outlineWidth: 0.5,
+      ...brushOverlayStyleBase,
       position: 'absolute',
-      left: charPos.col*8,
-      top: charPos.row*8,
-      width: `${(bw)*8}px`,
-      height: `${(bh)*8}px`,
-      backgroundColor: 'rgba(255,255,255,0)',
-      zIndex: 1,
-      pointerEvents:'none'
+      left: dstx*8,
+      top: dsty*8,
+      width: `${bw*8}px`,
+      height: `${bh*8}px`,
     }
     return (
       <div style={s}>
         <CharGrid
           width={bw}
           height={bh}
+          srcX={srcX}
+          srcY={srcY}
           grid={false}
           backgroundColor={backgroundColor}
           framebuf={this.props.brush.framebuf}
@@ -258,8 +295,14 @@ class FramebufferView_ extends Component {
   }
 
   brushDraw = (coord) => {
+    const { min, max } = this.props.brush.brushRegion
+    const area = {
+      width: max.col - min.col + 1,
+      height: max.row - min.row + 1
+    }
+    const destPos = computeBrushDstPos(coord, area)
     this.props.Framebuffer.setBrush({
-      ...coord,
+      ...destPos,
       brush: this.props.brush,
       undoId: this.props.undoId
     })
@@ -310,7 +353,6 @@ class FramebufferView_ extends Component {
   }
 
   handleMouseDown = (e) => {
-    console.log('mouse down')
     const { charPos } = this.props
     this.dragging = true
     this.prevCoord = charPos
@@ -318,7 +360,6 @@ class FramebufferView_ extends Component {
   }
 
   handleMouseUp = (e) => {
-    console.log('mouse up')
     const { charPos } = this.props
     this.dragging = false
     this.dragEnd()
@@ -354,6 +395,8 @@ class FramebufferView_ extends Component {
             charPos={this.props.charPos}
             backgroundColor={backg}
             brush={this.props.brush}
+            framebufWidth={this.props.framebufWidth}
+            framebufHeight={this.props.framebufHeight}
           />
         </Fragment>
     }
@@ -454,6 +497,8 @@ class Editor extends Component {
             curTextColor={this.props.textColor}
             selectedTool={this.props.selectedTool}
             framebuf={this.props.framebuf}
+            framebufWidth={this.props.framebufWidth}
+            framebufHeight={this.props.framebufHeight}
             backgroundColor={this.props.backgroundColor}
             brushRegion={this.props.brushRegion}
             brush={this.props.brush}
@@ -491,6 +536,8 @@ const mapStateToProps = state => {
   const framebuf = state.framebuf.present
   return {
     framebuf: framebuf.framebuf,
+    framebufWidth: framebuf.width,
+    framebufHeight: framebuf.height,
     backgroundColor: framebuf.backgroundColor,
     borderColor: framebuf.borderColor,
     selected,
