@@ -6,6 +6,8 @@ import classnames from 'classnames'
 import ColorPicker from '../components/ColorPicker'
 import CharGrid from '../components/CharGrid'
 
+import CharSelect from './CharSelect'
+
 import { withMouseCharPosition } from './hoc'
 
 import { Framebuffer } from '../redux/editor'
@@ -19,11 +21,7 @@ import { selectChar } from '../actions/editor'
 import styles from './Editor.css';
 import * as utils from '../utils';
 
-const charGridScaleStyle = {
-  position: 'relative',
-  transform: 'scale(2,2)',
-  transformOrigin: '0% 0%'
-}
+import { charGridScaleStyle }  from './inlineStyles'
 
 const brushOverlayStyleBase = {
   outlineColor: 'rgba(128, 255, 128, 0.5)',
@@ -274,64 +272,6 @@ class FramebufferView_ extends Component {
 }
 const FramebufferView = withMouseCharPosition(FramebufferView_)
 
-class CharSelect_ extends Component {
-  constructor (props) {
-    super(props)
-    this.computeCachedFb(0)
-  }
-
-  computeCachedFb(textColor) {
-    this.fb = Array(16).fill({}).map((_, y) => {
-      return Array(16).fill({}).map((_, x) => {
-        return {
-          code: utils.charScreencodeFromRowCol({row:y, col:x}),
-          color: textColor
-        }
-      })
-    })
-    this.prevTextColor = textColor
-  }
-
-  handleClick = () => {
-    this.props.setSelectedChar(this.props.charPos)
-  }
-
-  render () {
-    // Editor needs to specify a fixed width/height because the contents use
-    // relative/absolute positioning and thus seem to break out of the CSS
-    // grid.
-    const w = `${2*8*16+16}px`
-    const h = `${2*8*16+16}px`
-    const backg = utils.colorIndexToCssRgb(this.props.backgroundColor)
-    const s = {width: w, height:h}
-
-    if (this.prevTextColor !== this.props.textColor) {
-      this.computeCachedFb(this.props.textColor)
-    }
-
-    return (
-      <div className={styles.csContainer} style={s}>
-        <div
-          style={charGridScaleStyle}
-          onClick={this.handleClick}
-        >
-          <CharGrid
-            width={16}
-            height={16}
-            backgroundColor={backg}
-            grid={true}
-            framebuf={this.fb}
-            selected={this.props.selected}
-          />
-        </div>
-      </div>
-    )
-  }
-}
-const CharSelect = withMouseCharPosition(CharSelect_, {
-  grid: true
-})
-
 class Editor extends Component {
   render() {
     const borderColor = utils.colorIndexToCssRgb(this.props.borderColor)
@@ -359,12 +299,7 @@ class Editor extends Component {
           />
         </div>
         <div style={{marginLeft: '5px'}}>
-          <CharSelect
-            selected={this.props.selected}
-            setSelectedChar={this.props.Toolbar.setSelectedChar}
-            textColor={this.props.textColor}
-            backgroundColor={this.props.backgroundColor}
-          />
+          <CharSelect />
           <div style={{marginTop: '5px'}}>
             <ColorPicker
               selected={this.props.textColor}
