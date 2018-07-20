@@ -18,9 +18,9 @@ import {
   TOOL_BRUSH
 } from '../redux/toolbar'
 import { selectChar } from '../actions/editor'
-import styles from './Editor.css';
 import * as utils from '../utils';
 
+import styles from './Editor.css';
 import { charGridScaleStyle }  from './inlineStyles'
 
 const brushOverlayStyleBase = {
@@ -130,7 +130,7 @@ class FramebufferView_ extends Component {
   setChar = (clickLoc) => {
     const params = {
       ...clickLoc,
-      color: this.props.curTextColor,
+      color: this.props.textColor,
       undoId: this.props.undoId
     }
     if (this.props.selectedTool === TOOL_DRAW) {
@@ -272,6 +272,32 @@ class FramebufferView_ extends Component {
 }
 const FramebufferView = withMouseCharPosition(FramebufferView_)
 
+const FramebufferCont = connect(
+  state => {
+    const selected = state.toolbar.selectedChar
+    const framebuf = state.framebuf.present
+    return {
+      framebuf: framebuf.framebuf,
+      framebufWidth: framebuf.width,
+      framebufHeight: framebuf.height,
+      backgroundColor: framebuf.backgroundColor,
+      selected,
+      undoId: state.toolbar.undoId,
+      curScreencode: utils.charScreencodeFromRowCol(selected),
+      selectedTool: state.toolbar.selectedTool,
+      textColor: state.toolbar.textColor,
+      brush: state.toolbar.brush,
+      brushRegion: state.toolbar.brushRegion
+    }
+  },
+  dispatch => {
+    return {
+      Framebuffer: Framebuffer.bindDispatch(dispatch),
+      Toolbar: Toolbar.bindDispatch(dispatch)
+    }
+  }
+)(FramebufferView)
+
 class Editor extends Component {
   render() {
     const borderColor = utils.colorIndexToCssRgb(this.props.borderColor)
@@ -282,21 +308,7 @@ class Editor extends Component {
     return (
       <div className={styles.editorLayoutContainer}>
         <div className={styles.fbContainer} style={framebufStyle}>
-          <FramebufferView
-            Framebuffer={this.props.Framebuffer}
-            Toolbar={this.props.Toolbar}
-            undoId={this.props.undoId}
-            curScreencode={this.props.curScreencode}
-            curTextColor={this.props.textColor}
-            selectedTool={this.props.selectedTool}
-            framebuf={this.props.framebuf}
-            framebufWidth={this.props.framebufWidth}
-            framebufHeight={this.props.framebufHeight}
-            backgroundColor={this.props.backgroundColor}
-            brushRegion={this.props.brushRegion}
-            brush={this.props.brush}
-            captureBrush={this.props.captureBrush}
-          />
+          <FramebufferCont />
         </div>
         <div style={{marginLeft: '5px'}}>
           <CharSelect />
@@ -314,7 +326,6 @@ class Editor extends Component {
 
 const mapDispatchToProps = dispatch => {
   return {
-    Framebuffer: Framebuffer.bindDispatch(dispatch),
     Toolbar: Toolbar.bindDispatch(dispatch)
   }
 }
@@ -323,20 +334,11 @@ const mapStateToProps = state => {
   const selected = state.toolbar.selectedChar
   const framebuf = state.framebuf.present
   return {
-    framebuf: framebuf.framebuf,
-    framebufWidth: framebuf.width,
-    framebufHeight: framebuf.height,
-    backgroundColor: framebuf.backgroundColor,
     borderColor: framebuf.borderColor,
-    selected,
-    undoId: state.toolbar.undoId,
-    curScreencode: utils.charScreencodeFromRowCol(selected),
-    selectedTool: state.toolbar.selectedTool,
-    textColor: state.toolbar.textColor,
-    brush: state.toolbar.brush,
-    brushRegion: state.toolbar.brushRegion
+    textColor: state.toolbar.textColor
   }
 }
+
 export default connect(
   mapStateToProps,
   mapDispatchToProps
