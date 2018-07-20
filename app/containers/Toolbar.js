@@ -16,67 +16,7 @@ import {
 import { Framebuffer } from '../redux/editor'
 import styles from './Toolbar.css';
 
-const withHoverFade = (C, options) => {
-  return class extends Component {
-    constructor (props) {
-      super(props)
-      this.timerId = null
-      this.state = {
-        fadeOut: false
-      }
-    }
-
-    componentWillUnmount () {
-      if (this.timerId !== null) {
-        clearTimeout(this.timerId)
-      }
-    }
-
-    clearHoverTimer = () => {
-      if (this.timerId !== null) {
-        clearTimeout(this.timerId)
-        this.timerId = null
-      }
-    }
-
-    handleMouseEnter = () => {
-      this.setState({fadeOut: false})
-      this.clearHoverTimer()
-    }
-
-    handleMouseLeave = () => {
-      clearTimeout(this.timerId)
-      this.setState({fadeOut: true})
-      this.timerId = setTimeout(() => {
-        this.props.onSetActive(this.props.pickerId, false)
-      }, 500)
-    }
-
-    handleToggleActive = () => {
-      const newIsActive = !this.props.active
-      this.props.onSetActive(this.props.pickerId, newIsActive)
-      if (this.timerId !== null) {
-        this.clearHoverTimer()
-      }
-    }
-
-    render () {
-      return (
-        <div
-          className={this.props.containerClassName}
-          onMouseLeave={this.handleMouseLeave}
-          onMouseEnter={this.handleMouseEnter}
-        >
-          <C
-            onToggleActive={this.handleToggleActive}
-            fadeOut={this.state.fadeOut}
-            {...this.props}
-          />
-        </div>
-      )
-    }
-  }
-}
+import { withHoverFade } from './hoc'
 
 class Icon extends Component {
   render () {
@@ -163,7 +103,7 @@ class BrushMenu_ extends Component {
   render () {
     const { tool, active, ...props } = this.props
     const buttons =
-      <div className={styles.brushMenuContainer}>
+      <div className={classnames(styles.brushMenuContainer, this.props.fadeOut ? styles.fadeOut : null)}>
         <i
           className={classnames(styles.icon, styles.brushButton, 'fas fa-crop-alt')}
           onClick={this.handleClickBrushSelect}

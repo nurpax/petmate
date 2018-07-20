@@ -1,10 +1,11 @@
 
 import React, { Component, Fragment, PureComponent } from 'react';
 import { connect } from 'react-redux'
-import ReactCursorPosition from 'react-cursor-position'
 import classnames from 'classnames'
 
 import ColorPicker from '../components/ColorPicker'
+
+import { withMouseCharPosition } from './hoc'
 
 import { Framebuffer } from '../redux/editor'
 import {
@@ -21,31 +22,6 @@ const charGridScaleStyle = {
   position: 'relative',
   transform: 'scale(2,2)',
   transformOrigin: '0% 0%'
-}
-
-const withMouseCharPosition = (C, options) => {
-  class ToCharRowCol extends Component {
-    constructor (props) {
-      super(props)
-    }
-    render () {
-      const grid = options !== undefined ? options.grid : false
-      const { position, ...props } = this.props
-      const scl = grid ? 17 : 16
-      const col = Math.floor(this.props.position.x / scl)
-      const row = Math.floor(this.props.position.y / scl)
-      return <C charPos={{row, col}} grid={grid} {...props} />
-    }
-  }
-  return class extends Component {
-    render () {
-      return (
-        <ReactCursorPosition>
-          <ToCharRowCol {...this.props}/>
-        </ReactCursorPosition>
-      )
-    }
-  }
 }
 
 const nativeImage = require('electron').nativeImage
