@@ -6,6 +6,8 @@ import { configureStore, history } from './store/configureStore';
 import './app.global.css';
 
 const store = configureStore();
+// Create one framebuffer so that we have a canvas to draw on
+store.dispatch({type:'ADD_FRAMEBUF'})
 
 render(
   <AppContainer>

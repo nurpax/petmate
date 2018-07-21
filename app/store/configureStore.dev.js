@@ -50,9 +50,6 @@ const configureStore = (initialState) => {
       () => store.replaceReducer(require('../reducers')) // eslint-disable-line global-require
     );
   }
-
-  // Create one framebuffer so that we have a canvas to draw on
-  store.dispatch({type:'ADD_FRAMEBUF'})
   return store;
 };
 
