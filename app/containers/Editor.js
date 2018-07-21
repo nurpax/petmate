@@ -11,6 +11,9 @@ import CharSelect from './CharSelect'
 import { withMouseCharPosition } from './hoc'
 
 import { Framebuffer } from '../redux/editor'
+import * as selectors from '../redux/selectors'
+import { framebufIndexMergeProps }  from '../redux/utils'
+
 import {
   Toolbar,
   TOOL_DRAW,
@@ -275,8 +278,9 @@ const FramebufferView = withMouseCharPosition(FramebufferView_)
 const FramebufferCont = connect(
   state => {
     const selected = state.toolbar.selectedChar
-    const framebuf = state.framebuf.present
+    const framebuf = selectors.getCurrentFramebuf(state)
     return {
+      framebufIndex: state.toolbar.framebufIndex,
       framebuf: framebuf.framebuf,
       framebufWidth: framebuf.width,
       framebufHeight: framebuf.height,
@@ -295,7 +299,8 @@ const FramebufferCont = connect(
       Framebuffer: Framebuffer.bindDispatch(dispatch),
       Toolbar: Toolbar.bindDispatch(dispatch)
     }
-  }
+  },
+  framebufIndexMergeProps
 )(FramebufferView)
 
 class Editor extends Component {
@@ -332,7 +337,7 @@ const mapDispatchToProps = dispatch => {
 
 const mapStateToProps = state => {
   const selected = state.toolbar.selectedChar
-  const framebuf = state.framebuf.present
+  const framebuf = selectors.getCurrentFramebuf(state)
   return {
     borderColor: framebuf.borderColor,
     textColor: state.toolbar.textColor

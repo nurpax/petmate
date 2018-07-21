@@ -10,6 +10,7 @@ export const TOOL_COLORIZE = 1
 export const TOOL_BRUSH = 2
 
 const settables = reduxSettables([
+  settable('Toolbar', 'framebufIndex', 0),
   settable('Toolbar', 'textColor', 14),
   settable('Toolbar', 'selectedChar', {row: 0, col: 0}),
   settable('Toolbar', 'selectedTool', TOOL_DRAW),

@@ -12,12 +12,57 @@ const groupByUndoId = (action) => {
   return null
 }
 
+function list(reducer, actionTypes) {
+  return function (state = [], action) {
+    switch (action.type) {
+    case actionTypes.add:
+      return [...state, reducer(undefined, action)];
+    case actionTypes.remove:
+      return [...state.slice(0, action.framebufIndex), ...state.slice(action.framebufIndex + 1)];
+    default:
+      const { framebufIndex, ...rest } = action;
+      if (typeof framebufIndex !== 'undefined') {
+        return state.map((item, i) => {
+          if (framebufIndex == i) {
+            return reducer(item, rest)
+          } else {
+            return item
+          }
+        });
+      }
+      return state;
+    }
+  }
+}
+
 const rootReducer = combineReducers({
-  framebuf: undoable(Framebuffer.reducer, {
-    groupBy: groupByUndoId
-  }),
+  framebufList: list(
+    undoable(Framebuffer.reducer, {
+      groupBy: groupByUndoId
+    }),
+    {
+      add: 'ADD_FRAMEBUF',
+      remove: 'REMOVE_FRAMEBUF'
+    }
+  ),
   toolbar: Toolbar.reducer,
   router
-});
+})
 
-export default rootReducer;
+const rootReducerTop = (state, action) => {
+  // Kind of hacky way to set framebuffer index to last created element
+  if (action.type === 'Toolbar/SET_FRAMEBUFINDEX') {
+    if (action.data == -1) {
+      return {
+        ...state,
+        toolbar: {
+          ...state.toolbar,
+          framebufIndex: state.framebufList.length-1
+        }
+      }
+    }
+  }
+  return rootReducer(state, action)
+}
+
+export default rootReducerTop

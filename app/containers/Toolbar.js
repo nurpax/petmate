@@ -14,6 +14,8 @@ import {
   TOOL_BRUSH
 } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
+import * as selectors from '../redux/selectors'
+import { framebufIndexMergeProps } from '../redux/utils'
 import styles from './Toolbar.css';
 
 import { withHoverFade } from './hoc'
@@ -27,7 +29,7 @@ class Icon extends Component {
     return (
       <div className={classnames(styles.tooltip, selectedClass)}>
         <i
-          onClick={this.props.onIconClick}
+          onClick={() => this.props.onIconClick()}
           className={classnames(styles.icon, `fas ${this.props.iconName}`)}
         />
         {tooltip}
@@ -273,27 +275,38 @@ class ToolbarView extends Component {
   }
 }
 
-const mapDispatchToProps = {
-  undo: ActionCreators.undo,
-  redo: ActionCreators.redo,
+const undoActions = {
+  undo: (framebufIndex) => {
+    return {
+      ...ActionCreators.undo(),
+      framebufIndex
+    }
+  },
+  redo: (framebufIndex) => {
+    return {
+      ...ActionCreators.redo(),
+      framebufIndex
+    }
+  }
 }
-
-const mdtp = dispatch => {
+const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    ...bindActionCreators(mapDispatchToProps, dispatch),
+    ...bindActionCreators(undoActions, dispatch),
     Toolbar: Toolbar.bindDispatch(dispatch),
     Framebuffer: Framebuffer.bindDispatch(dispatch)
   }
 }
 
 const mapStateToProps = state => {
-  const framebuf = state.framebuf.present
+  const framebuf = selectors.getCurrentFramebuf(state)
   return {
+    framebufIndex: state.toolbar.framebufIndex,
     framebuf: framebuf,
     selectedTool: state.toolbar.selectedTool
   }
 }
 export default connect(
   mapStateToProps,
-  mdtp
+  mapDispatchToProps,
+  framebufIndexMergeProps
 )(ToolbarView)

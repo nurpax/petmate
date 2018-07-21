@@ -13,6 +13,7 @@ body {
   overflow-y: hidden;
   overflow-x: hidden;
   margin:0px;
+  user-select: none;
 }
 
 h2 {

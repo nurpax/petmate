@@ -13,11 +13,12 @@ class Settable {
     return settables.reduce((acc, s) => {
       return {
         ...acc,
-        [`set${uppercaseFirstChar(s.name)}`]: (v) => {
+        [`set${uppercaseFirstChar(s.name)}`]: (v, framebufIndex) => {
           return {
             type: s.type,
             data: v,
-            undoId: null
+            undoId: null,
+            framebufIndex
           }
         }
       }

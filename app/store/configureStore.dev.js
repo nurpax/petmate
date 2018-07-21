@@ -51,6 +51,8 @@ const configureStore = (initialState) => {
     );
   }
 
+  // Create one framebuffer so that we have a canvas to draw on
+  store.dispatch({type:'ADD_FRAMEBUF'})
   return store;
 };
 

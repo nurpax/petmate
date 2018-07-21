@@ -61,24 +61,27 @@ export class Framebuffer {
 
   static actions = {
     ...settables.actions,
-    setPixel: ({row, col, screencode, color, undoId}) => {
+    setPixel: ({row, col, screencode, color, undoId}, framebufIndex) => {
       return {
         type: Framebuffer.SET_PIXEL,
         data: { row, col, screencode, color },
-        undoId
+        undoId,
+        framebufIndex
       }
     },
-    setBrush: ({row, col, brush, undoId}) => {
+    setBrush: ({row, col, brush, undoId}, framebufIndex) => {
       return {
         type: Framebuffer.SET_BRUSH,
         data: { row, col, brush },
-        undoId
+        undoId,
+        framebufIndex
       }
     },
-    importFile: (contents) => {
+    importFile: (contents, framebufIndex) => {
       return {
         type: Framebuffer.IMPORT_FILE,
-        data: contents
+        data: contents,
+        framebufIndex
       }
     }
   }

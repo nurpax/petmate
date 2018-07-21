@@ -12,6 +12,7 @@ import {
 
 import CharGrid from '../components/CharGrid'
 import * as utils from '../utils'
+import * as selectors from '../redux/selectors'
 import { withMouseCharPosition } from './hoc'
 
 import styles from './CharSelect.css'
@@ -84,7 +85,7 @@ const mapDispatchToProps = dispatch => {
 
 const mapStateToProps = state => {
   const selected = state.toolbar.selectedChar
-  const framebuf = state.framebuf.present
+  const framebuf = selectors.getCurrentFramebuf(state)
   return {
     backgroundColor: framebuf.backgroundColor,
     selected,
