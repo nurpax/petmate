@@ -1,24 +1,41 @@
 
-const ADD_FRAMEBUF = 'ADD_FRAMEBUF'
-const REMOVE_FRAMEBUF = 'REMOVE_FRAMEBUF'
+export const ADD_FRAMEBUF = 'ADD_FRAMEBUF'
+export const REMOVE_FRAMEBUF = 'REMOVE_FRAMEBUF'
+export const SET_CURRENT_FRAMEBUF_INDEX = 'SET_CURRENT_FRAMEBUF_INDEX'
 
 function framebufListReducer(reducer, actionTypes) {
-  return function (state = [], action) {
+  return function (state = {
+    list: [],
+    idCount: 0
+  }, action) {
     switch (action.type) {
     case actionTypes.add:
-      return [...state, reducer(undefined, action)];
+      return {
+        ...state,
+        idCount: state.idCount+1,
+        list: [...state.list, {id:state.idCount, ...reducer(undefined, action)}]
+      }
     case actionTypes.remove:
-      return [...state.slice(0, action.framebufIndex), ...state.slice(action.framebufIndex + 1)];
+      return {
+        ...state,
+        list: [...state.list.slice(0, action.index), ...state.list.slice(action.index + 1)]
+      }
     default:
       const { framebufIndex, ...rest } = action;
       if (typeof framebufIndex !== 'undefined') {
-        return state.map((item, i) => {
-          if (framebufIndex == i) {
-            return reducer(item, rest)
-          } else {
-            return item
-          }
-        });
+        return {
+          ...state,
+          list: state.list.map((item, i) => {
+            if (framebufIndex == i) {
+              return {
+                id: item.id,
+                ...reducer(item, rest)
+              }
+            } else {
+              return item
+            }
+          })
+        }
       }
       return state;
     }
@@ -31,10 +48,16 @@ export const actions = {
       type: ADD_FRAMEBUF
     }
   },
-  removeFramebuf: (framebufIdx) => {
+  removeFramebuf: (index) => {
     return {
       type: REMOVE_FRAMEBUF,
-      framebufIndex
+      index
+    }
+  },
+  setCurrentFramebufIndex: (index) => {
+    return {
+      type: SET_CURRENT_FRAMEBUF_INDEX,
+      data: index
     }
   }
 }

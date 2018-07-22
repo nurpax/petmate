@@ -31,7 +31,7 @@ const rootReducerTop = (state, action) => {
         ...state,
         toolbar: {
           ...state.toolbar,
-          framebufIndex: state.framebufList.length-1
+          framebufIndex: state.framebufList.list.length-1
         }
       }
     }

@@ -280,7 +280,7 @@ const FramebufferCont = connect(
     const selected = state.toolbar.selectedChar
     const framebuf = selectors.getCurrentFramebuf(state)
     return {
-      framebufIndex: state.toolbar.framebufIndex,
+      framebufIndex: selectors.getCurrentFramebufIndex(state),
       framebuf: framebuf.framebuf,
       framebufWidth: framebuf.width,
       framebufHeight: framebuf.height,

@@ -5,6 +5,8 @@ import Root from './containers/Root';
 import { configureStore, history } from './store/configureStore';
 import './app.global.css';
 
+import * as framebufList from './redux/framebufList'
+
 const store = configureStore();
 // Create one framebuffer so that we have a canvas to draw on
 store.dispatch({type:'ADD_FRAMEBUF'})

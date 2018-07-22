@@ -23,12 +23,27 @@ class FramebufferTabs_ extends Component {
     this.props.Toolbar.setFramebufIndex(-1)
   }
 
+  handleRemoveTab = (idx) => {
+    this.props.Framebufs.removeFramebuf(idx)
+    this.props.Toolbar.setFramebufIndex(-1)
+  }
+
   render () {
+    const disableRemove = this.props.framebufList.length == 1
     const lis = this.props.framebufList.map((t, i) => {
-      const key = i
-      const name = `Tab ${i}`
+      const key = t.id
+      const name = `Tab ${t.id}`
       const cls = classnames(i === this.props.framebufIndex ? styles.active : null)
-      return <li key={key} className={cls}><a href='/#' onClick={this.handleActiveClick(i)}>{name}</a></li>
+      return (
+        <li key={key} className={cls}>
+          <a href='/#' onClick={this.handleActiveClick(i)}>{name}</a>
+          &nbsp;
+          {disableRemove ?
+            null
+            :
+            <i onClick={() => this.handleRemoveTab(i)} className='fa fa-times-circle'></i>}
+        </li>
+      )
     })
     return (
       <div className={styles.tabHeadings}>
@@ -52,8 +67,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 const mapStateToProps = state => {
   const framebuf = selectors.getCurrentFramebuf(state)
   return {
-    framebufIndex: state.toolbar.framebufIndex,
-    framebufList: state.framebufList
+    framebufIndex: selectors.getCurrentFramebufIndex(state),
+    framebufList: selectors.getFramebufs(state)
   }
 }
 export default connect(

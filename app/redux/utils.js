@@ -13,7 +13,6 @@ const injectFramebufIndex = (stateProps, dispatchProps) => {
       Object.keys(children).map(ck => {
         const f = children[ck]
         newDispatch[key][ck] = (...args) => {
-          console.log(args)
           f(...args, stateProps.framebufIndex)
         }
       })
