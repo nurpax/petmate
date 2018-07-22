@@ -1,6 +1,7 @@
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
 
 import classnames from 'classnames'
 
@@ -8,6 +9,7 @@ import styles from './FramebufferTabs.css'
 import { framebufIndexMergeProps }  from '../redux/utils'
 import { Framebuffer } from '../redux/editor'
 import { Toolbar } from '../redux/toolbar'
+import * as framebufList from '../redux/framebufList'
 import * as selectors from '../redux/selectors'
 
 class FramebufferTabs_ extends Component {
@@ -17,7 +19,7 @@ class FramebufferTabs_ extends Component {
   }
 
   handleNewTab = () => {
-    this.props.newFramebuf()
+    this.props.Framebufs.addFramebuf()
     this.props.Toolbar.setFramebufIndex(-1)
   }
 
@@ -43,11 +45,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     Toolbar: Toolbar.bindDispatch(dispatch),
     Framebuffer: Framebuffer.bindDispatch(dispatch),
-    newFramebuf: () => { // TODO make an action creator function somewhere
-      dispatch({
-        type: 'ADD_FRAMEBUF'
-      })
-    }
+    Framebufs: bindActionCreators(framebufList.actions, dispatch)
   }
 }
 
