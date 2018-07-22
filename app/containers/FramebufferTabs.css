@@ -6,43 +6,17 @@
 
 }
 
-ul.tabs {
-    margin: 0px;
-    padding: 0px;
-    list-style: none outside none;
-    margin-bottom: 0px;
-    padding-bottom: 0px;
+.tabs {
+  display: flex;
+  flex-direction: row;
 }
 
-ul.tabs a {
-    color: rgb(173,173,173);
+.tab {
+  border-style: solid;
+  border-width: 2px;
+  border-color: rgba(0,0,0,0);
 }
 
-ul.tabs i {
-    color: rgb(173,173,173);
-}
-
-ul.tabs li {
-    list-style: none outside none;
-    display: inline-block;
-    margin-left: 3px;
-    margin-right: 3px;
-
-    padding: 4px;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: 3px;
-    border-color: #333;
-
-    border-bottom: solid;
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
-    border-bottom-color: #000;
-
-    background-color: #000;
-}
-
-ul.tabs li.active {
-    border-bottom-color: rgb(25,25,25);
-    background-color: rgb(25,25,25);
+.tab.active {
+  border-color: rgba(255,255,255,0.6);
 }
