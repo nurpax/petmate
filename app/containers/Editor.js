@@ -5,6 +5,7 @@ import classnames from 'classnames'
 
 import ColorPicker from '../components/ColorPicker'
 import CharGrid from '../components/CharGrid'
+import CharPosOverlay from '../components/CharPosOverlay'
 
 import CharSelect from './CharSelect'
 
@@ -238,9 +239,9 @@ class FramebufferView_ extends Component {
     const H = 25
     const backg = utils.colorIndexToCssRgb(this.props.backgroundColor)
     const { selectedTool } = this.props
-    let brushOverlays = null
-    if (selectedTool === TOOL_BRUSH) {
-      brushOverlays =
+    let overlays = null
+    if (selectedTool === TOOL_BRUSH && this.props.isActive) {
+      overlays =
         <Fragment>
           <BrushSelectOverlay
             brushRegion={this.props.brushRegion}
@@ -253,10 +254,17 @@ class FramebufferView_ extends Component {
             framebufHeight={this.props.framebufHeight}
           />
         </Fragment>
+    } else if (selectedTool === TOOL_DRAW || selectedTool === TOOL_COLORIZE) {
+      overlays = this.props.isActive ? <CharPosOverlay charPos={this.props.charPos} opacity={0.5} /> : null
+    }
+    const scale = {
+      ...charGridScaleStyle,
+      width: W*8,
+      height: H*8
     }
     return (
       <div
-        style={charGridScaleStyle}
+        style={scale}
         onMouseMove={this.handleMouseMove}
         onMouseDown={this.handleMouseDown}
         onMouseUp={this.handleMouseUp}
@@ -268,7 +276,7 @@ class FramebufferView_ extends Component {
           backgroundColor={backg}
           framebuf={this.props.framebuf}
         />
-        {brushOverlays}
+        {overlays}
       </div>
     )
   }

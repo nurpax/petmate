@@ -3,129 +3,115 @@ import React, { Component } from 'react';
 import classnames from 'classnames'
 
 import * as utils from '../utils'
-import styles from './CharGrid.css'
 
-const nativeImage = require('electron').nativeImage
+const systemFontData = utils.loadAppFile('./assets/system-charset.bin')
 
-// TODO use blob URIs instead of data URIs
 class CharsetCache {
-  constructor () {
-    const data = utils.loadAppFile('./assets/system-charset.bin')
-    this.dataURIs = Array(16)
+  constructor (ctx) {
+    const data = systemFontData
+    this.images = Array(16)
 
     for (let colorIdx = 0; colorIdx < 16; colorIdx++) {
       const color = utils.palette[colorIdx]
-      this.dataURIs[colorIdx] = []
+      this.images[colorIdx] = []
 
       for (let c = 0; c < 256; c++) {
         const boffs = c*8;
         const char = []
 
+        let dstIdx = 0
+        let img = ctx.createImageData(8, 8);
+        let bits = img.data
+
         for (let y = 0; y < 8; y++) {
           const p = data[boffs+y]
           for (let i = 0; i < 8; i++) {
             const v = ((128 >> i) & p) ? 255 : 0
-            char.push(color.b)
-            char.push(color.g)
-            char.push(color.r)
-            char.push(v)
+            bits[dstIdx+0] = color.r
+            bits[dstIdx+1] = color.g
+            bits[dstIdx+2] = color.b
+            bits[dstIdx+3] = v
+            dstIdx += 4
           }
         }
-        const img = nativeImage.createFromBuffer(Buffer.from(char), {width: 8, height: 8})
-        this.dataURIs[colorIdx].push(img.toDataURL())
+        this.images[colorIdx].push(img)
       }
     }
   }
 
-  getDataURI(screencode, color) {
-    return this.dataURIs[color][screencode]
+  getImage(screencode, color) {
+    return this.images[color][screencode]
   }
-}
-
-const charset = new CharsetCache()
-
-function renderChar (key, cls, x, y, pix, grid, bg) {
-  const scl = grid ? 8.5 : 8
-  const s = {
-    position: 'absolute',
-    transform: `translate(${x*scl}px, ${y*scl}px)`,
-    backgroundColor: bg
-  }
-  return (
-    <img
-      key={key}
-      draggable={false}
-      style={s}
-      className={classnames(styles.pixelated, cls)}
-      width={8}
-      height={8}
-      src={charset.getDataURI(pix.code, pix.color)}
-    />
-  )
 }
 
 export default class CharGrid extends Component {
+  static defaultProps = {
+    srcX: 0,
+    srcY: 0
+  }
+
   constructor (props) {
     super(props)
-    this.resetCache(props)
+    this.font = null
+  }
+  componentDidMount() {
+    this.draw()
   }
 
-  shouldComponentUpdate (nextProps, nextState) {
-    return  (
-      this.props.width !== nextProps.width ||
-      this.props.height !== nextProps.height ||
-      this.props.srcX !== nextProps.srcX ||
-      this.props.srcY !== nextProps.srcY ||
-      this.props.framebuf !== nextProps.framebuf ||
-      this.props.backgroundColor !== nextProps.backgroundColor ||
-      this.props.selected !== nextProps.selected
-    )
+  componentDidUpdate (prevProps) {
+    if (this.props.width !== prevProps.width ||
+      this.props.height !== prevProps.height ||
+      this.props.srcX !== prevProps.srcX ||
+      this.props.srcY !== prevProps.srcY ||
+      this.props.framebuf !== prevProps.framebuf ||
+      this.props.backgroundColor !== prevProps.backgroundColor) {
+      this.draw(prevProps)
+    }
   }
 
-  resetCache (props) {
-    this.cachedWidth = props.width
-    this.cachedHeight = props.height
-    this.images  = Array(props.width*props.height).fill(null)
-    this.classes = Array(props.width*props.height).fill(null)
-    this.pix = Array(props.width*props.height).fill(null)
-    this.prevBackgroundColor = null
+  draw (prevProps) {
+    const canvas = this.refs.canvas
+    const ctx = canvas.getContext("2d")
+
+    if (this.font === null) {
+      this.font = new CharsetCache(ctx)
+    }
+
+    const { grid, srcX, srcY } = this.props
+
+    const xScale = grid ? 9 : 8
+    const yScale = grid ? 9 : 8
+
+    for (var y = 0; y < this.props.height; y++) {
+      const charRow = this.props.framebuf[y + srcY]
+      for (var x = 0; x < this.props.width; x++) {
+        const c = charRow[x + srcX]
+        const img = this.font.getImage(c.code, c.color)
+        ctx.putImageData(img, x*xScale, y*yScale)
+      }
+    }
+    if (grid) {
+      ctx.fillStyle = 'rgba(0,0,0,255)'
+      for (var y = 0; y < this.props.height; y++) {
+        ctx.fillRect(0, y*yScale+8, this.props.width*xScale, 1)
+      }
+      for (var x = 0; x < this.props.width; x++) {
+        ctx.fillRect(x*xScale+8, 0, 1, this.props.height*yScale)
+      }
+    }
   }
 
   render () {
-    const { width, height, selected } = this.props
-    const srcX = this.props.srcX !== undefined ? this.props.srcX : 0
-    const srcY = this.props.srcY !== undefined ? this.props.srcY : 0
-
-    if (width !== this.cachedWidth || height !== this.cachedHeight) {
-      this.resetCache(this.props)
-    }
-
-    for (var y = 0; y < height; y++) {
-      const fbRow = this.props.framebuf[y + srcY]
-      for (var x = 0; x < width; x++) {
-        let cls = styles.char
-        if (selected !== undefined) {
-          const { row, col } = selected
-          if (y === row && x === col) {
-            cls = styles.charSelected
-          }
-        }
-
-        const idx = y*width + x
-        const pix = fbRow[x + srcX]
-
-        if (this.images[idx] == null ||
-            this.classes[idx] !== cls ||
-            this.prevBackgroundColor !== this.props.backgroundColor ||
-            this.pix[idx] !== pix) {
-          this.images[idx] = renderChar(idx, cls, x, y, pix, this.props.grid, this.props.backgroundColor)
-          this.pix[idx] = pix
-          this.classes[idx] = cls
-        }
-      }
-    }
-    this.prevBackgroundColor = this.props.backgroundColor
-    return this.images
+    const scale = this.props.grid ? 9 : 8
+    return (
+      <canvas
+        ref='canvas'
+        style={{
+          backgroundColor: this.props.backgroundColor
+        }}
+        width={this.props.width*scale}
+        height={this.props.height*scale}>
+      </canvas>
+    )
   }
 }
-

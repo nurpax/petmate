@@ -10,7 +10,7 @@ export const withMouseCharPosition = (C, options) => {
     render () {
       const grid = options !== undefined ? options.grid : false
       const { position, ...props } = this.props
-      const scl = grid ? 17 : 16
+      const scl = grid ? 18 : 16
       const col = Math.floor(this.props.position.x / scl)
       const row = Math.floor(this.props.position.y / scl)
       return <C charPos={{row, col}} grid={grid} {...props} />

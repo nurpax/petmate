@@ -11,6 +11,7 @@ import {
 } from '../redux/toolbar'
 
 import CharGrid from '../components/CharGrid'
+import CharPosOverlay from '../components/CharPosOverlay'
 import * as utils from '../utils'
 import * as selectors from '../redux/selectors'
 import { withMouseCharPosition } from './hoc'
@@ -44,8 +45,8 @@ class CharSelect_ extends Component {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
-    const w = `${2*8*16+16}px`
-    const h = `${2*8*16+16}px`
+    const w = `${2*8*16+32}px`
+    const h = `${2*8*16+32}px`
     const backg = utils.colorIndexToCssRgb(this.props.backgroundColor)
     const s = {width: w, height:h}
 
@@ -56,7 +57,11 @@ class CharSelect_ extends Component {
     return (
       <div className={styles.csContainer} style={s}>
         <div
-          style={charGridScaleStyle}
+          style={{
+            ...charGridScaleStyle,
+            width: 16*9,
+            height: 16*9
+          }}
           onClick={this.handleClick}
         >
           <CharGrid
@@ -67,6 +72,12 @@ class CharSelect_ extends Component {
             framebuf={this.fb}
             selected={this.props.selected}
           />
+          {this.props.isActive ?
+            <CharPosOverlay grid={true} opacity={0.5} charPos={this.props.charPos} />
+            : null}
+          {this.props.selected ?
+            <CharPosOverlay grid={true} opacity={1.0} charPos={this.props.selected} />
+            : null}
         </div>
       </div>
     )
