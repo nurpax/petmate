@@ -10,7 +10,7 @@ import styles from './FramebufferTabs.css'
 import { framebufIndexMergeProps }  from '../redux/utils'
 import { Framebuffer } from '../redux/editor'
 import { Toolbar } from '../redux/toolbar'
-import * as framebufList from '../redux/framebufList'
+import * as Screens from '../redux/screens'
 import * as selectors from '../redux/selectors'
 
 import * as utils from '../utils'
@@ -57,32 +57,28 @@ class FramebufTab extends Component {
 
 class FramebufferTabs_ extends Component {
   handleActiveClick = (idx) => {
-    this.props.Toolbar.setFramebufIndex(idx)
+    this.props.Screens.setCurrentScreenIndex(idx)
   }
 
   handleNewTab = () => {
-    this.props.Framebufs.addFramebuf()
-    this.props.Toolbar.setFramebufIndex(-1)
+    this.props.Screens.newScreen()
   }
 
   handleRemoveTab = (idx) => {
-    this.props.Framebufs.removeFramebuf(idx)
-    this.props.Toolbar.setFramebufIndex(-1)
+//    this.props.Framebufs.removeFramebuf(idx)
+//    this.props.Toolbar.setFramebufIndex(-1)
   }
 
   render () {
-    const disableRemove = this.props.framebufList.length == 1
-    const lis = this.props.framebufList.map((t, i) => {
-      const key = t.id
-      const name = `Tab ${t.id}`
-      const cls = classnames(i === this.props.framebufIndex ? styles.active : null)
+    const disableRemove = this.props.screens.length == 1
+    const lis = this.props.screens.map((framebufId, i) => {
       return (
         <FramebufTab
-          key={key}
+          key={framebufId}
           id={i}
           onSetActiveTab={this.handleActiveClick}
-          framebuf={this.props.getFramebufByIndex(i)}
-          active={i === this.props.framebufIndex} />
+          framebuf={this.props.getFramebufByIndex(framebufId)}
+          active={i === this.props.activeScreen} />
       )
     })
     return (
@@ -102,20 +98,18 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     Toolbar: Toolbar.bindDispatch(dispatch),
     Framebuffer: Framebuffer.bindDispatch(dispatch),
-    Framebufs: bindActionCreators(framebufList.actions, dispatch)
+    Screens: bindActionCreators(Screens.actions, dispatch)
   }
 }
 
 const mapStateToProps = state => {
-  const framebuf = selectors.getCurrentFramebuf(state)
   return {
-    framebufIndex: selectors.getCurrentFramebufIndex(state),
-    framebufList: selectors.getFramebufs(state),
+    activeScreen: selectors.getCurrentScreenIndex(state),
+    screens: selectors.getScreens(state),
     getFramebufByIndex: (idx) => selectors.getFramebufByIndex(state, idx)
   }
 }
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-  framebufIndexMergeProps
 )(FramebufferTabs_)

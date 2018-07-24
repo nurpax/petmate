@@ -1,41 +1,27 @@
 
+import undoable from 'redux-undo'
+import { Framebuffer } from '../redux/editor'
+
 export const ADD_FRAMEBUF = 'ADD_FRAMEBUF'
 export const REMOVE_FRAMEBUF = 'REMOVE_FRAMEBUF'
-export const SET_CURRENT_FRAMEBUF_INDEX = 'SET_CURRENT_FRAMEBUF_INDEX'
 
 function framebufListReducer(reducer, actionTypes) {
-  return function (state = {
-    list: [],
-    idCount: 0
-  }, action) {
+  return function (state = [], action) {
     switch (action.type) {
     case actionTypes.add:
-      return {
-        ...state,
-        idCount: state.idCount+1,
-        list: [...state.list, {id:state.idCount, ...reducer(undefined, action)}]
-      }
+      return state.concat(reducer(undefined, action))
     case actionTypes.remove:
-      return {
-        ...state,
-        list: [...state.list.slice(0, action.index), ...state.list.slice(action.index + 1)]
-      }
+      return [...state.slice(0, action.index), ...state.slice(action.index + 1)]
     default:
       const { framebufIndex, ...rest } = action;
       if (typeof framebufIndex !== 'undefined') {
-        return {
-          ...state,
-          list: state.list.map((item, i) => {
-            if (framebufIndex == i) {
-              return {
-                id: item.id,
-                ...reducer(item, rest)
-              }
-            } else {
-              return item
-            }
-          })
-        }
+        return state.map((item, i) => {
+          if (framebufIndex == i) {
+            return reducer(item, rest)
+          } else {
+            return item
+          }
+        })
       }
       return state;
     }
@@ -53,18 +39,24 @@ export const actions = {
       type: REMOVE_FRAMEBUF,
       index
     }
-  },
-  setCurrentFramebufIndex: (index) => {
-    return {
-      type: SET_CURRENT_FRAMEBUF_INDEX,
-      data: index
-    }
   }
 }
 
-export const reducer = (r) => {
+const groupByUndoId = (action) => {
+  if (action.undoId !== undefined) {
+    return action.undoId
+  }
+  return null
+}
+
+const mkReducer = () => {
+  const r = undoable(Framebuffer.reducer, {
+    groupBy: groupByUndoId
+  })
   return framebufListReducer(r, {
     add: ADD_FRAMEBUF,
     remove: REMOVE_FRAMEBUF
   })
 }
+
+export const reducer = mkReducer()

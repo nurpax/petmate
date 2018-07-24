@@ -4,36 +4,27 @@ import undoable from 'redux-undo'
 import { routerReducer as router } from 'react-router-redux'
 import { Toolbar } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
+import * as Screens from '../redux/screens'
 import * as framebufList from '../redux/framebufList'
 
-const groupByUndoId = (action) => {
-  if (action.undoId !== undefined) {
-    return action.undoId
-  }
-  return null
-}
-
 const rootReducer = combineReducers({
-  framebufList: framebufList.reducer(
-    undoable(Framebuffer.reducer, {
-      groupBy: groupByUndoId
-    })
-  ),
+  framebufList: framebufList.reducer,
   toolbar: Toolbar.reducer,
+  screens: Screens.reducer,
   router
 })
 
 const rootReducerTop = (state, action) => {
-  // Kind of hacky way to set framebuffer index to last created element
-  if (action.type === 'Toolbar/SET_FRAMEBUFINDEX') {
-    if (action.data == -1) {
-      return {
-        ...state,
-        toolbar: {
-          ...state.toolbar,
-          framebufIndex: state.framebufList.list.length-1
-        }
-      }
+  if (action.type === Screens.ADD_SCREEN_AND_FRAMEBUF) {
+    const newFramebufs =
+      framebufList.reducer(state.framebufList, framebufList.actions.addFramebuf())
+    const fbs = newFramebufs
+    const newScreens =
+      Screens.reducer(state.screens, Screens.actions.addScreen(fbs.length-1))
+    return {
+      ...state,
+      framebufList: newFramebufs,
+      screens: newScreens
     }
   }
   return rootReducer(state, action)

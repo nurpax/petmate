@@ -300,7 +300,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 const mapStateToProps = state => {
   const framebuf = selectors.getCurrentFramebuf(state)
   return {
-    framebufIndex: selectors.getCurrentFramebufIndex(state),
+    framebufIndex: selectors.getCurrentScreenFramebufIndex(state),
     framebuf: framebuf,
     selectedTool: state.toolbar.selectedTool
   }
