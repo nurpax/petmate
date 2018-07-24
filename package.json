@@ -1,6 +1,6 @@
 {
-  "name": "petski",
-  "productName": "Petski",
+  "name": "Petmate",
+  "productName": "Petmate",
   "version": "0.14.0",
   "description": "C64 PETSCII Editor",
   "scripts": {
@@ -41,8 +41,8 @@
     ]
   },
   "build": {
-    "productName": "Petski",
-    "appId": "com.nurpax.petski",
+    "productName": "Petmate",
+    "appId": "com.nurpax.petmate",
     "files": [
       "dist/",
       "assets/",
