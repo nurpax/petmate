@@ -39,7 +39,12 @@ const brushOverlayStyleBase = {
 class BrushSelectOverlay extends Component {
   render () {
     if (this.props.brushRegion === null) {
-      return null
+      return (
+        <CharPosOverlay
+          charPos={this.props.charPos}
+          color='rgba(128, 255, 128, 0.5)'
+        />
+      )
     }
     const { min, max } = utils.sortRegion(this.props.brushRegion)
     const s = {
@@ -244,6 +249,7 @@ class FramebufferView_ extends Component {
       overlays =
         <Fragment>
           <BrushSelectOverlay
+            charPos={this.props.charPos}
             brushRegion={this.props.brushRegion}
           />
           <BrushOverlay

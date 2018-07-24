@@ -13,9 +13,13 @@ export default class CharPosOverlay extends Component {
   render () {
     const { charPos, grid } = this.props
     const scale = grid ? 9 : 8
+    let outlineColor = `rgba(255, 255, 255, ${this.props.opacity})`
+    if (this.props.color !== undefined) {
+      outlineColor = this.props.color
+    }
     const s = {
       ...charPosOverlayStyleBase,
-      outlineColor: `rgba(255, 255, 255, ${this.props.opacity})`,
+      outlineColor: outlineColor,
       position: 'absolute',
       left: charPos.col*scale-0.5,
       top: charPos.row*scale-0.5,
