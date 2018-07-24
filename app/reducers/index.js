@@ -21,10 +21,13 @@ const rootReducerTop = (state, action) => {
     const fbs = newFramebufs
     const newScreens =
       Screens.reducer(state.screens, Screens.actions.addScreen(fbs.length-1))
+    let lastScreenId = newScreens.list.length-1
+    const newScreens2 =
+      Screens.reducer(newScreens, Screens.actions.setCurrentScreenIndex(lastScreenId))
     return {
       ...state,
       framebufList: newFramebufs,
-      screens: newScreens
+      screens: newScreens2
     }
   }
   return rootReducer(state, action)
