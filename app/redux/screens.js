@@ -4,7 +4,7 @@ export const ADD_SCREEN_AND_FRAMEBUF = 'ADD_SCREEN_AND_FRAMEBUF'
 export const REMOVE_SCREEN = 'REMOVE_SCREEN'
 export const SET_CURRENT_SCREEN_INDEX = 'SET_CURRENT_SCREEN_INDEX'
 
-export function reducer(state = {current: 0, list: [0]}, action) {
+export function reducer(state = {current: 0, list: []}, action) {
   switch (action.type) {
   case ADD_SCREEN:
     return {

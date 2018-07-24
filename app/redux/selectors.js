@@ -14,6 +14,7 @@ export const getCurrentScreenFramebufIndex = (state) => {
 }
 
 export const getFramebufByIndex = (state, idx) => {
+  console.log(getFramebufByIndex, state, idx)
   return state.framebufList[idx].present
 }
 

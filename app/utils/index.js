@@ -1,4 +1,6 @@
 
+import * as workspace from './workspace'
+
 const fs = require('fs')
 const path = require('path')
 
@@ -40,14 +42,20 @@ export const charScreencodeFromRowCol = ({row, col}) => {
 
 const FILE_VERSION = 1
 
-export const saveFramebuf = (filename, framebuf) => {
-  const content = JSON.stringify({
-    version: FILE_VERSION,
+const framebufFields = (framebuf) => {
+  return {
     width: framebuf.width,
     height: framebuf.height,
     backgroundColor: framebuf.backgroundColor,
     borderColor: framebuf.borderColor,
     framebuf: framebuf.framebuf
+  }
+}
+
+export const saveFramebuf = (filename, framebuf) => {
+  const content = JSON.stringify({
+    version: FILE_VERSION,
+    ...framebufFields(framebuf)
   })
   try {
     fs.writeFileSync(filename, content, 'utf-8');
@@ -57,11 +65,46 @@ export const saveFramebuf = (filename, framebuf) => {
   }
 }
 
+const WORKSPACE_VERSION = 1
+export const saveWorkspace = (filename, screens, getFramebufById) => {
+  console.log('save workspace', screens)
+  const content = JSON.stringify({
+    version: WORKSPACE_VERSION,
+    // TODO need to renumber the id handles so that we save only currently
+    // used framebuffers
+    screens: screens.map(id => id),
+    framebufs: screens.map(fbid => {
+      return {
+        ...framebufFields(getFramebufById(fbid))
+      }
+    })
+  })
+  try {
+    fs.writeFileSync(filename, content, 'utf-8');
+  }
+  catch(e) {
+    alert(`Failed to save file '${filename}'!`)
+  }
+}
+
+export const loadWorkspace = (filename, dispatch) => {
+  console.log(dispatch)
+  const ext = path.extname(filename)
+  try {
+    const content = fs.readFileSync(filename, 'utf-8')
+    const c = JSON.parse(content)
+    workspace.load(dispatch, c)
+  }
+  catch(e) {
+    console.log(e)
+    alert(`Failed to load workspace '${filename}'!`)
+  }
+}
+
 const loadJsonFramebuf = (filename, importFile) => {
   try {
     const content = fs.readFileSync(filename, 'utf-8')
     const c = JSON.parse(content)
-    console.log(c)
     if (c.version === 1) {
       importFile({
         width: c.width,

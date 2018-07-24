@@ -164,10 +164,38 @@ class ToolbarView extends Component {
     }
   }
 
+  handleSaveWorkspace = () => {
+    const {dialog} = require('electron').remote
+    const filters = [
+      {name: 'Petmate workspace file', extensions: ['petmate']},
+    ]
+    const filename = dialog.showSaveDialog({properties: ['openFile'], filters})
+    if (filename === undefined) {
+      return
+    }
+    utils.saveWorkspace(filename, this.props.screens, this.props.getFramebufByIndex)
+  }
+
+  handleLoadWorkspace = () => {
+    const {dialog} = require('electron').remote
+    const filters = [
+      {name: 'Petmate workspace', extensions: ['petmate']},
+    ]
+    const filename = dialog.showOpenDialog({properties: ['openFile'], filters})
+    if (filename === undefined) {
+      return
+    }
+    if (filename.length === 1) {
+      utils.loadWorkspace(filename[0], this.props.dispatch)
+    } else {
+      console.error('wtf?!')
+    }
+  }
+
   handleSaveFile = () => {
     const {dialog} = require('electron').remote
     const filters = [
-      {name: 'PETSCII file', extensions: ['petski']}
+      {name: 'PETSCII file', extensions: ['petmate']}
     ]
     const filename = dialog.showSaveDialog({properties: ['openFile'], filters})
     if (filename === undefined) {
@@ -241,11 +269,14 @@ class ToolbarView extends Component {
           onIconClick={this.props.Toolbar.clearCanvas}
           iconName='fa-trash' tooltip='Clear canvas'/>
         <Icon
-          onIconClick={this.handleLoadFile}
-          iconName='fa-folder-open' tooltip='Load file'/>
+          onIconClick={this.handleLoadWorkspace}
+          iconName='fa-folder-open' tooltip='Load workspace'/>
         <Icon
-          onIconClick={this.handleSaveFile}
-          iconName='fa-save' tooltip='Save file'/>
+          onIconClick={this.handleSaveWorkspace}
+          iconName='fa-save' tooltip='Save workspace'/>
+        <Icon
+          onIconClick={this.handleLoadFile}
+          iconName='fa-file-import' tooltip='Import PETSCII'/>
         <Icon
           onIconClick={this.props.undo}
           iconName='fa-undo' tooltip='Undo'/>
@@ -293,6 +324,7 @@ const undoActions = {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     ...bindActionCreators(undoActions, dispatch),
+    dispatch: (action) => dispatch(action),
     Toolbar: Toolbar.bindDispatch(dispatch),
     Framebuffer: Framebuffer.bindDispatch(dispatch)
   }
@@ -302,6 +334,8 @@ const mapStateToProps = state => {
   const framebuf = selectors.getCurrentFramebuf(state)
   return {
     framebufIndex: selectors.getCurrentScreenFramebufIndex(state),
+    screens: selectors.getScreens(state),
+    getFramebufByIndex: fid => selectors.getFramebufByIndex(state, fid),
     framebuf: framebuf,
     selectedTool: state.toolbar.selectedTool
   }

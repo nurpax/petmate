@@ -6,6 +6,7 @@ import { Toolbar } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
 import * as Screens from '../redux/screens'
 import * as framebufList from '../redux/framebufList'
+import * as Root from '../redux/root'
 
 const rootReducer = combineReducers({
   framebufList: framebufList.reducer,
@@ -15,6 +16,9 @@ const rootReducer = combineReducers({
 })
 
 const rootReducerTop = (state, action) => {
+  if (action.type === Root.RESET_STATE) {
+    return rootReducer(undefined, action)
+  }
   if (action.type === Screens.ADD_SCREEN_AND_FRAMEBUF) {
     const newFramebufs =
       framebufList.reducer(state.framebufList, framebufList.actions.addFramebuf())
