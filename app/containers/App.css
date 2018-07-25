@@ -2,11 +2,12 @@
 .topPadding {
   background-color: #000;
   padding-top: 10px;
-  padding-bottom: 0px;
+  padding-bottom: 10px;
 }
 
 .empty {
   composes: topPadding;
+  background-color: #000;
   grid-area: empty;
 }
 

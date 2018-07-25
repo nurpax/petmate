@@ -34,12 +34,10 @@ li {
 
 a {
   color: white;
-  opacity: 0.75;
   text-decoration: none;
 }
 
 a:hover {
-  opacity: 1;
   text-decoration: none;
   cursor: pointer;
 }

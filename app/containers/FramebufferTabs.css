@@ -1,6 +1,8 @@
 
 .tabHeadings {
+  margin-left: 10px;
   padding-top: 4px;
+  padding-bottom: 4px;
   padding-bottom: 0px;
   background-color: #000;
 
@@ -23,9 +25,9 @@
 }
 
 .tab.newScreen {
+  padding-left: 10px;
   color: rgb(173,173,173);
   font-size: 20px;
-  padding-left: 10px;
 }
 
 .tab.newScreen:hover {
