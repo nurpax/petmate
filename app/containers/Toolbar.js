@@ -194,7 +194,9 @@ class ToolbarView extends Component {
     }
   }
 
-  handleSaveFile = () => {
+  handleExportFile = () => {
+    alert('Not implemented yet')
+    /*
     const {dialog} = require('electron').remote
     const filters = [
       {name: 'PETSCII file', extensions: ['petmate']}
@@ -204,9 +206,10 @@ class ToolbarView extends Component {
       return
     }
     utils.saveFramebuf(filename, this.props.framebuf)
+    */
   }
 
-  handleLoadFile = () => {
+  handleImportFile = () => {
     const {dialog} = require('electron').remote
     const filters = [
       {name: 'PETSCII file', extensions: ['petski']},
@@ -277,8 +280,11 @@ class ToolbarView extends Component {
           onIconClick={this.handleSaveWorkspace}
           iconName='fa-save' tooltip='Save workspace'/>
         <Icon
-          onIconClick={this.handleLoadFile}
+          onIconClick={this.handleImportFile}
           iconName='fa-file-import' tooltip='Import PETSCII'/>
+        <Icon
+          onIconClick={this.handleExportFile}
+          iconName='fa-file-export' tooltip='Export PETSCII'/>
         <Icon
           onIconClick={this.props.undo}
           iconName='fa-undo' tooltip='Undo'/>
