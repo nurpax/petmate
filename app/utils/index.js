@@ -1,5 +1,9 @@
 
 import * as workspace from './workspace'
+import {
+  loadCalTxtFramebuf,
+  loadMarqCFramebuf
+ } from './importers'
 
 const fs = require('fs')
 const path = require('path')
@@ -122,84 +126,14 @@ const loadJsonFramebuf = (filename, importFile) => {
   }
 }
 
-/**
- * Returns an array with arrays of the given size.
- *
- * @param myArray {Array} array to split
- * @param chunk_size {Integer} Size of every group
- */
-function chunkArray(myArray, chunk_size){
-    var index = 0;
-    var arrayLength = myArray.length;
-    var tempArray = [];
-
-    for (index = 0; index < arrayLength; index += chunk_size) {
-        const myChunk = myArray.slice(index, index+chunk_size);
-        // Do something if you want with the group
-        tempArray.push(myChunk);
-    }
-
-    return tempArray;
-}
-
-const loadCalTxtFramebuf = (filename, importFile) => {
-  try {
-    const content = fs.readFileSync(filename, 'utf-8')
-    const lines = content.split('\n')
-
-    let mode = undefined
-    let charcodes = []
-    let colors = []
-    lines.forEach(line => {
-      if (line.match(/Character data/)) {
-        mode = 'char'
-        return
-      }
-      if (line.match(/Colour data/)) {
-        mode = 'color'
-        return
-      }
-      var m;
-      if (m = /BYTE (.*)/.exec(line)) {
-        let arr = JSON.parse(`[${m[1]}]`)
-        arr.forEach(c => {
-          if (mode === 'char') {
-            charcodes.push(c)
-          } else if (mode === 'color') {
-            colors.push(c)
-          } else {
-            console.error('invalid mode')
-          }
-        })
-      }
-    })
-    console.log('CHARCODES', charcodes.length)
-    console.log('COLORS', colors.length)
-    const codes = charcodes.map((c,i) => {
-      return {
-        code: c,
-        color: colors[i]
-      }
-    })
-    importFile({
-      width: 40,
-      height: 25,
-      backgroundColor: 0,
-      borderColor: 0,
-      framebuf: chunkArray(codes, 40)
-    })
-  }
-  catch(e) {
-    alert(`Failed to load file '${filename}'!`)
-  }
-}
-
 export const loadFramebuf = (filename, importFile) => {
   const ext = path.extname(filename)
   if (ext === '.petski') {
     return loadJsonFramebuf(filename, importFile)
   }  else if (ext === '.txt') {
     return loadCalTxtFramebuf(filename, importFile)
+  }  else if (ext === '.c') {
+    return loadMarqCFramebuf(filename, importFile)
   }
 }
 

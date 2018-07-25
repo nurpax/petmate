@@ -213,7 +213,8 @@ class ToolbarView extends Component {
     const {dialog} = require('electron').remote
     const filters = [
       {name: 'PETSCII file', extensions: ['petski']},
-      {name: 'PETSCII .txt', extensions: ['txt']}
+      {name: 'PETSCII .txt', extensions: ['txt']},
+      {name: 'PETSCII .c', extensions: ['c']}
     ]
     const filename = dialog.showOpenDialog({properties: ['openFile'], filters})
     if (filename === undefined) {
