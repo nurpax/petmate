@@ -148,7 +148,7 @@ export default class MenuBuilder {
           label: 'Documentation',
           click() {
             shell.openExternal(
-              'https://nurpax.github.io/petmate/docs'
+              'https://nurpax.github.io/petmate/'
             );
           }
         },
@@ -233,7 +233,7 @@ export default class MenuBuilder {
             label: 'Documentation',
             click() {
               shell.openExternal(
-                'https://nurpax.github.io/petmate/docs'
+                'https://nurpax.github.io/petmate/'
               );
             }
           },
