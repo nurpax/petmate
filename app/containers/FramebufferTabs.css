@@ -9,6 +9,7 @@
 .tabs {
   display: flex;
   flex-direction: row;
+  align-items: center;
 }
 
 .tab {
@@ -19,4 +20,14 @@
 
 .tab.active {
   border-color: rgba(255,255,255,0.6);
+}
+
+.tab.newScreen {
+  color: rgb(173,173,173);
+  font-size: 20px;
+  padding-left: 10px;
+}
+
+.tab.newScreen:hover {
+  color: rgb(255,255,255);
 }

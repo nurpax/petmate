@@ -85,7 +85,7 @@ class FramebufferTabs_ extends Component {
       <div className={styles.tabHeadings}>
         <div className={styles.tabs}>
           {lis}
-          <div className={styles.tab}>
+          <div className={classnames(styles.tab, styles.newScreen)}>
             <i onClick={this.handleNewTab} className='fa fa-plus'></i>
           </div>
         </div>

@@ -6,6 +6,7 @@
 }
 
 .tooltip {
+    color: rgb(173,173,173);
     position: relative;
     display: inline-block;
     display: flex;
@@ -37,6 +38,11 @@
     visibility: visible;
 }
 
+/* for icon text */
+.tooltip:hover {
+    color: rgb(255,255,255);
+}
+
 .tooltip .colorpicker {
     position: absolute;
     top: 15px;
@@ -45,14 +51,9 @@
 }
 
 .icon {
-    color: rgb(173,173,173);
     padding-top: 7px;
     padding-bottom: 7px;
     font-size: 25px;
-}
-
-.icon:hover {
-    color: rgb(255,255,255);
 }
 
 .tooltip.selectedTool {

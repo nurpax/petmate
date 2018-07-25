@@ -27,9 +27,11 @@ class Icon extends Component {
       <span className={styles.tooltiptext}>{this.props.tooltip}</span> :
       null
     return (
-      <div className={classnames(styles.tooltip, selectedClass)}>
+      <div
+        className={classnames(styles.tooltip, selectedClass)}
+        onClick={() => this.props.onIconClick()}
+      >
         <i
-          onClick={() => this.props.onIconClick()}
           className={classnames(styles.icon, `fas ${this.props.iconName}`)}
         />
         {tooltip}
