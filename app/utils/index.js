@@ -4,6 +4,7 @@ import {
   loadCalTxtFramebuf,
   loadMarqCFramebuf
  } from './importers'
+import { savePNG } from './exporters'
 
 const fs = require('fs')
 const path = require('path')
@@ -57,15 +58,11 @@ const framebufFields = (framebuf) => {
 }
 
 export const saveFramebuf = (filename, framebuf) => {
-  const content = JSON.stringify({
-    version: FILE_VERSION,
-    ...framebufFields(framebuf)
-  })
-  try {
-    fs.writeFileSync(filename, content, 'utf-8');
-  }
-  catch(e) {
-    alert(`Failed to save file '${filename}'!`)
+  const ext = path.extname(filename)
+  if (ext === '.png') {
+    return savePNG(filename, framebuf)
+  } else {
+    alert(`Unsupported export format ${ext}!`)
   }
 }
 
@@ -158,3 +155,5 @@ export const loadAppFile = (filename) => {
     path.resolve(appPath, filename)
   return fs.readFileSync(abspath)
 }
+
+export const systemFontData = loadAppFile('./assets/system-charset.bin')

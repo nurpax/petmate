@@ -4,7 +4,7 @@ import classnames from 'classnames'
 
 import * as utils from '../utils'
 
-const systemFontData = utils.loadAppFile('./assets/system-charset.bin')
+const systemFontData = utils.systemFontData
 
 class CharsetCache {
   constructor (ctx) {

@@ -195,18 +195,15 @@ class ToolbarView extends Component {
   }
 
   handleExportFile = () => {
-    alert('Not implemented yet')
-    /*
     const {dialog} = require('electron').remote
     const filters = [
-      {name: 'PETSCII file', extensions: ['petmate']}
+      {name: 'PNG .png', extensions: ['png']}
     ]
     const filename = dialog.showSaveDialog({properties: ['openFile'], filters})
     if (filename === undefined) {
       return
     }
     utils.saveFramebuf(filename, this.props.framebuf)
-    */
   }
 
   handleImportFile = () => {
