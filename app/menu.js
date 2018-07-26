@@ -8,6 +8,10 @@ export default class MenuBuilder {
     this.mainWindow = mainWindow;
   }
 
+  sendMenuCommand (msg) {
+    this.mainWindow.webContents.send('menu', msg)
+  }
+
   buildMenu() {
     if (
       process.env.NODE_ENV === 'development' ||
@@ -77,8 +81,17 @@ export default class MenuBuilder {
     const subMenuEdit = {
       label: 'Edit',
       submenu: [
-        { label: 'Undo', accelerator: 'Command+Z', selector: 'undo:' },
-        { label: 'Redo', accelerator: 'Shift+Command+Z', selector: 'redo:' },
+        { label: 'Undo', accelerator: 'Command+Z', selector: 'undo:',
+          click: () => {
+            this.sendMenuCommand('undo')
+          }
+        },
+        { label: 'Redo', accelerator: 'Shift+Command+Z', selector: 'redo:',
+          click: () => {
+            this.sendMenuCommand('redo')
+          }
+        },
+        /*
         { type: 'separator' },
         { label: 'Cut', accelerator: 'Command+X', selector: 'cut:' },
         { label: 'Copy', accelerator: 'Command+C', selector: 'copy:' },
@@ -88,6 +101,7 @@ export default class MenuBuilder {
           accelerator: 'Command+A',
           selector: 'selectAll:'
         }
+        */
       ]
     };
     const subMenuViewDev = {
