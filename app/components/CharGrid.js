@@ -53,6 +53,7 @@ export default class CharGrid extends Component {
 
   constructor (props) {
     super(props)
+    this.canvasRef = React.createRef();
     this.font = null
   }
   componentDidMount() {
@@ -74,7 +75,7 @@ export default class CharGrid extends Component {
   }
 
   draw (prevProps) {
-    const canvas = this.refs.canvas
+    const canvas = this.canvasRef.current
     const ctx = canvas.getContext("2d")
 
     if (this.font === null) {
@@ -137,9 +138,14 @@ export default class CharGrid extends Component {
     const scale = this.props.grid ? 9 : 8
     return (
       <canvas
-        ref='canvas'
+        ref={this.canvasRef}
         style={{
-          backgroundColor: this.props.backgroundColor
+          backgroundColor: this.props.backgroundColor,
+          position: 'absolute',
+          top: '0px',
+          left: '0px',
+          width: `${this.props.width*scale}px`,
+          height: `${this.props.height*scale}px`,
         }}
         width={this.props.width*scale}
         height={this.props.height*scale}>
