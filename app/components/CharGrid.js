@@ -101,7 +101,6 @@ export default class CharGrid extends Component {
     // Delete previous char highlighter
     if (prevProps !== undefined && prevProps.charPos !== null) {
       const charPos = prevProps.charPos
-      console.log(charPos)
       if (charPos.row < this.props.height && charPos.col < this.props.width) {
         const c = this.props.framebuf[charPos.row][charPos.col]
         const img = this.font.getImage(c.code, c.color)
@@ -111,10 +110,11 @@ export default class CharGrid extends Component {
     // Render current char highlighter
     if (this.props.charPos !== null) {
       const charPos = this.props.charPos
-      console.log(charPos)
       if (charPos.row < this.props.height && charPos.col < this.props.width) {
         const c = {
-          code: this.props.curScreencode,
+          code: this.props.curScreencode !== null ?
+            this.props.curScreencode :
+            this.props.framebuf[charPos.row][charPos.col].code,
           color: this.props.textColor
         }
         const img = this.font.getImage(c.code, c.color)

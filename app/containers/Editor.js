@@ -245,6 +245,7 @@ class FramebufferView_ extends Component {
     const backg = utils.colorIndexToCssRgb(this.props.backgroundColor)
     const { selectedTool } = this.props
     let overlays = null
+    let screencodeHighlight = this.props.curScreencode
     if (selectedTool === TOOL_BRUSH && this.props.isActive) {
       overlays =
         <Fragment>
@@ -262,6 +263,9 @@ class FramebufferView_ extends Component {
         </Fragment>
     } else if (selectedTool === TOOL_DRAW || selectedTool === TOOL_COLORIZE) {
       overlays = this.props.isActive ? <CharPosOverlay charPos={this.props.charPos} opacity={0.5} /> : null
+      if (selectedTool === TOOL_COLORIZE) {
+        screencodeHighlight = null
+      }
     }
     const scale = {
       ...charGridScaleStyle,
@@ -282,7 +286,7 @@ class FramebufferView_ extends Component {
           backgroundColor={backg}
           framebuf={this.props.framebuf}
           charPos={this.props.isActive ? this.props.charPos : null}
-          curScreencode={this.props.curScreencode}
+          curScreencode={screencodeHighlight}
           textColor={this.props.textColor}
         />
         {overlays}
