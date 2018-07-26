@@ -21,8 +21,8 @@ export default class CharPosOverlay extends Component {
       ...charPosOverlayStyleBase,
       outlineColor: outlineColor,
       position: 'absolute',
-      left: charPos.col*scale-0.5,
-      top: charPos.row*scale-0.5,
+      left: charPos.col*scale,
+      top: charPos.row*scale,
       width: `${8}px`,
       height: `${8}px`
     }

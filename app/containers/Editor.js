@@ -247,26 +247,30 @@ class FramebufferView_ extends Component {
     let overlays = null
     let screencodeHighlight = this.props.curScreencode
     let highlightCharPos = true
-    if (selectedTool === TOOL_BRUSH && this.props.isActive) {
-      highlightCharPos = false
-      overlays =
-        <Fragment>
-          <BrushSelectOverlay
-            charPos={this.props.charPos}
-            brushRegion={this.props.brushRegion}
-          />
-          <BrushOverlay
-            charPos={this.props.charPos}
-            backgroundColor={backg}
-            brush={this.props.brush}
-            framebufWidth={this.props.framebufWidth}
-            framebufHeight={this.props.framebufHeight}
-          />
-        </Fragment>
-    } else if (selectedTool === TOOL_DRAW || selectedTool === TOOL_COLORIZE) {
-      overlays = this.props.isActive ? <CharPosOverlay charPos={this.props.charPos} opacity={0.5} /> : null
-      if (selectedTool === TOOL_COLORIZE) {
-        screencodeHighlight = null
+    if (this.props.isActive) {
+      if (selectedTool === TOOL_BRUSH) {
+        highlightCharPos = false
+        if (this.props.brush !== null) {
+          overlays =
+            <BrushOverlay
+              charPos={this.props.charPos}
+              backgroundColor={backg}
+              brush={this.props.brush}
+              framebufWidth={this.props.framebufWidth}
+              framebufHeight={this.props.framebufHeight}
+            />
+        } else {
+          overlays =
+            <BrushSelectOverlay
+              charPos={this.props.charPos}
+              brushRegion={this.props.brushRegion}
+            />
+        }
+      } else if (selectedTool === TOOL_DRAW || selectedTool === TOOL_COLORIZE) {
+        overlays = <CharPosOverlay charPos={this.props.charPos} opacity={0.5} />
+        if (selectedTool === TOOL_COLORIZE) {
+          screencodeHighlight = null
+        }
       }
     }
     const scale = {
