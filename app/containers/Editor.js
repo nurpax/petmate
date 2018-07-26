@@ -281,6 +281,9 @@ class FramebufferView_ extends Component {
           grid={false}
           backgroundColor={backg}
           framebuf={this.props.framebuf}
+          charPos={this.props.isActive ? this.props.charPos : null}
+          curScreencode={this.props.curScreencode}
+          textColor={this.props.textColor}
         />
         {overlays}
       </div>

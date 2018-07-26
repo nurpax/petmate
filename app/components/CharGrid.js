@@ -47,7 +47,8 @@ class CharsetCache {
 export default class CharGrid extends Component {
   static defaultProps = {
     srcX: 0,
-    srcY: 0
+    srcY: 0,
+    charPos: null
   }
 
   constructor (props) {
@@ -64,6 +65,9 @@ export default class CharGrid extends Component {
       this.props.srcX !== prevProps.srcX ||
       this.props.srcY !== prevProps.srcY ||
       this.props.framebuf !== prevProps.framebuf ||
+      this.props.charPos !== prevProps.charPos ||
+      this.props.curScreencode !== prevProps.curScreencode ||
+      this.props.textColor !== prevProps.textColor ||
       this.props.backgroundColor !== prevProps.backgroundColor) {
       this.draw(prevProps)
     }
@@ -84,12 +88,40 @@ export default class CharGrid extends Component {
 
     for (var y = 0; y < this.props.height; y++) {
       const charRow = this.props.framebuf[y + srcY]
+      if (prevProps !== undefined && charRow === prevProps.framebuf[y + srcY]) {
+        continue
+      }
       for (var x = 0; x < this.props.width; x++) {
         const c = charRow[x + srcX]
         const img = this.font.getImage(c.code, c.color)
         ctx.putImageData(img, x*xScale, y*yScale)
       }
     }
+
+    // Delete previous char highlighter
+    if (prevProps !== undefined && prevProps.charPos !== null) {
+      const charPos = prevProps.charPos
+      console.log(charPos)
+      if (charPos.row < this.props.height && charPos.col < this.props.width) {
+        const c = this.props.framebuf[charPos.row][charPos.col]
+        const img = this.font.getImage(c.code, c.color)
+        ctx.putImageData(img, charPos.col*xScale, charPos.row*yScale)
+      }
+    }
+    // Render current char highlighter
+    if (this.props.charPos !== null) {
+      const charPos = this.props.charPos
+      console.log(charPos)
+      if (charPos.row < this.props.height && charPos.col < this.props.width) {
+        const c = {
+          code: this.props.curScreencode,
+          color: this.props.textColor
+        }
+        const img = this.font.getImage(c.code, c.color)
+        ctx.putImageData(img, charPos.col*xScale, charPos.row*yScale)
+      }
+    }
+
     if (grid) {
       ctx.fillStyle = 'rgba(0,0,0,255)'
       for (var y = 0; y < this.props.height; y++) {
