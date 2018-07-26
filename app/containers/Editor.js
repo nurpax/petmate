@@ -246,7 +246,9 @@ class FramebufferView_ extends Component {
     const { selectedTool } = this.props
     let overlays = null
     let screencodeHighlight = this.props.curScreencode
+    let highlightCharPos = true
     if (selectedTool === TOOL_BRUSH && this.props.isActive) {
+      highlightCharPos = false
       overlays =
         <Fragment>
           <BrushSelectOverlay
@@ -285,7 +287,7 @@ class FramebufferView_ extends Component {
           grid={false}
           backgroundColor={backg}
           framebuf={this.props.framebuf}
-          charPos={this.props.isActive ? this.props.charPos : null}
+          charPos={this.props.isActive && highlightCharPos ? this.props.charPos : null}
           curScreencode={screencodeHighlight}
           textColor={this.props.textColor}
         />
