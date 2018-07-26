@@ -56,6 +56,7 @@ export default class CharGrid extends Component {
     this.canvasRef = React.createRef();
     this.font = null
   }
+
   componentDidMount() {
     this.draw()
   }
@@ -87,9 +88,17 @@ export default class CharGrid extends Component {
     const xScale = grid ? 9 : 8
     const yScale = grid ? 9 : 8
 
+    const dstSrcChanged =
+      prevProps !== undefined ?
+        (this.props.width !== prevProps.width ||
+         this.props.height !== prevProps.height ||
+         this.props.srcX !== prevProps.srcX ||
+         this.props.srcY !== prevProps.srcY)
+        :
+        true
     for (var y = 0; y < this.props.height; y++) {
       const charRow = this.props.framebuf[y + srcY]
-      if (prevProps !== undefined && charRow === prevProps.framebuf[y + srcY]) {
+      if (!dstSrcChanged && charRow === prevProps.framebuf[y + srcY]) {
         continue
       }
       for (var x = 0; x < this.props.width; x++) {
