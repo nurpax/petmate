@@ -332,7 +332,10 @@ const FramebufferCont = connect(
 
 class Editor extends Component {
   render() {
-    const borderColor = utils.colorIndexToCssRgb(this.props.borderColor)
+    if (this.props.framebuf === null) {
+      return null
+    }
+    const borderColor = utils.colorIndexToCssRgb(this.props.framebuf.borderColor)
     const framebufStyle = {
       width: '640px', height:'400px',
       borderColor: borderColor
@@ -340,7 +343,7 @@ class Editor extends Component {
     return (
       <div className={styles.editorLayoutContainer}>
         <div className={styles.fbContainer} style={framebufStyle}>
-          <FramebufferCont />
+          {this.props.framebuf ? <FramebufferCont /> : null}
         </div>
         <div style={{marginLeft: '5px'}}>
           <CharSelect />
@@ -366,7 +369,7 @@ const mapStateToProps = state => {
   const selected = state.toolbar.selectedChar
   const framebuf = selectors.getCurrentFramebuf(state)
   return {
-    borderColor: framebuf.borderColor,
+    framebuf,
     textColor: state.toolbar.textColor
   }
 }

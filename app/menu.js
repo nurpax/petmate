@@ -78,6 +78,26 @@ export default class MenuBuilder {
         }
       ]
     };
+    const subMenuFile = {
+      label: 'File',
+      submenu: [
+        { label: 'Open', accelerator: 'Command+O',
+          click: () => {
+            this.sendMenuCommand('open')
+          }
+        },
+        { label: 'Save', accelerator: 'Command+S',
+          click: () => {
+            this.sendMenuCommand('save')
+          }
+        },
+        { label: 'Save As..', accelerator: 'Command+Shift+S',
+          click: () => {
+            this.sendMenuCommand('save-as')
+          }
+        }
+      ]
+    };
     const subMenuEdit = {
       label: 'Edit',
       submenu: [
@@ -178,7 +198,7 @@ export default class MenuBuilder {
     const subMenuView =
       process.env.NODE_ENV === 'development' ? subMenuViewDev : subMenuViewProd;
 
-    return [subMenuAbout, subMenuEdit, subMenuView, subMenuWindow, subMenuHelp];
+    return [subMenuAbout, subMenuFile, subMenuEdit, subMenuView, subMenuWindow, subMenuHelp];
   }
 
   buildDefaultTemplate() {

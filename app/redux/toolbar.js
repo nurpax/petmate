@@ -14,7 +14,8 @@ const settables = reduxSettables([
   settable('Toolbar', 'selectedChar', {row: 0, col: 0}),
   settable('Toolbar', 'selectedTool', TOOL_DRAW),
   settable('Toolbar', 'brushRegion', null),
-  settable('Toolbar', 'brush', null)
+  settable('Toolbar', 'brush', null),
+  settable('Toolbar', 'workspaceFilename', null)
 ])
 
 export class Toolbar {

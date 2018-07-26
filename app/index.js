@@ -32,13 +32,22 @@ if (module.hot) {
 }
 
 // Listen to commands from the main process
-require('electron').ipcRenderer.on('menu', (event, message, data) => {
+require('electron').ipcRenderer.on('menu', (event, message) => {
   switch (message) {
     case 'undo':
       store.dispatch(ReduxRoot.actions.undo())
       return
     case 'redo':
       store.dispatch(ReduxRoot.actions.redo())
+      return
+    case 'open':
+      store.dispatch(ReduxRoot.actions.fileOpenWorkspace())
+      return
+    case 'save-as':
+      store.dispatch(ReduxRoot.actions.fileSaveAsWorkspace())
+      return
+    case 'save':
+      store.dispatch(ReduxRoot.actions.fileSaveWorkspace())
       return
     default:
       console.warn('unknown message from main process', message)

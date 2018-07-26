@@ -68,7 +68,6 @@ export const saveFramebuf = (filename, framebuf) => {
 
 const WORKSPACE_VERSION = 1
 export const saveWorkspace = (filename, screens, getFramebufById) => {
-  console.log('save workspace', screens)
   const content = JSON.stringify({
     version: WORKSPACE_VERSION,
     // TODO need to renumber the id handles so that we save only currently
@@ -89,7 +88,6 @@ export const saveWorkspace = (filename, screens, getFramebufById) => {
 }
 
 export const loadWorkspace = (filename, dispatch) => {
-  console.log(dispatch)
   const ext = path.extname(filename)
   try {
     const content = fs.readFileSync(filename, 'utf-8')
@@ -97,7 +95,7 @@ export const loadWorkspace = (filename, dispatch) => {
     workspace.load(dispatch, c)
   }
   catch(e) {
-    console.log(e)
+    console.error(e)
     alert(`Failed to load workspace '${filename}'!`)
   }
 }
@@ -146,6 +144,7 @@ export const sortRegion = ({min, max}) => {
 }
 
 const electron = require('electron')
+const { ipcRenderer } = electron
 const isDev = require('electron-is-dev');
 
 export const loadAppFile = (filename) => {
@@ -157,3 +156,38 @@ export const loadAppFile = (filename) => {
 }
 
 export const systemFontData = loadAppFile('./assets/system-charset.bin')
+
+function setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename) {
+  setWorkspaceFilename(filename)
+  ipcRenderer.send('set-title', `Petmate - ${filename}`)
+}
+
+export function dialogLoadWorkspace(dispatch, setWorkspaceFilename) {
+  const {dialog} = require('electron').remote
+  const filters = [
+    {name: 'Petmate workspace', extensions: ['petmate']},
+  ]
+  const filename = dialog.showOpenDialog({properties: ['openFile'], filters})
+  if (filename === undefined) {
+    return
+  }
+  if (filename.length === 1) {
+    loadWorkspace(filename[0], dispatch)
+    setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename[0])
+  } else {
+    console.error('wtf?!')
+  }
+}
+
+export function dialogSaveAsWorkspace(dispatch, screens, getFramebufByIndex, setWorkspaceFilename) {
+  const {dialog} = require('electron').remote
+  const filters = [
+    {name: 'Petmate workspace file', extensions: ['petmate']},
+  ]
+  const filename = dialog.showSaveDialog({properties: ['openFile'], filters})
+  if (filename === undefined) {
+    return
+  }
+  saveWorkspace(filename, screens, getFramebufByIndex)
+  setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename)
+}

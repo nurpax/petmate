@@ -10,11 +10,19 @@ export const getCurrentScreenIndex = (state) => {
 }
 
 export const getCurrentScreenFramebufIndex = (state) => {
-  return getScreens(state)[getCurrentScreenIndex(state)]
+  const idx = getCurrentScreenIndex(state)
+  const screens = getScreens(state)
+  if (idx < screens.length) {
+    return screens[idx]
+  }
+  return null
 }
 
 export const getFramebufByIndex = (state, idx) => {
-  return state.framebufList[idx].present
+  if (idx < state.framebufList.length) {
+    return state.framebufList[idx].present
+  }
+  return null
 }
 
 export const getCurrentFramebuf = (state) => {

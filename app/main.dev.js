@@ -66,6 +66,11 @@ app.on('ready', async () => {
     height: 728
   });
 
+  mainWindow.on('page-title-updated', (event, message) => {
+    event.preventDefault()
+  })
+  mainWindow.setTitle('Petmate')
+
   mainWindow.loadURL(`file://${__dirname}/app.html`);
 
   // @TODO: Use 'ready-to-show' event
@@ -84,4 +89,11 @@ app.on('ready', async () => {
 
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
+
+  // Handle browser window set window title requests
+  const {ipcMain} = require('electron')
+  ipcMain.on('set-title', (event, arg) => {
+    mainWindow.setTitle(arg)
+  })
+
 });

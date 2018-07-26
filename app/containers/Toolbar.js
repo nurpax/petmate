@@ -15,6 +15,7 @@ import {
 } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
 import * as selectors from '../redux/selectors'
+import * as Root from '../redux/root'
 import { framebufIndexMergeProps } from '../redux/utils'
 import styles from './Toolbar.css';
 
@@ -167,31 +168,11 @@ class ToolbarView extends Component {
   }
 
   handleSaveWorkspace = () => {
-    const {dialog} = require('electron').remote
-    const filters = [
-      {name: 'Petmate workspace file', extensions: ['petmate']},
-    ]
-    const filename = dialog.showSaveDialog({properties: ['openFile'], filters})
-    if (filename === undefined) {
-      return
-    }
-    utils.saveWorkspace(filename, this.props.screens, this.props.getFramebufByIndex)
+    this.props.fileSaveAsWorkspace()
   }
 
   handleLoadWorkspace = () => {
-    const {dialog} = require('electron').remote
-    const filters = [
-      {name: 'Petmate workspace', extensions: ['petmate']},
-    ]
-    const filename = dialog.showOpenDialog({properties: ['openFile'], filters})
-    if (filename === undefined) {
-      return
-    }
-    if (filename.length === 1) {
-      utils.loadWorkspace(filename[0], this.props.dispatch)
-    } else {
-      console.error('wtf?!')
-    }
+    this.props.fileOpenWorkspace()
   }
 
   handleExportFile = () => {
@@ -225,6 +206,9 @@ class ToolbarView extends Component {
   }
 
   render() {
+    if (this.props.framebuf === null) {
+      return null
+    }
     const brushMenu = (key) => {
       const selectedClass = this.props.selectedTool === TOOL_BRUSH ? styles.selectedTool : null
       return (
@@ -330,6 +314,7 @@ const undoActions = {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     ...bindActionCreators(undoActions, dispatch),
+    ...bindActionCreators(Root.actions, dispatch),
     dispatch: (action) => dispatch(action),
     Toolbar: Toolbar.bindDispatch(dispatch),
     Framebuffer: Framebuffer.bindDispatch(dispatch)
