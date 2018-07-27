@@ -5,6 +5,7 @@ import Root from './containers/Root';
 import { configureStore, history } from './store/configureStore';
 import './app.global.css';
 
+import { formats } from './utils'
 import * as Screens from './redux/screens'
 import * as ReduxRoot from './redux/root'
 
@@ -48,6 +49,18 @@ require('electron').ipcRenderer.on('menu', (event, message) => {
       return
     case 'save':
       store.dispatch(ReduxRoot.actions.fileSaveWorkspace())
+      return
+    case 'export-png':
+      store.dispatch(ReduxRoot.actions.fileExportAs(formats.png))
+      return
+    case 'export-kickass':
+      alert('KickAssembler source export not implemented yet')
+      return
+    case 'export-prg':
+      alert('PRG export not implemented yet')
+      return
+    case 'import-marq-c':
+      store.dispatch(ReduxRoot.actions.fileImport(formats.c))
       return
     default:
       console.warn('unknown message from main process', message)

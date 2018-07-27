@@ -2,8 +2,15 @@
 import * as selectors from './selectors'
 import { ActionCreators } from 'redux-undo';
 
+import { Framebuffer } from './editor'
 import { Toolbar } from './toolbar'
-import { dialogLoadWorkspace, dialogSaveAsWorkspace, saveWorkspace } from '../utils'
+import {
+  dialogLoadWorkspace,
+  dialogSaveAsWorkspace,
+  dialogExportFile,
+  dialogImportFile,
+  saveWorkspace
+} from '../utils'
 
 export const RESET_STATE = 'RESET_STATE'
 export const LOAD_WORKSPACE = 'LOAD_WORKSPACE'
@@ -38,7 +45,6 @@ export const actions = {
       const screens = selectors.getScreens(state)
       const getFramebufByIndex = (idx) => selectors.getFramebufByIndex(state, idx)
       const filename = state.toolbar.workspaceFilename
-      console.log('save workspace', filename)
       if (filename === null) {
         return dispatch(saveAsWorkspace())
       }
@@ -52,6 +58,25 @@ export const actions = {
       data
     }
   },
+
+  fileImport: (type) => {
+    return (dispatch, getState) => {
+      const state = getState()
+      const framebufIndex = selectors.getCurrentScreenFramebufIndex(state)
+      dialogImportFile(type, framebuf => {
+        dispatch(Framebuffer.actions.importFile(framebuf, framebufIndex))
+      })
+    }
+  },
+
+  fileExportAs: (type) => {
+    return (dispatch, getState) => {
+      const state = getState()
+      const framebuf = selectors.getCurrentFramebuf(state)
+      dialogExportFile(type, framebuf)
+    }
+  },
+
   resetState: () => {
     return {
       type: RESET_STATE

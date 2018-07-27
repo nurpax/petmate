@@ -1,6 +1,16 @@
 // @flow
 import { app, Menu, shell, BrowserWindow } from 'electron';
 
+const importers = [
+  { label: 'Marq PETSCII (.c)', cmd: 'import-marq-c' }
+]
+
+const exporters = [
+  { label: 'PNG (.png)', cmd: 'export-png' },
+  { label: 'Executable (.prg)', cmd: 'export-prg' },
+  { label: 'KickAssembler source (.asm)', cmd: 'export-kickass' }
+]
+
 export default class MenuBuilder {
   mainWindow: BrowserWindow;
 
@@ -28,6 +38,24 @@ export default class MenuBuilder {
     Menu.setApplicationMenu(menu);
 
     return menu;
+  }
+
+  mkImportCmd (label, cmd) {
+    return {
+      label,
+      click: () => {
+        this.sendMenuCommand(cmd)
+      }
+    }
+  }
+
+  mkExportCmd (label, cmd) {
+    return {
+      label,
+      click: () => {
+        this.sendMenuCommand(cmd)
+      }
+    }
   }
 
   setupDevelopmentEnvironment() {
@@ -81,20 +109,28 @@ export default class MenuBuilder {
     const subMenuFile = {
       label: 'File',
       submenu: [
-        { label: 'Open', accelerator: 'Command+O',
+        { label: 'Open File...', accelerator: 'Command+O',
           click: () => {
             this.sendMenuCommand('open')
           }
         },
-        { label: 'Save', accelerator: 'Command+S',
+        { type: 'separator' },
+        { label: 'Save...', accelerator: 'Command+S',
           click: () => {
             this.sendMenuCommand('save')
           }
         },
-        { label: 'Save As..', accelerator: 'Command+Shift+S',
+        { label: 'Save As...', accelerator: 'Command+Shift+S',
           click: () => {
             this.sendMenuCommand('save-as')
           }
+        },
+        { type: 'separator' },
+        { label: 'Import...',
+          submenu: importers.map(decl => this.mkImportCmd(decl.label, decl.cmd))
+        },
+        { label: 'Export As...',
+          submenu: exporters.map(decl => this.mkExportCmd(decl.label, decl.cmd))
         }
       ]
     };
@@ -111,17 +147,6 @@ export default class MenuBuilder {
             this.sendMenuCommand('redo')
           }
         },
-        /*
-        { type: 'separator' },
-        { label: 'Cut', accelerator: 'Command+X', selector: 'cut:' },
-        { label: 'Copy', accelerator: 'Command+C', selector: 'copy:' },
-        { label: 'Paste', accelerator: 'Command+V', selector: 'paste:' },
-        {
-          label: 'Select All',
-          accelerator: 'Command+A',
-          selector: 'selectAll:'
-        }
-        */
       ]
     };
     const subMenuViewDev = {

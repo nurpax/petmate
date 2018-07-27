@@ -30,6 +30,23 @@ export const palette = [
   {r:174, g:174, b:174},
 ]
 
+//    {}
+//    {name: 'PETSCII file', extensions: ['petski']},
+//    {name: 'PETSCII .txt', extensions: ['txt']},
+//    {name: 'PETSCII .c', extensions: ['c']}
+//  ]
+
+export const formats = {
+  png: {
+    name: 'PNG .png',
+    ext: 'png'
+  },
+  c: {
+    name: 'PETSCII .c',
+    ext: 'c'
+  }
+}
+
 export function rgbToCssRgb(o) {
   return `rgb(${o.r}, ${o.g}, ${o.b}`
 }
@@ -190,4 +207,32 @@ export function dialogSaveAsWorkspace(dispatch, screens, getFramebufByIndex, set
   }
   saveWorkspace(filename, screens, getFramebufByIndex)
   setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename)
+}
+
+export function dialogExportFile(type, framebuf) {
+  const {dialog} = require('electron').remote
+  const filters = [
+    {name: 'PNG .png', extensions: ['png']}
+  ]
+  const filename = dialog.showSaveDialog({properties: ['openFile'], filters})
+  if (filename === undefined) {
+    return
+  }
+  saveFramebuf(filename, framebuf)
+}
+
+export function dialogImportFile(type, importFile) {
+  const {dialog} = require('electron').remote
+  const filters = [
+    { name: type.name, extensions: [type.ext] }
+  ]
+  const filename = dialog.showOpenDialog({properties: ['openFile'], filters})
+  if (filename === undefined) {
+    return
+  }
+  if (filename.length === 1) {
+    loadFramebuf(filename[0], importFile)
+  } else {
+    console.error('wtf?!')
+  }
 }

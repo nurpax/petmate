@@ -175,36 +175,6 @@ class ToolbarView extends Component {
     this.props.fileOpenWorkspace()
   }
 
-  handleExportFile = () => {
-    const {dialog} = require('electron').remote
-    const filters = [
-      {name: 'PNG .png', extensions: ['png']}
-    ]
-    const filename = dialog.showSaveDialog({properties: ['openFile'], filters})
-    if (filename === undefined) {
-      return
-    }
-    utils.saveFramebuf(filename, this.props.framebuf)
-  }
-
-  handleImportFile = () => {
-    const {dialog} = require('electron').remote
-    const filters = [
-      {name: 'PETSCII file', extensions: ['petski']},
-      {name: 'PETSCII .txt', extensions: ['txt']},
-      {name: 'PETSCII .c', extensions: ['c']}
-    ]
-    const filename = dialog.showOpenDialog({properties: ['openFile'], filters})
-    if (filename === undefined) {
-      return
-    }
-    if (filename.length === 1) {
-      utils.loadFramebuf(filename[0], this.props.Framebuffer.importFile)
-    } else {
-      console.error('wtf?!')
-    }
-  }
-
   render() {
     if (this.props.framebuf === null) {
       return null
@@ -255,18 +225,6 @@ class ToolbarView extends Component {
         <Icon
           onIconClick={this.props.Toolbar.clearCanvas}
           iconName='fa-trash' tooltip='Clear canvas'/>
-        <Icon
-          onIconClick={this.handleLoadWorkspace}
-          iconName='fa-folder-open' tooltip='Load workspace'/>
-        <Icon
-          onIconClick={this.handleSaveWorkspace}
-          iconName='fa-save' tooltip='Save workspace'/>
-        <Icon
-          onIconClick={this.handleImportFile}
-          iconName='fa-file-import' tooltip='Import PETSCII'/>
-        <Icon
-          onIconClick={this.handleExportFile}
-          iconName='fa-file-export' tooltip='Export PETSCII'/>
         <Icon
           onIconClick={this.props.undo}
           iconName='fa-undo' tooltip='Undo'/>
