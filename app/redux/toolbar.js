@@ -21,7 +21,8 @@ const settables = reduxSettables([
 ])
 
 export class Toolbar {
-  static CLEAR_CANVAS = `${Toolbar.name}/CLEAR_CANVAS`
+  static RESET_BRUSH = `${Toolbar.name}/RESET_BRUSH`
+  static RESET_BRUSH_REGION = `${Toolbar.name}/RESET_BRUSH_REGION`
   static CAPTURE_BRUSH = `${Toolbar.name}/CAPTURE_BRUSH`
   static INC_UNDO_ID = `${Toolbar.name}/INC_UNDO_ID`
 
@@ -32,17 +33,33 @@ export class Toolbar {
         type: Toolbar.INC_UNDO_ID
       }
     },
+
+    keyDown: (key) => {
+      return (dispatch, getState) => {
+        const state = getState()
+        if (key === 'Escape') {
+          if (state.toolbar.selectedTool === TOOL_BRUSH) {
+            dispatch(Toolbar.actions.resetBrush())
+          }
+        }
+      }
+    },
+
     clearCanvas: () => {
       return (dispatch, getState) => {
         const state = getState()
         const framebufIndex = selectors.getCurrentScreenFramebufIndex(state)
         const undoId = state.undoId
         dispatch(Framebuffer.actions.clearCanvas(framebufIndex, undoId))
-        dispatch({
-          type: Toolbar.CLEAR_CANVAS,
-        })
       }
     },
+
+    resetBrush: () => {
+      return {
+        type: Toolbar.RESET_BRUSH
+      }
+    },
+
     captureBrush: (framebuf, brushRegion) => {
       const { min, max } = utils.sortRegion(brushRegion)
       const h = max.row - min.row + 1
@@ -69,9 +86,10 @@ export class Toolbar {
       undoId: 0
     }, action) {
     switch (action.type) {
-      case Toolbar.CLEAR_CANVAS:
+      case Toolbar.RESET_BRUSH:
         return {
           ...state,
+          brush: null,
           brushRegion: null
         }
       case Toolbar.CAPTURE_BRUSH:
@@ -85,7 +103,6 @@ export class Toolbar {
           ...state,
           undoId: state.undoId+1
         }
-      // CLEAR_CANVAS is routed to the framebuf reducer
       default:
         return settables.reducer(state, action)
     }

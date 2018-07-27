@@ -1,7 +1,12 @@
 
 import React, {Component } from 'react';
+import { connect } from 'react-redux'
+
 import Toolbar from './Toolbar'
 import FramebufferTabs from './FramebufferTabs'
+
+import { Framebuffer } from '../redux/editor'
+import * as reduxToolbar from '../redux/toolbar'
 
 import s from './App.css'
 
@@ -19,7 +24,20 @@ class ExtLink extends Component {
   }
 }
 
-export default class App extends Component {
+class AppView extends Component {
+
+  handleKeyDown = (event) => {
+    this.props.Toolbar.keyDown(event.key)
+  }
+
+  componentDidMount() {
+    document.addEventListener('keydown', this.handleKeyDown);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleKeyDown);
+  }
+
   render() {
     const icon = null
     return (
@@ -42,3 +60,19 @@ export default class App extends Component {
     )
   }
 }
+
+const mapDispatchToProps = dispatch => {
+  return {
+    Toolbar: reduxToolbar.Toolbar.bindDispatch(dispatch)
+  }
+}
+
+const mapStateToProps = state => {
+  return {
+  }
+}
+
+export default connect(
+  null,
+  mapDispatchToProps
+)(AppView)
