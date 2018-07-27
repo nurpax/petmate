@@ -3,6 +3,7 @@ export const ADD_SCREEN = 'ADD_SCREEN'
 export const ADD_SCREEN_AND_FRAMEBUF = 'ADD_SCREEN_AND_FRAMEBUF'
 export const REMOVE_SCREEN = 'REMOVE_SCREEN'
 export const SET_CURRENT_SCREEN_INDEX = 'SET_CURRENT_SCREEN_INDEX'
+export const NEXT_SCREEN = 'NEXT_SCREEN'
 
 export function reducer(state = {current: 0, list: []}, action) {
   switch (action.type) {
@@ -20,6 +21,11 @@ export function reducer(state = {current: 0, list: []}, action) {
     return {
       ...state,
       current: action.data
+    }
+  case NEXT_SCREEN:
+    return {
+      ...state,
+      current: Math.min(state.list.length-1, Math.max(0, state.current + action.data))
     }
   default:
     return state
@@ -49,6 +55,12 @@ export const actions = {
     return {
       type: SET_CURRENT_SCREEN_INDEX,
       data: index
+    }
+  },
+  nextScreen: (dir) => {
+    return {
+      type: NEXT_SCREEN,
+      data: dir
     }
   }
 }

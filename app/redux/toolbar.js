@@ -3,6 +3,7 @@ import { bindActionCreators } from 'redux'
 
 import { settable, reduxSettables } from './settable'
 import { Framebuffer } from './editor'
+import * as Screens from './screens'
 
 import * as selectors from './selectors'
 import * as utils from '../utils'
@@ -41,6 +42,10 @@ export class Toolbar {
           if (state.toolbar.selectedTool === TOOL_BRUSH) {
             dispatch(Toolbar.actions.resetBrush())
           }
+        } else if (key === 'ArrowLeft') {
+          dispatch(Screens.actions.nextScreen(-1))
+        } else if (key === 'ArrowRight') {
+          dispatch(Screens.actions.nextScreen(+1))
         }
       }
     },
