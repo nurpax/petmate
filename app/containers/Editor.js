@@ -186,18 +186,18 @@ class FramebufferView_ extends Component {
   }
 
   dragMove = (coord) => {
-    const { selectedTool } = this.props
+    const { selectedTool, brush, brushRegion } = this.props
     if (selectedTool === TOOL_DRAW ||
         selectedTool === TOOL_COLORIZE) {
       this.setChar(coord)
     } else if (selectedTool === TOOL_BRUSH) {
-      if (this.props.brush === null) {
+      if (brush !== null) {
+        this.brushDraw(coord)
+      } else if (brushRegion !== null) {
         this.props.Toolbar.setBrushRegion({
-          ...this.props.brushRegion,
+          ...brushRegion,
           max: coord
         })
-      } else {
-        this.brushDraw(coord)
       }
     } else {
       console.error('not implemented')
@@ -205,9 +205,11 @@ class FramebufferView_ extends Component {
   }
 
   dragEnd = () => {
-    const { selectedTool } = this.props
-    if (selectedTool === TOOL_BRUSH && this.props.brush === null) {
-      this.props.Toolbar.captureBrush(this.props.framebuf, this.props.brushRegion)
+    const { selectedTool, brush, brushRegion } = this.props
+    if (selectedTool === TOOL_BRUSH) {
+      if (brush === null && brushRegion !== null) {
+        this.props.Toolbar.captureBrush(this.props.framebuf, brushRegion)
+      }
     }
     this.props.Toolbar.incUndoId()
   }

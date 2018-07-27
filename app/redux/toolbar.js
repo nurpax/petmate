@@ -1,8 +1,10 @@
 
 import { bindActionCreators } from 'redux'
 
-import { settable, reduxSettables} from './settable'
+import { settable, reduxSettables } from './settable'
+import { Framebuffer } from './editor'
 
+import * as selectors from './selectors'
 import * as utils from '../utils'
 
 export const TOOL_DRAW = 0
@@ -31,9 +33,14 @@ export class Toolbar {
       }
     },
     clearCanvas: () => {
-      return {
-        type: Toolbar.CLEAR_CANVAS,
-        data: {}
+      return (dispatch, getState) => {
+        const state = getState()
+        const framebufIndex = selectors.getCurrentScreenFramebufIndex(state)
+        const undoId = state.undoId
+        dispatch(Framebuffer.actions.clearCanvas(framebufIndex, undoId))
+        dispatch({
+          type: Toolbar.CLEAR_CANVAS,
+        })
       }
     },
     captureBrush: (framebuf, brushRegion) => {

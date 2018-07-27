@@ -58,6 +58,7 @@ export class Framebuffer {
   static SET_PIXEL = `${Framebuffer.name}/SET_PIXEL`
   static SET_BRUSH = `${Framebuffer.name}/SET_BRUSH`
   static IMPORT_FILE = `${Framebuffer.name}/IMPORT_FILE`
+  static CLEAR_CANVAS = `${Framebuffer.name}/CLEAR_CANVAS`
 
   static actions = {
     ...settables.actions,
@@ -83,7 +84,14 @@ export class Framebuffer {
         data: contents,
         framebufIndex
       }
-    }
+    },
+    clearCanvas: (framebufIndex, undoId) => {
+      return {
+        type: Framebuffer.CLEAR_CANVAS,
+        undoId,
+        framebufIndex
+      }
+    },
   }
 
   static reducer(state = {
@@ -103,7 +111,7 @@ export class Framebuffer {
           ...state,
           framebuf: setBrush(state.framebuf, action.data)
         }
-      case Toolbar.CLEAR_CANVAS:
+      case Framebuffer.CLEAR_CANVAS:
         return {
           ...state,
           framebuf: emptyFramebuf()
