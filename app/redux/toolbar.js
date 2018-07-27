@@ -25,6 +25,7 @@ export class Toolbar {
   static RESET_BRUSH = `${Toolbar.name}/RESET_BRUSH`
   static RESET_BRUSH_REGION = `${Toolbar.name}/RESET_BRUSH_REGION`
   static CAPTURE_BRUSH = `${Toolbar.name}/CAPTURE_BRUSH`
+  static NEXT_CHARCODE = `${Toolbar.name}/NEXT_CHARCODE`
   static INC_UNDO_ID = `${Toolbar.name}/INC_UNDO_ID`
 
   static actions = {
@@ -46,6 +47,14 @@ export class Toolbar {
           dispatch(Screens.actions.nextScreen(-1))
         } else if (key === 'ArrowRight') {
           dispatch(Screens.actions.nextScreen(+1))
+        } else if (key === 'a') {
+          dispatch(Toolbar.actions.nextCharcode({ row: 0, col: -1}))
+        } else if (key === 'd') {
+          dispatch(Toolbar.actions.nextCharcode({ row: 0, col: +1}))
+        } else if (key === 's') {
+          dispatch(Toolbar.actions.nextCharcode({ row: +1, col: 0}))
+        } else if (key === 'w') {
+          dispatch(Toolbar.actions.nextCharcode({ row: -1, col: 0}))
         }
       }
     },
@@ -62,6 +71,13 @@ export class Toolbar {
     resetBrush: () => {
       return {
         type: Toolbar.RESET_BRUSH
+      }
+    },
+
+    nextCharcode: (dir) => {
+      return {
+        type: Toolbar.NEXT_CHARCODE,
+        data: dir
       }
     },
 
@@ -102,6 +118,15 @@ export class Toolbar {
           ...state,
           brushRegion: null,
           brush: action.data
+        }
+      case Toolbar.NEXT_CHARCODE:
+        const dir = action.data
+        return {
+          ...state,
+          selectedChar: {
+            row: Math.max(0, Math.min(15, state.selectedChar.row + dir.row)),
+            col: Math.max(0, Math.min(15, state.selectedChar.col + dir.col)),
+          }
         }
       case Toolbar.INC_UNDO_ID:
         return {
