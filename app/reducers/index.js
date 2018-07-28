@@ -23,11 +23,15 @@ const rootReducerTop = (state, action) => {
     const newFramebufs =
       framebufList.reducer(state.framebufList, framebufList.actions.addFramebuf())
     const fbs = newFramebufs
+    const fbidx = fbs.length-1
+    let insertAfterIndex = action.insertAfterIndex
+    if (insertAfterIndex === undefined) {
+      insertAfterIndex = state.screens.list.length-1
+    }
     const newScreens =
-      Screens.reducer(state.screens, Screens.actions.addScreen(fbs.length-1))
-    let lastScreenId = newScreens.list.length-1
+      Screens.reducer(state.screens, Screens.actions.addScreen(fbidx, insertAfterIndex))
     const newScreens2 =
-      Screens.reducer(newScreens, Screens.actions.setCurrentScreenIndex(lastScreenId))
+      Screens.reducer(newScreens, Screens.actions.setCurrentScreenIndex(insertAfterIndex+1))
     return {
       ...state,
       framebufList: newFramebufs,

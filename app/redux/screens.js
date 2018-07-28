@@ -1,4 +1,7 @@
 
+import * as selectors from './selectors'
+import { Framebuffer } from './editor'
+
 export const ADD_SCREEN = 'ADD_SCREEN'
 export const ADD_SCREEN_AND_FRAMEBUF = 'ADD_SCREEN_AND_FRAMEBUF'
 export const REMOVE_SCREEN = 'REMOVE_SCREEN'
@@ -8,9 +11,14 @@ export const NEXT_SCREEN = 'NEXT_SCREEN'
 export function reducer(state = {current: 0, list: []}, action) {
   switch (action.type) {
   case ADD_SCREEN:
+    const insertAfter = action.data.insertAfterIndex
     return {
       ...state,
-      list: state.list.concat(action.data.framebufId)
+      list: [
+        ...state.list.slice(0, insertAfter + 1),
+        action.data.framebufId,
+        ...state.list.slice(insertAfter + 1)
+      ]
     }
   case REMOVE_SCREEN:
     return {
@@ -33,16 +41,42 @@ export function reducer(state = {current: 0, list: []}, action) {
 }
 
 export const actions = {
-  addScreen: (framebufId) => {
+  addScreen: (framebufId, insertAfterIndex) => {
     return {
       type: ADD_SCREEN,
-      data: {framebufId}
+      data: { framebufId, insertAfterIndex },
     }
   },
   removeScreen: (index) => {
-    return {
-      type: REMOVE_SCREEN,
-      index
+    return (dispatch, getState) => {
+      const state = getState()
+      const numScreens = selectors.getScreens(state).length
+      if (numScreens <= 1) {
+        // Don't allow deletion of the last framebuffer
+        return
+      }
+      dispatch(actions.setCurrentScreenIndex(index == numScreens - 1 ? numScreens - 2 : index))
+      dispatch({
+        type: REMOVE_SCREEN,
+        index
+      })
+    }
+  },
+  cloneScreen: (index) => {
+    return (dispatch, getState) => {
+      const state = getState()
+      const fbidx = selectors.getScreens(state)[index]
+      const framebuf = selectors.getFramebufByIndex(state, fbidx)
+      dispatch({
+        type: ADD_SCREEN_AND_FRAMEBUF,
+        insertAfterIndex: index
+      })
+      dispatch((dispatch, getState) => {
+        const state = getState()
+        const newScreenIdx = selectors.getCurrentScreenIndex(state)
+        const newFramebufIdx = selectors.getScreens(state)[newScreenIdx]
+        dispatch(Framebuffer.actions.copyFramebuf(framebuf, newFramebufIdx))
+      })
     }
   },
   newScreen: () => {

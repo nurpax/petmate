@@ -59,6 +59,7 @@ export class Framebuffer {
   static SET_BRUSH = `${Framebuffer.name}/SET_BRUSH`
   static IMPORT_FILE = `${Framebuffer.name}/IMPORT_FILE`
   static CLEAR_CANVAS = `${Framebuffer.name}/CLEAR_CANVAS`
+  static COPY_FRAMEBUF = `${Framebuffer.name}/COPY_FRAMEBUF`
 
   static actions = {
     ...settables.actions,
@@ -92,6 +93,14 @@ export class Framebuffer {
         framebufIndex
       }
     },
+    copyFramebuf: (framebuf, framebufIndex) => {
+      return {
+        type: Framebuffer.COPY_FRAMEBUF,
+        data: framebuf,
+        undoId: null,
+        framebufIndex
+      }
+    },
   }
 
   static reducer(state = {
@@ -115,6 +124,11 @@ export class Framebuffer {
         return {
           ...state,
           framebuf: emptyFramebuf()
+        }
+      case Framebuffer.COPY_FRAMEBUF:
+        return {
+          ...state,
+          ...action.data
         }
       case Framebuffer.IMPORT_FILE:
         const c = action.data

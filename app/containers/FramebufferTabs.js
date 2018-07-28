@@ -5,6 +5,8 @@ import { bindActionCreators } from 'redux'
 
 import classnames from 'classnames'
 
+import ContextMenuArea from './ContextMenuArea'
+
 import CharGrid from '../components/CharGrid'
 import styles from './FramebufferTabs.css'
 import { framebufIndexMergeProps }  from '../redux/utils'
@@ -19,6 +21,15 @@ class FramebufTab extends Component {
   handleSelect = () => {
     this.props.onSetActiveTab(this.props.id)
   }
+
+  handleMenuDuplicate = () => {
+    this.props.onDuplicateTab(this.props.id)
+  }
+
+  handleMenuRemove = () => {
+    this.props.onRemoveTab(this.props.id)
+  }
+
   render () {
     const { width, height, framebuf, backgroundColor, borderColor } =
       this.props.framebuf
@@ -35,22 +46,36 @@ class FramebufTab extends Component {
       transform: `scale(${scaleX}, ${scaleY})`,
       transformOrigin: '0% 0%'
     }
+
+    const menuItems = [
+      {
+        label: "Duplicate",
+        click: this.handleMenuDuplicate
+      },
+      {
+        label: "Remove",
+        click: this.handleMenuRemove
+      }
+    ]
+
     return (
-      <div
-        onClick={this.handleSelect}
-        className={classnames(styles.tab, this.props.active ? styles.active : null)}
-        style={s}
-      >
-        <div style={scaleStyle}>
-          <CharGrid
-            width={width}
-            height={height}
-            backgroundColor={backg}
-            grid={false}
-            framebuf={framebuf}
-          />
+      <ContextMenuArea menuItems={menuItems}>
+        <div
+          onClick={this.handleSelect}
+          className={classnames(styles.tab, this.props.active ? styles.active : null)}
+          style={s}
+        >
+          <div style={scaleStyle}>
+            <CharGrid
+              width={width}
+              height={height}
+              backgroundColor={backg}
+              grid={false}
+              framebuf={framebuf}
+            />
+          </div>
         </div>
-      </div>
+      </ContextMenuArea>
     )
   }
 }
@@ -65,8 +90,11 @@ class FramebufferTabs_ extends Component {
   }
 
   handleRemoveTab = (idx) => {
-//    this.props.Framebufs.removeFramebuf(idx)
-//    this.props.Toolbar.setFramebufIndex(-1)
+    this.props.Screens.removeScreen(idx)
+  }
+
+  handleDuplicateTab = (idx) => {
+    this.props.Screens.cloneScreen(idx)
   }
 
   render () {
@@ -77,6 +105,8 @@ class FramebufferTabs_ extends Component {
           key={framebufId}
           id={i}
           onSetActiveTab={this.handleActiveClick}
+          onRemoveTab={this.handleRemoveTab}
+          onDuplicateTab={this.handleDuplicateTab}
           framebuf={this.props.getFramebufByIndex(framebufId)}
           active={i === this.props.activeScreen} />
       )

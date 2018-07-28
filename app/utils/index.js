@@ -93,9 +93,8 @@ const WORKSPACE_VERSION = 1
 export const saveWorkspace = (filename, screens, getFramebufById) => {
   const content = JSON.stringify({
     version: WORKSPACE_VERSION,
-    // TODO need to renumber the id handles so that we save only currently
-    // used framebuffers
-    screens: screens.map(id => id),
+    // Renumber screen indices to 0,1,2,..,N and drop unused framebufs
+    screens: screens.map((dummy,idx )=> idx),
     framebufs: screens.map(fbid => {
       return {
         ...framebufFields(getFramebufById(fbid))
