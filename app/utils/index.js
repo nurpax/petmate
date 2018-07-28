@@ -4,7 +4,10 @@ import {
   loadCalTxtFramebuf,
   loadMarqCFramebuf
  } from './importers'
-import { savePNG } from './exporters'
+import {
+  savePNG,
+  saveMarqC
+} from './exporters'
 
 const fs = require('fs')
 const path = require('path')
@@ -78,6 +81,8 @@ export const saveFramebuf = (filename, framebuf) => {
   const ext = path.extname(filename)
   if (ext === '.png') {
     return savePNG(filename, framebuf)
+  } else if (ext === '.c') {
+    return saveMarqC(filename, framebuf)
   } else {
     alert(`Unsupported export format ${ext}!`)
   }
@@ -160,6 +165,27 @@ export const sortRegion = ({min, max}) => {
   }
 }
 
+/**
+ * Returns an array with arrays of the given size.
+ *
+ * @param myArray {Array} array to split
+ * @param chunk_size {Integer} Size of every group
+ */
+export function chunkArray(myArray, chunk_size){
+    var index = 0;
+    var arrayLength = myArray.length;
+    var tempArray = [];
+
+    for (index = 0; index < arrayLength; index += chunk_size) {
+        const myChunk = myArray.slice(index, index+chunk_size);
+        // Do something if you want with the group
+        tempArray.push(myChunk);
+    }
+
+    return tempArray;
+}
+
+
 const electron = require('electron')
 const { ipcRenderer } = electron
 const isDev = require('electron-is-dev');
@@ -212,7 +238,7 @@ export function dialogSaveAsWorkspace(dispatch, screens, getFramebufByIndex, set
 export function dialogExportFile(type, framebuf) {
   const {dialog} = require('electron').remote
   const filters = [
-    {name: 'PNG .png', extensions: ['png']}
+    {name: type.name, extensions: [type.ext]}
   ]
   const filename = dialog.showSaveDialog({properties: ['openFile'], filters})
   if (filename === undefined) {

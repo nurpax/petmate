@@ -2,11 +2,12 @@
 import { app, Menu, shell, BrowserWindow } from 'electron';
 
 const importers = [
-  { label: 'Marq PETSCII (.c)', cmd: 'import-marq-c' }
+  { label: 'PETSCII (.c)', cmd: 'import-marq-c' }
 ]
 
 const exporters = [
   { label: 'PNG (.png)', cmd: 'export-png' },
+  { label: 'PETSCII (.c)', cmd: 'export-marq-c' },
   { label: 'Executable (.prg)', cmd: 'export-prg' },
   { label: 'KickAssembler source (.asm)', cmd: 'export-kickass' }
 ]

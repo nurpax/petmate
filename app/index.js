@@ -53,6 +53,9 @@ require('electron').ipcRenderer.on('menu', (event, message) => {
     case 'export-png':
       store.dispatch(ReduxRoot.actions.fileExportAs(formats.png))
       return
+    case 'export-marq-c':
+      store.dispatch(ReduxRoot.actions.fileExportAs(formats.c))
+      return
     case 'export-kickass':
       alert('KickAssembler source export not implemented yet')
       return
