@@ -6,7 +6,8 @@ import {
  } from './importers'
 import {
   savePNG,
-  saveMarqC
+  saveMarqC,
+  saveExecutablePRG
 } from './exporters'
 
 const fs = require('fs')
@@ -33,12 +34,6 @@ export const palette = [
   {r:174, g:174, b:174},
 ]
 
-//    {}
-//    {name: 'PETSCII file', extensions: ['petski']},
-//    {name: 'PETSCII .txt', extensions: ['txt']},
-//    {name: 'PETSCII .c', extensions: ['c']}
-//  ]
-
 export const formats = {
   png: {
     name: 'PNG .png',
@@ -47,6 +42,10 @@ export const formats = {
   c: {
     name: 'PETSCII .c',
     ext: 'c'
+  },
+  prg: {
+    name: 'Executable .prg',
+    ext: 'prg'
   }
 }
 
@@ -83,6 +82,8 @@ export const saveFramebuf = (filename, framebuf) => {
     return savePNG(filename, framebuf)
   } else if (ext === '.c') {
     return saveMarqC(filename, framebuf)
+  } else if (ext === '.prg') {
+    return saveExecutablePRG(filename, framebuf)
   } else {
     alert(`Unsupported export format ${ext}!`)
   }
@@ -199,6 +200,7 @@ export const loadAppFile = (filename) => {
 }
 
 export const systemFontData = loadAppFile('./assets/system-charset.bin')
+export const executablePrgTemplate = loadAppFile('./assets/template.prg')
 
 function setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename) {
   setWorkspaceFilename(filename)

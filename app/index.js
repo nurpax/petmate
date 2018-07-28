@@ -60,7 +60,7 @@ require('electron').ipcRenderer.on('menu', (event, message) => {
       alert('KickAssembler source export not implemented yet')
       return
     case 'export-prg':
-      alert('PRG export not implemented yet')
+      store.dispatch(ReduxRoot.actions.fileExportAs(formats.prg))
       return
     case 'import-marq-c':
       store.dispatch(ReduxRoot.actions.fileImport(formats.c))

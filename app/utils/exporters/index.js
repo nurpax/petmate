@@ -1,6 +1,6 @@
 
 import { systemFontData, palette } from '../../utils'
-import { chunkArray } from '../../utils'
+import { chunkArray, executablePrgTemplate } from '../../utils'
 
 const nativeImage = require('electron').nativeImage
 
@@ -59,6 +59,7 @@ function bytesToCommaDelimited(dstLines, bytes, bytesPerLine) {
     }
   }
 }
+
 export const saveMarqC = (filename, fb) => {
   try {
     const { width, height, framebuf, backgroundColor, borderColor } = fb
@@ -83,6 +84,40 @@ export const saveMarqC = (filename, fb) => {
     lines.push('};')
     lines.push(`// META: ${width} ${height} C64 upper`)
     fs.writeFileSync(filename, lines.join('\n') + '\n', null)
+  }
+  catch(e) {
+    alert(`Failed to save file '${filename}'!`)
+    console.error(e)
+  }
+}
+
+export const saveExecutablePRG = (filename, fb) => {
+  try {
+    const { width, height, framebuf, backgroundColor, borderColor } = fb
+
+    if (width != 40 || height != 25) {
+      throw 'Only 40x25 framebuffer widths are supported!'
+    }
+
+    let buf = executablePrgTemplate.slice(0)
+    // Search for STA $d020
+    const d020idx = buf.indexOf(Buffer.from([0x8d, 0x20, 0xd0]))
+    buf[d020idx - 1] = borderColor
+    // Search for STA $d021
+    const d021idx = buf.indexOf(Buffer.from([0x8d, 0x21, 0xd0]))
+    buf[d021idx - 1] = backgroundColor
+
+    let screencodeOffs = 0x62
+    let colorOffs = screencodeOffs + 1000
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        buf[screencodeOffs++] = framebuf[y][x].code
+        buf[colorOffs++] = framebuf[y][x].color
+      }
+    }
+
+    fs.writeFileSync(filename, buf, null)
   }
   catch(e) {
     alert(`Failed to save file '${filename}'!`)
