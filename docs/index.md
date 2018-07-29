@@ -18,8 +18,8 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Features
 
-- Commodore 64 standard character mode graphics with the uppercase system ROM character set.
-- Drawing operations: draw character, colorize a character, select brush, draw with brush.
+- Commodore 64 standard character mode graphics with the uppercase system ROM character set
+- Drawing operations: draw character, colorize a character, select brush, draw with brush
 - Undo/redo stack
 - Multiple screens (each with their own undo stack)
 - Save/load workspace as a .petmate file (.petmate is the native file format for this editor)
