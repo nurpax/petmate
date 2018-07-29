@@ -38,7 +38,7 @@ This project is work-in-progress.  You can view [github issues](https://github.c
 
 Open/Save/Save As: use platform shortcuts.  E.g., Save is `Ctrl+S` on Windows, `⌘S` on Mac.
 
-Undo/Redo: use native shortcuts (e.g., `⌘Z` and `⌘⇧Z` on Mac).
+Undo/Redo: use platform shortcuts (e.g., `⌘Z` and `⌘⇧Z` on Mac).
 
 ## Release history
 
