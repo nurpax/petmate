@@ -112,18 +112,18 @@ export default class MenuBuilder {
       submenu: [
         { label: 'Open File...', accelerator: 'Command+O',
           click: () => {
-            this.sendMenuCommand('open')
+            this.sendMenuCommand('open');
           }
         },
         { type: 'separator' },
         { label: 'Save...', accelerator: 'Command+S',
           click: () => {
-            this.sendMenuCommand('save')
+            this.sendMenuCommand('save');
           }
         },
         { label: 'Save As...', accelerator: 'Command+Shift+S',
           click: () => {
-            this.sendMenuCommand('save-as')
+            this.sendMenuCommand('save-as');
           }
         },
         { type: 'separator' },
@@ -140,12 +140,12 @@ export default class MenuBuilder {
       submenu: [
         { label: 'Undo', accelerator: 'Command+Z', selector: 'undo:',
           click: () => {
-            this.sendMenuCommand('undo')
+            this.sendMenuCommand('undo');
           }
         },
         { label: 'Redo', accelerator: 'Shift+Command+Z', selector: 'redo:',
           click: () => {
-            this.sendMenuCommand('redo')
+            this.sendMenuCommand('redo');
           }
         },
       ]
@@ -232,17 +232,51 @@ export default class MenuBuilder {
       {
         label: '&File',
         submenu: [
-          {
-            label: '&Open',
-            accelerator: 'Ctrl+O'
-          },
-          {
-            label: '&Close',
-            accelerator: 'Ctrl+W',
+          { label: '&Open', accelerator: 'Ctrl+O',
             click: () => {
-              this.mainWindow.close();
+              this.sendMenuCommand('open');
             }
-          }
+          },
+          { type: 'separator' },
+          { label: '&Save', accelerator: 'Ctrl+S',
+            click: () => {
+              this.sendMenuCommand('save');
+            }
+          },
+          { label: 'Save As...', accelerator: 'Ctrl+Shift+S',
+            click: () => {
+              this.sendMenuCommand('save-as');
+            }
+          },
+          { type: 'separator' },
+          { label: 'Import',
+            submenu: importers.map(decl => this.mkImportCmd(decl.label, decl.cmd))
+          },
+          { label: 'Export',
+            submenu: exporters.map(decl => this.mkExportCmd(decl.label, decl.cmd))
+          },
+          { type: 'separator' },
+          { label: 'E&xit',
+            accelerator: 'CmdOrCtrl+Q',
+            click: () => {
+              app.exit(0)
+            }
+          },
+        ]
+      },
+      {
+        label: '&Edit',
+        submenu: [
+          { label: '&Undo', accelerator: 'Ctrl+Z', selector: 'undo:',
+            click: () => {
+              this.sendMenuCommand('undo');
+            }
+          },
+          { label: '&Redo', accelerator: 'Ctrl+Y', selector: 'redo:',
+            click: () => {
+              this.sendMenuCommand('redo');
+            }
+          },
         ]
       },
       {
