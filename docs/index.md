@@ -42,5 +42,5 @@ Undo/Redo: use platform shortcuts (e.g., `⌘Z` and `⌘⇧Z` on Mac).
 
 ## Release history
 
-### v0.1.0 - first public beta
+Petmate 0.1.0 (2018-07-29)
 
