@@ -36,7 +36,7 @@ This project is work-in-progress.  You can view [github issues](https://github.c
 - `a`, `s`, `d`, `w` - move left/down/right/up in the character selector.
 - `Left/right arrows` - move to previous/next screen
 
-Open/Save/Save As: use platform shortcuts.  E.g., Save is `Ctrl+S` on Windows, `⌘S` on Mac.
+Open/Save/Save As: use platform shortcuts (e.g., Save is `Ctrl+S` on Windows, `⌘S` on Mac).
 
 Undo/Redo: use platform shortcuts (e.g., `⌘Z` and `⌘⇧Z` on Mac).
 
