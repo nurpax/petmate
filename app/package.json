@@ -1,6 +1,6 @@
 {
-  "name": "electron-react-boilerplate",
-  "productName": "electron-react-boilerplate",
+  "name": "petmate",
+  "productName": "petmate",
   "version": "0.1.0",
   "description": "C64 PETSCII Editor",
   "main": "./main.prod.js",
