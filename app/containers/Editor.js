@@ -9,7 +9,10 @@ import CharPosOverlay from '../components/CharPosOverlay'
 
 import CharSelect from './CharSelect'
 
-import { withMouseCharPosition } from './hoc'
+import {
+  withMouseCharPosition,
+  withMouseCharPositionShiftLockAxis
+} from './hoc'
 
 import { Framebuffer } from '../redux/editor'
 import * as selectors from '../redux/selectors'
@@ -134,8 +137,6 @@ class FramebufferView_ extends Component {
 
   constructor (props) {
     super(props)
-    this.dragging = false
-    this.prevCoord = null
   }
 
   setChar = (clickLoc) => {
@@ -220,31 +221,6 @@ class FramebufferView_ extends Component {
     this.props.Toolbar.incUndoId()
   }
 
-  handleMouseDown = (e) => {
-    const { charPos } = this.props
-    this.dragging = true
-    e.target.setPointerCapture(e.pointerId);
-    this.prevCoord = charPos
-    this.dragStart(charPos)
-  }
-
-  handleMouseUp = (e) => {
-    const { charPos } = this.props
-    this.dragging = false
-    this.dragEnd()
-  }
-
-  handleMouseMove = (e) => {
-    if (this.dragging) {
-      const coord = this.props.charPos
-      if (this.prevCoord.row !== coord.row ||
-          this.prevCoord.col !== coord.col) {
-        this.prevCoord = coord
-        this.dragMove(coord)
-      }
-    }
-  }
-
   render () {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
@@ -297,9 +273,9 @@ class FramebufferView_ extends Component {
     return (
       <div
         style={scale}
-        onPointerDown={this.handleMouseDown}
-        onPointerMove={this.handleMouseMove}
-        onPointerUp={this.handleMouseUp}
+        onPointerDown={(e) => this.props.onMouseDown(e, this.dragStart)}
+        onPointerMove={(e) => this.props.onMouseMove(e, this.dragMove)}
+        onPointerUp={(e) => this.props.onMouseUp(e, this.dragEnd)}
       >
         <CharGrid
           width={W}
@@ -316,7 +292,7 @@ class FramebufferView_ extends Component {
     )
   }
 }
-const FramebufferView = withMouseCharPosition(FramebufferView_)
+const FramebufferView = withMouseCharPositionShiftLockAxis(FramebufferView_)
 
 const FramebufferCont = connect(
   state => {
@@ -334,7 +310,8 @@ const FramebufferCont = connect(
       selectedTool: state.toolbar.selectedTool,
       textColor: state.toolbar.textColor,
       brush: state.toolbar.brush,
-      brushRegion: state.toolbar.brushRegion
+      brushRegion: state.toolbar.brushRegion,
+      shiftKey: state.toolbar.shiftKey
     }
   },
   dispatch => {
