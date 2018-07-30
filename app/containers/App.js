@@ -17,7 +17,9 @@ class ExtLink extends Component {
   }
   render () {
     return (
-      <a onClick={this.handleIconClick} href={this.props.href}>
+      <a
+        onClick={this.handleIconClick}
+        href={this.props.href}>
         {this.props.children}
       </a>
     )
@@ -39,7 +41,7 @@ class AppView extends Component {
   }
 
   render() {
-    const icon = null
+    const icon = <img style={{paddingLeft:'3px'}}width={56} src={require('assets/appicon.png')} />
     return (
       <div className={s.appGrid}>
         <div className={s.empty}>
