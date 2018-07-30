@@ -108,10 +108,12 @@ class BrushMenu_ extends Component {
   render () {
     const { tool, active, ...props } = this.props
     const buttons =
-      <div className={classnames(styles.brushMenuContainer, this.props.fadeOut ? styles.fadeOut : null)}>
+      <div
+        className={classnames(styles.brushMenuContainer, this.props.fadeOut ? styles.fadeOut : null)}
+        onClick={this.handleClickBrushSelect}
+      >
         <i
           className={classnames(styles.icon, styles.brushButton, 'fas fa-crop-alt')}
-          onClick={this.handleClickBrushSelect}
         />
       </div>
     // tooltip    {active ? null : 'Brush'}
@@ -223,14 +225,14 @@ class ToolbarView extends Component {
     return (
       <div className={styles.toolbar}>
         <Icon
-          onIconClick={this.props.Toolbar.clearCanvas}
-          iconName='fa-trash' tooltip='Clear canvas'/>
-        <Icon
           onIconClick={this.props.undo}
           iconName='fa-undo' tooltip='Undo'/>
         <Icon
           onIconClick={this.props.redo}
           iconName='fa-redo' tooltip='Redo'/>
+        <Icon
+          onIconClick={this.props.Toolbar.clearCanvas}
+          iconName='fa-broom' tooltip='Clear canvas'/>
         {tools}
         <FbColorPicker
           pickerId='border'
