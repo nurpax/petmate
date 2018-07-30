@@ -18,7 +18,8 @@ const settables = reduxSettables([
   settable('Toolbar', 'selectedTool', TOOL_DRAW),
   settable('Toolbar', 'brushRegion', null),
   settable('Toolbar', 'brush', null),
-  settable('Toolbar', 'workspaceFilename', null)
+  settable('Toolbar', 'workspaceFilename', null),
+  settable('Toolbar', 'shiftKey', false),
 ])
 
 export class Toolbar {
@@ -55,6 +56,17 @@ export class Toolbar {
           dispatch(Toolbar.actions.nextCharcode({ row: +1, col: 0}))
         } else if (key === 'w') {
           dispatch(Toolbar.actions.nextCharcode({ row: -1, col: 0}))
+        } else if (key === 'Shift') {
+          dispatch(Toolbar.actions.setShiftKey(true))
+        }
+      }
+    },
+
+    keyUp: (key) => {
+      return (dispatch, getState) => {
+        const state = getState()
+        if (key === 'Shift') {
+          dispatch(Toolbar.actions.setShiftKey(false))
         }
       }
     },

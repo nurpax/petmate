@@ -32,12 +32,18 @@ class AppView extends Component {
     this.props.Toolbar.keyDown(event.key)
   }
 
+  handleKeyUp = (event) => {
+    this.props.Toolbar.keyUp(event.key)
+  }
+
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyDown);
+    document.addEventListener('keyup', this.handleKeyUp);
   }
 
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleKeyDown);
+    document.removeEventListener('keyup', this.handleKeyUp);
   }
 
   render() {
