@@ -7,7 +7,12 @@ import { Toolbar } from './toolbar'
 const FB_WIDTH = 40
 const FB_HEIGHT = 25
 
-function setChar(framebuf, {row, col, screencode, color}) {
+function setChar(fbState, {row, col, screencode, color}) {
+  const { framebuf, width, height } = fbState
+  if (row < 0 || row >= height ||
+      col < 0 || col >= width) {
+    return framebuf
+  }
   return framebuf.map((pixelRow, idx) => {
     if (row === idx) {
       return pixelRow.map((pix, x) => {
@@ -113,7 +118,7 @@ export class Framebuffer {
       case Framebuffer.SET_PIXEL:
         return {
           ...state,
-          framebuf: setChar(state.framebuf, action.data)
+          framebuf: setChar(state, action.data)
         }
       case Framebuffer.SET_BRUSH:
         return {

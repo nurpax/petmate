@@ -42,6 +42,8 @@ class BrushSelectOverlay extends Component {
       return (
         <CharPosOverlay
           charPos={this.props.charPos}
+          framebufWidth={this.props.framebufWidth}
+          framebufHeight={this.props.framebufHeight}
           color='rgba(128, 255, 128, 0.5)'
         />
       )
@@ -194,9 +196,13 @@ class FramebufferView_ extends Component {
       if (brush !== null) {
         this.brushDraw(coord)
       } else if (brushRegion !== null) {
+        const clamped = {
+          row: Math.max(0, Math.min(coord.row, this.props.framebufHeight-1)),
+          col: Math.max(0, Math.min(coord.col, this.props.framebufWidth-1))
+        }
         this.props.Toolbar.setBrushRegion({
           ...brushRegion,
-          max: coord
+          max: clamped
         })
       }
     } else {
@@ -217,6 +223,7 @@ class FramebufferView_ extends Component {
   handleMouseDown = (e) => {
     const { charPos } = this.props
     this.dragging = true
+    e.target.setPointerCapture(e.pointerId);
     this.prevCoord = charPos
     this.dragStart(charPos)
   }
@@ -256,20 +263,27 @@ class FramebufferView_ extends Component {
           overlays =
             <BrushOverlay
               charPos={this.props.charPos}
-              backgroundColor={backg}
-              brush={this.props.brush}
               framebufWidth={this.props.framebufWidth}
               framebufHeight={this.props.framebufHeight}
+              backgroundColor={backg}
+              brush={this.props.brush}
             />
         } else {
           overlays =
             <BrushSelectOverlay
               charPos={this.props.charPos}
+              framebufWidth={this.props.framebufWidth}
+              framebufHeight={this.props.framebufHeight}
               brushRegion={this.props.brushRegion}
             />
         }
       } else if (selectedTool === TOOL_DRAW || selectedTool === TOOL_COLORIZE) {
-        overlays = <CharPosOverlay charPos={this.props.charPos} opacity={0.5} />
+        overlays =
+          <CharPosOverlay
+            framebufWidth={this.props.framebufWidth}
+            framebufHeight={this.props.framebufHeight}
+            charPos={this.props.charPos} opacity={0.5}
+        />
         if (selectedTool === TOOL_COLORIZE) {
           screencodeHighlight = null
         }
@@ -283,9 +297,9 @@ class FramebufferView_ extends Component {
     return (
       <div
         style={scale}
-        onMouseMove={this.handleMouseMove}
-        onMouseDown={this.handleMouseDown}
-        onMouseUp={this.handleMouseUp}
+        onPointerDown={this.handleMouseDown}
+        onPointerMove={this.handleMouseMove}
+        onPointerUp={this.handleMouseUp}
       >
         <CharGrid
           width={W}

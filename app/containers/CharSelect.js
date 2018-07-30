@@ -42,6 +42,8 @@ class CharSelect_ extends Component {
   }
 
   render () {
+    const W = 16
+    const H = 16
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
@@ -59,24 +61,35 @@ class CharSelect_ extends Component {
         <div
           style={{
             ...charGridScaleStyle,
-            width: 16*9,
-            height: 16*9
+            width: W*9,
+            height: H*9
           }}
           onClick={this.handleClick}
         >
           <CharGrid
-            width={16}
-            height={16}
+            width={W}
+            height={H}
             backgroundColor={backg}
             grid={true}
             framebuf={this.fb}
             selected={this.props.selected}
           />
           {this.props.isActive ?
-            <CharPosOverlay grid={true} opacity={0.5} charPos={this.props.charPos} />
+            <CharPosOverlay
+              framebufWidth={W}
+              framebufHeight={H}
+              grid={true}
+              opacity={0.5}
+              charPos={this.props.charPos}
+            />
             : null}
           {this.props.selected ?
-            <CharPosOverlay grid={true} opacity={1.0} charPos={this.props.selected} />
+            <CharPosOverlay
+              framebufWidth={W}
+              framebufHeight={H}
+              grid={true}
+              opacity={1.0}
+              charPos={this.props.selected} />
             : null}
         </div>
       </div>

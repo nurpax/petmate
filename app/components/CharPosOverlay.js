@@ -1,5 +1,6 @@
 
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 
 const charPosOverlayStyleBase = {
   outlineStyle: 'solid',
@@ -10,12 +11,21 @@ const charPosOverlayStyleBase = {
 }
 
 export default class CharPosOverlay extends Component {
+  static propTypes = {
+    framebufWidth: PropTypes.number.isRequired,
+    framebufHeight: PropTypes.number.isRequired,
+  }
+
   render () {
-    const { charPos, grid } = this.props
+    const { charPos, grid, framebufWidth, framebufHeight } = this.props
     const scale = grid ? 9 : 8
     let outlineColor = `rgba(255, 255, 255, ${this.props.opacity})`
     if (this.props.color !== undefined) {
       outlineColor = this.props.color
+    }
+    if (charPos.row < 0 || charPos.row >= framebufHeight ||
+        charPos.col < 0 || charPos.col >= framebufWidth) {
+      return null
     }
     const s = {
       ...charPosOverlayStyleBase,
