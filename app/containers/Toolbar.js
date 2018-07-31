@@ -22,6 +22,9 @@ import styles from './Toolbar.css';
 import { withHoverFade } from './hoc'
 
 class Icon extends Component {
+  static defaultProps = {
+    bottom: false
+  }
   render () {
     const selectedClass = this.props.selected !== undefined && this.props.selected ? styles.selectedTool : null
     const tooltip = this.props.tooltip !== null ?
@@ -29,7 +32,7 @@ class Icon extends Component {
       null
     return (
       <div
-        className={classnames(styles.tooltip, selectedClass)}
+        className={classnames(styles.tooltip, selectedClass, this.props.bottom ? styles.end : null)}
         onClick={() => this.props.onIconClick()}
       >
         <i
@@ -252,6 +255,10 @@ class ToolbarView extends Component {
           onSelectColor={this.handleSelectBgColor}
           tooltip='Background'
         />
+        <Icon
+          bottom={true}
+          onIconClick={() => this.props.Toolbar.setShowSettings(true)}
+          iconName='fa-cog' tooltip='Preferences'/>
       </div>
     )
   }

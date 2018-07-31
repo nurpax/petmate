@@ -9,7 +9,7 @@ body {
   color: white;
   height: 100vh;
   background-color: rgb(25,25,25);
-  font-family: Arial, Helvetica, Helvetica Neue, serif;
+  font-family: BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
   overflow-y: hidden;
   overflow-x: hidden;
   margin:0px;
@@ -40,4 +40,47 @@ a {
 a:hover {
   text-decoration: none;
   cursor: pointer;
+}
+
+h1, h2, h3 {
+  color: rgb(200, 200, 200);
+}
+
+button {
+    outline: none;
+    background-color: #008CBA;
+    border: none;
+    color: white;
+    margin-right: 7px;
+    margin-bottom: 7px;
+    padding: 8px 8px;
+    min-width: 80px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+button:hover {
+  background-color: #007CAA;
+}
+
+button.primary {
+
+}
+
+button.primary:hover {
+  background-color: #007CAA;
+}
+
+button.cancel {
+    background-color: rgba(0,0,0,0);
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgba(255,255,255, 0.3);
+    color: white;
+}
+
+button.cancel:hover {
+    border-color: rgba(255,255,255, 0.2);
 }

@@ -20,6 +20,7 @@ const settables = reduxSettables([
   settable('Toolbar', 'brush', null),
   settable('Toolbar', 'workspaceFilename', null),
   settable('Toolbar', 'shiftKey', false),
+  settable('Toolbar', 'showSettings', false),
 ])
 
 export class Toolbar {

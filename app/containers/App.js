@@ -1,9 +1,10 @@
 
-import React, {Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux'
 
 import Toolbar from './Toolbar'
 import FramebufferTabs from './FramebufferTabs'
+import Settings from './Settings'
 
 import { Framebuffer } from '../redux/editor'
 import * as reduxToolbar from '../redux/toolbar'
@@ -49,22 +50,25 @@ class AppView extends Component {
   render() {
     const icon = <img style={{paddingLeft:'3px'}}width={56} src={require('assets/appicon.png')} />
     return (
-      <div className={s.appGrid}>
-        <div className={s.empty}>
-          <ExtLink href='https://nurpax.github.io/petmate/'>
-            {icon}
-          </ExtLink>
+      <Fragment>
+        <div className={s.appGrid}>
+          <div className={s.empty}>
+            <ExtLink href='https://nurpax.github.io/petmate/'>
+              {icon}
+            </ExtLink>
+          </div>
+          <div className={s.topmenu}>
+            <FramebufferTabs />
+          </div>
+          <div className={s.leftmenubar}>
+            <Toolbar />
+          </div>
+          <div className={s.editor}>
+            {this.props.children}
+          </div>
         </div>
-        <div className={s.topmenu}>
-          <FramebufferTabs />
-        </div>
-        <div className={s.leftmenubar}>
-          <Toolbar />
-        </div>
-        <div className={s.editor}>
-          {this.props.children}
-        </div>
-      </div>
+        <Settings />
+      </Fragment>
     )
   }
 }

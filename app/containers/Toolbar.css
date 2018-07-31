@@ -1,38 +1,44 @@
 
 .toolbar {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10px;
+  height: 100%;
+}
+
+.end {
+  margin-top: auto;
+  margin-bottom: 20px;
 }
 
 .tooltip {
-    color: rgb(173,173,173);
-    position: relative;
-    display: inline-block;
-    display: flex;
-    justify-content: center;
-    width: 80%;
-    border-width: 1px;
-    border-style: solid;
-    border-color: rgba(0,0,0,0); /* invisible border */
+  color: rgb(173,173,173);
+  position: relative;
+  display: inline-block;
+  display: flex;
+  justify-content: center;
+  width: 80%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(0,0,0,0); /* invisible border */
 }
 
 /* Tooltip text */
 .tooltip .tooltiptext {
-    visibility: hidden;
-    width: 120px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    padding: 5px 0;
-    border-radius: 6px;
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
 
-    /* Position the tooltip text - see examples below! */
-    position: absolute;
-    top: 7px;
-    left: 50px;
-    z-index: 1;
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  top: 7px;
+  left: 50px;
+  z-index: 1;
 }
 
 .tooltip:hover .tooltiptext {
