@@ -35,6 +35,7 @@ This project is work-in-progress.  You can view [github issues](https://github.c
 - `ESC` - reset brush selection
 - `a`, `s`, `d`, `w` - move left/down/right/up in the character selector.
 - `Left/right arrows` - move to previous/next screen
+- `Start drawing while holding SHIFT` - lock vertical or horizontal movement for drawing straight lines.
 
 Open/Save/Save As: use platform shortcuts (e.g., Save is `Ctrl+S` on Windows, `⌘S` on Mac).
 
