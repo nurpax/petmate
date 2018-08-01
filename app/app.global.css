@@ -46,6 +46,17 @@ h1, h2, h3 {
   color: rgb(200, 200, 200);
 }
 
+h2, h3, h4 {
+  margin-bottom: 5px;
+}
+
+h4 {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  color: rgb(200, 200, 200);
+  font-weight: 500;
+}
+
 button {
     outline: none;
     background-color: #008CBA;

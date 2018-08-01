@@ -28,3 +28,24 @@ export const getFramebufByIndex = (state, idx) => {
 export const getCurrentFramebuf = (state) => {
   return getFramebufByIndex(state, getCurrentScreenFramebufIndex(state))
 }
+
+export const getSettings = (state) => {
+  return state.settings['saved']
+}
+
+export const getSettingsEditing = (state) => {
+  return state.settings['editing']
+}
+
+export const getSettingsPaletteRemap = (state) => {
+  const idx = state.toolbar.selectedPaletteRemap
+  if (idx === undefined) {
+    return undefined
+  }
+  const palettes = getSettings(state).palettes
+  if (idx >= palettes.length) {
+    console.error('trying to use an undefined palette idx', idx)
+    return undefined
+  }
+  return palettes[idx]
+}

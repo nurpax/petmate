@@ -343,6 +343,7 @@ class Editor extends Component {
           <div style={{marginTop: '5px'}}>
             <ColorPicker
               selected={this.props.textColor}
+              paletteRemap={this.props.paletteRemap}
               onSelectColor={this.props.Toolbar.setTextColor}
             />
           </div>
@@ -363,7 +364,8 @@ const mapStateToProps = state => {
   const framebuf = selectors.getCurrentFramebuf(state)
   return {
     framebuf,
-    textColor: state.toolbar.textColor
+    textColor: state.toolbar.textColor,
+    paletteRemap: selectors.getSettingsPaletteRemap(state)
   }
 }
 

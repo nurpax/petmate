@@ -20,7 +20,10 @@ const settables = reduxSettables([
   settable('Toolbar', 'brush', null),
   settable('Toolbar', 'workspaceFilename', null),
   settable('Toolbar', 'shiftKey', false),
+  settable('Toolbar', 'metaKey', false),
+  settable('Toolbar', 'ctrlKey', false),
   settable('Toolbar', 'showSettings', false),
+  settable('Toolbar', 'selectedPaletteRemap', 0),
 ])
 
 export class Toolbar {
@@ -28,6 +31,7 @@ export class Toolbar {
   static RESET_BRUSH_REGION = `${Toolbar.name}/RESET_BRUSH_REGION`
   static CAPTURE_BRUSH = `${Toolbar.name}/CAPTURE_BRUSH`
   static NEXT_CHARCODE = `${Toolbar.name}/NEXT_CHARCODE`
+  static NEXT_COLOR = `${Toolbar.name}/NEXT_COLOR`
   static INC_UNDO_ID = `${Toolbar.name}/INC_UNDO_ID`
 
   static actions = {
@@ -41,24 +45,63 @@ export class Toolbar {
     keyDown: (key) => {
       return (dispatch, getState) => {
         const state = getState()
-        if (key === 'Escape') {
-          if (state.toolbar.selectedTool === TOOL_BRUSH) {
-            dispatch(Toolbar.actions.resetBrush())
+        const { shiftKey, metaKey, ctrlKey } = state.toolbar
+        const noMods = !shiftKey && !metaKey && !ctrlKey
+        const metaOrCtrl = metaKey || ctrlKey
+        console.log(key)
+        // No shift, meta or ctrl
+        if (noMods) {
+          if (key === 'Escape') {
+            if (state.toolbar.selectedTool === TOOL_BRUSH) {
+              dispatch(Toolbar.actions.resetBrush())
+            }
+          } else if (noMods && key === 'ArrowLeft') {
+            dispatch(Screens.actions.nextScreen(-1))
+          } else if (noMods && key === 'ArrowRight') {
+            dispatch(Screens.actions.nextScreen(+1))
+          } else if (key === 'a') {
+            dispatch(Toolbar.actions.nextCharcode({ row: 0, col: -1}))
+          } else if (key === 'd') {
+            dispatch(Toolbar.actions.nextCharcode({ row: 0, col: +1}))
+          } else if (key === 's') {
+            dispatch(Toolbar.actions.nextCharcode({ row: +1, col: 0}))
+          } else if (key === 'w') {
+            dispatch(Toolbar.actions.nextCharcode({ row: -1, col: 0}))
           }
-        } else if (key === 'ArrowLeft') {
-          dispatch(Screens.actions.nextScreen(-1))
-        } else if (key === 'ArrowRight') {
-          dispatch(Screens.actions.nextScreen(+1))
-        } else if (key === 'a') {
-          dispatch(Toolbar.actions.nextCharcode({ row: 0, col: -1}))
-        } else if (key === 'd') {
-          dispatch(Toolbar.actions.nextCharcode({ row: 0, col: +1}))
-        } else if (key === 's') {
-          dispatch(Toolbar.actions.nextCharcode({ row: +1, col: 0}))
-        } else if (key === 'w') {
-          dispatch(Toolbar.actions.nextCharcode({ row: -1, col: 0}))
-        } else if (key === 'Shift') {
+        }
+
+        // Meta only
+        if (metaOrCtrl) {
+          if (key === 'ArrowLeft') {
+            dispatch(Toolbar.actions.nextColor(-1))
+          } else if (key === 'ArrowRight') {
+            dispatch(Toolbar.actions.nextColor(+1))
+          }
+        }
+
+        if (key === 'Shift') {
           dispatch(Toolbar.actions.setShiftKey(true))
+        } else if (key === 'Meta') {
+          dispatch(Toolbar.actions.setMetaKey(true))
+        } else if (key === 'Control') {
+          dispatch(Toolbar.actions.setCtrlKey(true))
+        }
+
+        if (metaOrCtrl) {
+          switch(key) {
+            case '1':
+              dispatch(Toolbar.actions.setSelectedPaletteRemap(0))
+              break
+            case '2':
+              dispatch(Toolbar.actions.setSelectedPaletteRemap(1))
+              break
+            case '3':
+              dispatch(Toolbar.actions.setSelectedPaletteRemap(2))
+              break
+            case '4':
+              dispatch(Toolbar.actions.setSelectedPaletteRemap(3))
+              break
+          }
         }
       }
     },
@@ -68,6 +111,10 @@ export class Toolbar {
         const state = getState()
         if (key === 'Shift') {
           dispatch(Toolbar.actions.setShiftKey(false))
+        } else if (key === 'Meta') {
+          dispatch(Toolbar.actions.setMetaKey(false))
+        } else if (key === 'Control') {
+          dispatch(Toolbar.actions.setCtrlKey(false))
         }
       }
     },
@@ -91,6 +138,17 @@ export class Toolbar {
       return {
         type: Toolbar.NEXT_CHARCODE,
         data: dir
+      }
+    },
+
+    nextColor: (dir) => {
+      return (dispatch, getState) => {
+        const state = getState()
+        dispatch({
+          type: Toolbar.NEXT_COLOR,
+          data: dir,
+          paletteRemap: selectors.getSettingsPaletteRemap(state)
+        })
       }
     },
 
@@ -139,6 +197,16 @@ export class Toolbar {
           selectedChar: {
             row: Math.max(0, Math.min(15, state.selectedChar.row + dir.row)),
             col: Math.max(0, Math.min(15, state.selectedChar.col + dir.col)),
+          }
+        }
+      case Toolbar.NEXT_COLOR: {
+          const remap = action.paletteRemap
+          const idx = remap.indexOf(state.textColor)
+          const dir = action.data
+          const nextIdx = Math.max(0, Math.min(15, idx + dir))
+          return {
+            ...state,
+            textColor: remap[nextIdx]
           }
         }
       case Toolbar.INC_UNDO_ID:

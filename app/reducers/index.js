@@ -4,6 +4,7 @@ import undoable from 'redux-undo'
 import { routerReducer as router } from 'react-router-redux'
 import { Toolbar } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
+import { Settings } from '../redux/settings'
 import * as Screens from '../redux/screens'
 import * as framebufList from '../redux/framebufList'
 import * as Root from '../redux/root'
@@ -12,6 +13,7 @@ const rootReducer = combineReducers({
   framebufList: framebufList.reducer,
   toolbar: Toolbar.reducer,
   screens: Screens.reducer,
+  settings: Settings.reducer,
   router
 })
 

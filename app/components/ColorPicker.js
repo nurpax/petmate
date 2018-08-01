@@ -34,23 +34,45 @@ const SortableList = SortableContainer(({items}) => {
 })
 
 export class SortableColorPalette extends Component {
-  state = {
-    items: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-  };
   onSortEnd = ({oldIndex, newIndex}) => {
-    this.setState({
-      items: arrayMove(this.state.items, oldIndex, newIndex),
-    });
-  };
+    const newArr = arrayMove(this.props.palette, oldIndex, newIndex)
+    this.props.setPalette(newArr)
+  }
   render () {
-    return <SortableList helperClass={styles.sortableHelper} axis='x' items={this.state.items} onSortEnd={this.onSortEnd} />;
+    return (
+      <SortableList
+        helperClass={styles.sortableHelper}
+        axis='x'
+        items={this.props.palette}
+        onSortEnd={this.onSortEnd}
+      />
+    )
   }
 }
 
+export class ColorPalette extends Component {
+  render () {
+    const items = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'row'
+      }}>
+        {items.map((value,idx) => {
+          return <ColorBlock key={idx} color={value} />
+        })}
+      </div>
+    )
+  }
+}
 
 export default class ColorPicker extends Component {
+  static defaultProps = {
+    paletteRemap: Array(16).fill().map((d,i) => i)
+  }
   render() {
-    const colors = utils.palette.map((c, idx) => {
+    const colors = this.props.paletteRemap.map((idx) => {
+      const c = utils.palette[idx]
       const bg = utils.rgbToCssRgb(c)
       const style = {
         backgroundColor: bg,

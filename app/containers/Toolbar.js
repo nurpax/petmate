@@ -79,7 +79,11 @@ class FbColorPicker_ extends Component {
       picker =
         <div className={classnames(styles.colorpicker, this.props.fadeOut ? styles.fadeOut : null)}>
           <div style={{transform: 'scale(2,2)', transformOrigin:'0% 0%'}}>
-            <ColorPicker color={this.props.color} onSelectColor={this.handleSelectColor} />
+            <ColorPicker
+              color={this.props.color}
+              onSelectColor={this.handleSelectColor}
+              paletteRemap={this.props.paletteRemap}
+            />
           </div>
         </div>
       tooltip = null
@@ -244,6 +248,7 @@ class ToolbarView extends Component {
           color={this.props.framebuf.borderColor}
           onSetActive={this.setPickerActive}
           onSelectColor={this.handleSelectBorderColor}
+          paletteRemap={this.props.paletteRemap}
           tooltip='Border'
         />
         <FbColorPicker
@@ -253,6 +258,7 @@ class ToolbarView extends Component {
           color={this.props.framebuf.backgroundColor}
           onSetActive={this.setPickerActive}
           onSelectColor={this.handleSelectBgColor}
+          paletteRemap={this.props.paletteRemap}
           tooltip='Background'
         />
         <Icon
@@ -295,7 +301,8 @@ const mapStateToProps = state => {
     screens: selectors.getScreens(state),
     getFramebufByIndex: fid => selectors.getFramebufByIndex(state, fid),
     framebuf: framebuf,
-    selectedTool: state.toolbar.selectedTool
+    selectedTool: state.toolbar.selectedTool,
+    paletteRemap: selectors.getSettingsPaletteRemap(state)
   }
 }
 export default connect(
