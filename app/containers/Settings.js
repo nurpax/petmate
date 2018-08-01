@@ -6,6 +6,8 @@ import {
   Toolbar
 } from '../redux/toolbar'
 
+import { SortableColorPalette } from '../components/ColorPicker'
+
 import styles from './Settings.css'
 
 class Settings_ extends Component {
@@ -30,7 +32,9 @@ class Settings_ extends Component {
           }}>
 
             <div>
-              <h3>Preferences</h3>
+              <h2>Preferences</h2>
+              <h3>Custom palette 1:</h3>
+              <SortableColorPalette />
             </div>
 
             <div style={{alignSelf: 'flex-end'}}>

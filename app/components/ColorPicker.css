@@ -22,3 +22,7 @@
     outline-width: 2px;
     z-index: 1;
 }
+
+.sortableHelper {
+    z-index: 11;
+}
