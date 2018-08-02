@@ -12,9 +12,9 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.1.1.dmg'>Petmate-0.1.1.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.1.1.exe'>Petmate Setup 0.1.1.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.1.1_amd64.deb'>petmate_0.1.1_amd64.deb</a> (untested!)
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.2.0.dmg'>Petmate-0.2.0.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.2.0.exe'>Petmate Setup 0.2.0.exe</a>
+* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.2.0_amd64.deb'>petmate_0.2.0_amd64.deb</a> (untested!)
 
 ## Features
 
@@ -52,6 +52,13 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.2.0 (2018-08-03)
+- Multiple, customizable palettes (saved in Preferences) ([#58](https://github.com/nurpax/petmate/issues/58))
+- Added keyboard shortcuts for selecting next/prev color and shortcuts to switch between color palettes.
+- Added automatic switching to character drawing when the user selects a character or a color ([#64](https://github.com/nurpax/petmate/issues/64))
+- Inherit previous screen colors when adding a new screen ([#63](https://github.com/nurpax/petmate/issues/63))
+
 
 Petmate 0.1.1 (2018-07-31)
 - Fix [mouse drawing drag end doesn't always get detected correctly](https://github.com/nurpax/petmate/issues/45)
