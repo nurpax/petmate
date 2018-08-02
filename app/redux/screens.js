@@ -80,11 +80,40 @@ export const actions = {
     }
   },
   newScreen: () => {
-    return {
-      type: ADD_SCREEN_AND_FRAMEBUF,
-      data: null
+    return (dispatch, getState) => {
+      const state = getState()
+      const index = state.screens.current
+      const fbidx = selectors.getScreens(state)[index]
+      const framebuf = selectors.getFramebufByIndex(state, fbidx)
+      let colors = null
+      if (framebuf !== null) {
+        colors = {
+          backgroundColor: framebuf.backgroundColor,
+          borderColor: framebuf.borderColor
+        }
+      }
+      dispatch({
+        type: ADD_SCREEN_AND_FRAMEBUF,
+        data: null
+      })
+      if (colors !== null) {
+        dispatch((dispatch, getState) => {
+          const state = getState()
+          const newScreenIdx = selectors.getCurrentScreenIndex(state)
+          const newFramebufIdx = selectors.getScreens(state)[newScreenIdx]
+          dispatch(Framebuffer.actions.setBackgroundColor(
+            colors.backgroundColor,
+            newFramebufIdx
+          ))
+          dispatch(Framebuffer.actions.setBorderColor(
+            colors.borderColor,
+            newFramebufIdx
+          ))
+        })
+      }
     }
   },
+
   setCurrentScreenIndex: (index) => {
     return {
       type: SET_CURRENT_SCREEN_INDEX,
