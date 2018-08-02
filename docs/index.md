@@ -36,10 +36,20 @@ This project is work-in-progress.  You can view [github issues](https://github.c
 - `a`, `s`, `d`, `w` - move left/down/right/up in the character selector.
 - `Left/right arrows` - move to previous/next screen
 - `Start drawing while holding SHIFT` - lock vertical or horizontal movement for drawing straight lines.
+- `⌘Left, ⌘Right / Ctrl+Left, Ctrl+Right`: Select prev/next color.
+- `⌘1-4 / Ctrl+1-4`: Switch between palettes.  Use the Preferences pane to configure palettes.
 
 Open/Save/Save As: use platform shortcuts (e.g., Save is `Ctrl+S` on Windows, `⌘S` on Mac).
 
 Undo/Redo: use platform shortcuts (e.g., `⌘Z` and `⌘⇧Z` on Mac).
+
+## Preferences
+
+The settings are saved in the following location:
+
+- macOS: `~/Library/Application\ Support/Petmate/Settings`
+- Windows: `%APPDATA%/Petmate/Settings`
+- Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
 
