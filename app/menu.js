@@ -116,7 +116,7 @@ export default class MenuBuilder {
           }
         },
         { type: 'separator' },
-        { label: 'Save...', accelerator: 'Command+S',
+        { label: 'Save', accelerator: 'Command+S',
           click: () => {
             this.sendMenuCommand('save');
           }
