@@ -324,6 +324,10 @@ const FramebufferCont = connect(
 )(FramebufferView)
 
 class Editor extends Component {
+  handleSetColor = (color) => {
+    this.props.Toolbar.setCurrentColor(color)
+  }
+
   render() {
     if (this.props.framebuf === null) {
       return null
@@ -344,7 +348,7 @@ class Editor extends Component {
             <ColorPicker
               selected={this.props.textColor}
               paletteRemap={this.props.paletteRemap}
-              onSelectColor={this.props.Toolbar.setTextColor}
+              onSelectColor={this.handleSetColor}
             />
           </div>
         </div>

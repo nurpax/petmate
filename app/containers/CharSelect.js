@@ -38,7 +38,7 @@ class CharSelect_ extends Component {
   }
 
   handleClick = () => {
-    this.props.Toolbar.setSelectedChar(this.props.charPos)
+    this.props.Toolbar.setCurrentChar(this.props.charPos)
   }
 
   render () {

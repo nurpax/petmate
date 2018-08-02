@@ -152,6 +152,27 @@ export class Toolbar {
       }
     },
 
+    setCurrentColor: (color) => {
+      return (dispatch, getState) => {
+        const state = getState()
+        dispatch(Toolbar.actions.setTextColor(color))
+        if (state.toolbar.selectedTool === TOOL_BRUSH) {
+          dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
+        }
+      }
+    },
+
+    setCurrentChar: (charPos) => {
+      return (dispatch, getState) => {
+        const state = getState()
+        dispatch(Toolbar.actions.setSelectedChar(charPos))
+        if (state.toolbar.selectedTool === TOOL_BRUSH) {
+          dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
+        }
+      }
+    },
+
+
     captureBrush: (framebuf, brushRegion) => {
       const { min, max } = utils.sortRegion(brushRegion)
       const h = max.row - min.row + 1
