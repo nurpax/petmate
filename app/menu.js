@@ -84,7 +84,12 @@ export default class MenuBuilder {
           selector: 'orderFrontStandardAboutPanel:'
         },
         { type: 'separator' },
-        { label: 'Services', submenu: [] },
+        { label: 'Preferences...',
+          accelerator: 'Command+,',
+          click: () => {
+            this.sendMenuCommand('preferences');
+          }
+        },
         { type: 'separator' },
         {
           label: 'Hide Petmate',

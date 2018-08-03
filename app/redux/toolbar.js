@@ -55,6 +55,9 @@ export class Toolbar {
             if (state.toolbar.selectedTool === TOOL_BRUSH) {
               dispatch(Toolbar.actions.resetBrush())
             }
+            if (state.toolbar.showSettings) {
+              dispatch(Toolbar.actions.setShowSettings(false))
+            }
           } else if (noMods && key === 'ArrowLeft') {
             dispatch(Screens.actions.nextScreen(-1))
           } else if (noMods && key === 'ArrowRight') {

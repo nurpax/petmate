@@ -8,6 +8,7 @@ import './app.global.css';
 import { formats } from './utils'
 import * as Screens from './redux/screens'
 import { Settings } from './redux/settings'
+import { Toolbar } from './redux/toolbar'
 import * as ReduxRoot from './redux/root'
 
 const store = configureStore();
@@ -78,6 +79,9 @@ require('electron').ipcRenderer.on('menu', (event, message) => {
       return
     case 'import-marq-c':
       store.dispatch(ReduxRoot.actions.fileImport(formats.c))
+      return
+    case 'preferences':
+      store.dispatch(Toolbar.actions.setShowSettings(true))
       return
     default:
       console.warn('unknown message from main process', message)
