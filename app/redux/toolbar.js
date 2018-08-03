@@ -76,14 +76,9 @@ export class Toolbar {
             dispatch(Toolbar.actions.mirrorBrush('v', true))
           } else if (key === 'h') {
             dispatch(Toolbar.actions.mirrorBrush('h', true))
-          }
-        }
-
-        // Meta only
-        if (metaOrCtrl) {
-          if (key === 'ArrowLeft') {
+          } else if (key === 'q') {
             dispatch(Toolbar.actions.nextColor(-1))
-          } else if (key === 'ArrowRight') {
+          } else if (key === 'e') {
             dispatch(Toolbar.actions.nextColor(+1))
           }
         }
