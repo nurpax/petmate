@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import styles from './ColorPicker.css';
 import * as utils from '../utils'
+import * as fp from '../utils/fp'
 
 import { SortableContainer, SortableElement, arrayMove } from 'react-sortable-hoc';
 
@@ -52,7 +53,7 @@ export class SortableColorPalette extends Component {
 
 export class ColorPalette extends Component {
   render () {
-    const items = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    const items = fp.mkArray(16, i => i)
     return (
       <div style={{
         display: 'flex',
@@ -68,7 +69,7 @@ export class ColorPalette extends Component {
 
 export default class ColorPicker extends Component {
   static defaultProps = {
-    paletteRemap: Array(16).fill().map((d,i) => i)
+    paletteRemap: fp.mkArray(16, i => i)
   }
   render() {
     const colors = this.props.paletteRemap.map((idx) => {

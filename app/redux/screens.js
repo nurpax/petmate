@@ -2,6 +2,8 @@
 import * as selectors from './selectors'
 import { Framebuffer } from './editor'
 
+import * as fp from '../utils/fp'
+
 export const ADD_SCREEN = 'ADD_SCREEN'
 export const ADD_SCREEN_AND_FRAMEBUF = 'ADD_SCREEN_AND_FRAMEBUF'
 export const REMOVE_SCREEN = 'REMOVE_SCREEN'
@@ -14,16 +16,12 @@ export function reducer(state = {current: 0, list: []}, action) {
     const insertAfter = action.data.insertAfterIndex
     return {
       ...state,
-      list: [
-        ...state.list.slice(0, insertAfter + 1),
-        action.data.framebufId,
-        ...state.list.slice(insertAfter + 1)
-      ]
+      list: fp.arrayInsertAt(state.list, insertAfter+1, action.data.framebufId)
     }
   case REMOVE_SCREEN:
     return {
       ...state,
-      list: [...state.list.slice(0, action.index), ...state.list.slice(action.index + 1)]
+      list: fp.arrayRemoveAt(state.list, action.index)
     }
   case SET_CURRENT_SCREEN_INDEX:
     return {

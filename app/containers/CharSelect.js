@@ -13,6 +13,7 @@ import {
 import CharGrid from '../components/CharGrid'
 import CharPosOverlay from '../components/CharPosOverlay'
 import * as utils from '../utils'
+import * as fp from '../utils/fp'
 import * as selectors from '../redux/selectors'
 import { withMouseCharPosition } from './hoc'
 
@@ -26,8 +27,8 @@ class CharSelect_ extends Component {
   }
 
   computeCachedFb(textColor) {
-    this.fb = Array(16).fill({}).map((_, y) => {
-      return Array(16).fill({}).map((_, x) => {
+    this.fb = fp.mkArray(16, y => {
+      return fp.mkArray(16, x => {
         return {
           code: utils.charScreencodeFromRowCol({row:y, col:x}),
           color: textColor

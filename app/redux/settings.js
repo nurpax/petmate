@@ -1,6 +1,8 @@
 
 import { bindActionCreators } from 'redux'
 
+import * as fp from '../utils/fp'
+
 export const LOAD = 'LOAD'
 export const SET_PALETTE = 'SET_PALETTE'
 export const SAVE_EDITS = 'SAVE_EDITS'
@@ -8,19 +10,8 @@ export const CANCEL_EDITS = 'CANCEL_EDITS'
 
 const CONFIG_FILE_VERSION = 1
 
-const mk16 = () => Array(16).fill().map((d,i) => i)
-
 const initialState = {
-  palettes: Array(4).fill().map((d, pi) => mk16())
-}
-
-const arrSet = (arr, idx, newVal) => {
-  return arr.map((v,i) => {
-    if (i == idx) {
-      return newVal
-    }
-    return v
-  })
+  palettes: fp.mkArray(4, () => fp.mkArray(16, i => i))
 }
 
 function saveSettings(settings) {
@@ -112,7 +103,7 @@ export class Settings {
           ...state,
           [branch]: {
             ...state[branch],
-            palettes: arrSet(state[branch].palettes, action.idx, action.palette)
+            palettes: fp.arraySet(state[branch].palettes, action.idx, action.palette)
           }
         }
       default:

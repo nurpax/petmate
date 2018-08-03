@@ -2,6 +2,8 @@
 import undoable from 'redux-undo'
 import { Framebuffer } from '../redux/editor'
 
+import * as fp from '../utils/fp'
+
 export const ADD_FRAMEBUF = 'ADD_FRAMEBUF'
 export const REMOVE_FRAMEBUF = 'REMOVE_FRAMEBUF'
 
@@ -11,7 +13,7 @@ function framebufListReducer(reducer, actionTypes) {
     case actionTypes.add:
       return state.concat(reducer(undefined, action))
     case actionTypes.remove:
-      return [...state.slice(0, action.index), ...state.slice(action.index + 1)]
+      return fp.arrayRemoveAt(state, action.index)
     default:
       const { framebufIndex, ...rest } = action;
       if (typeof framebufIndex !== 'undefined') {
