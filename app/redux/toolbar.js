@@ -7,6 +7,7 @@ import * as Screens from './screens'
 
 import * as selectors from './selectors'
 import * as utils from '../utils'
+import * as brush from './brush'
 
 export const TOOL_DRAW = 0
 export const TOOL_COLORIZE = 1
@@ -30,6 +31,7 @@ export class Toolbar {
   static RESET_BRUSH = `${Toolbar.name}/RESET_BRUSH`
   static RESET_BRUSH_REGION = `${Toolbar.name}/RESET_BRUSH_REGION`
   static CAPTURE_BRUSH = `${Toolbar.name}/CAPTURE_BRUSH`
+  static MIRROR_BRUSH =  `${Toolbar.name}/MIRROR_BRUSH`
   static NEXT_CHARCODE = `${Toolbar.name}/NEXT_CHARCODE`
   static NEXT_COLOR = `${Toolbar.name}/NEXT_COLOR`
   static INC_UNDO_ID = `${Toolbar.name}/INC_UNDO_ID`
@@ -70,6 +72,10 @@ export class Toolbar {
             dispatch(Toolbar.actions.nextCharcode({ row: +1, col: 0}))
           } else if (key === 'w') {
             dispatch(Toolbar.actions.nextCharcode({ row: -1, col: 0}))
+          } else if (key === 'v') {
+            dispatch(Toolbar.actions.mirrorBrush('v', true))
+          } else if (key === 'h') {
+            dispatch(Toolbar.actions.mirrorBrush('h', true))
           }
         }
 
@@ -175,7 +181,6 @@ export class Toolbar {
       }
     },
 
-
     captureBrush: (framebuf, brushRegion) => {
       const { min, max } = utils.sortRegion(brushRegion)
       const h = max.row - min.row + 1
@@ -192,6 +197,17 @@ export class Toolbar {
             min: {row: 0, col: 0},
             max: {row: h-1, col: w-1}
           }
+        }
+      }
+    },
+
+    mirrorBrush: (axis) => {
+      // TODO grab charset from current fb
+      return {
+        type: Toolbar.MIRROR_BRUSH,
+        data: {
+          charset: utils.systemFontData,
+          axis
         }
       }
     }
@@ -224,19 +240,24 @@ export class Toolbar {
           }
         }
       case Toolbar.NEXT_COLOR: {
-          const remap = action.paletteRemap
-          const idx = remap.indexOf(state.textColor)
-          const dir = action.data
-          const nextIdx = Math.max(0, Math.min(15, idx + dir))
-          return {
-            ...state,
-            textColor: remap[nextIdx]
-          }
+        const remap = action.paletteRemap
+        const idx = remap.indexOf(state.textColor)
+        const dir = action.data
+        const nextIdx = Math.max(0, Math.min(15, idx + dir))
+        return {
+          ...state,
+          textColor: remap[nextIdx]
+        }
         }
       case Toolbar.INC_UNDO_ID:
         return {
           ...state,
           undoId: state.undoId+1
+        }
+      case Toolbar.MIRROR_BRUSH:
+        return {
+          ...state,
+          brush: brush.mirrorBrush(state.brush, action.data)
         }
       default:
         return settables.reducer(state, action)
