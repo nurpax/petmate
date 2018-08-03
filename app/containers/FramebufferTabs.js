@@ -34,13 +34,17 @@ class FramebufTab extends Component {
     const { width, height, framebuf, backgroundColor, borderColor } =
       this.props.framebuf
     const backg = utils.colorIndexToCssRgb(backgroundColor)
+    const bord = utils.colorIndexToCssRgb(borderColor)
     const scaleX = 1.0/4
     const scaleY = 1.0/4
     const s = {
       width: 40*2,
       height: 25*2,
       backgroundColor: '#000',
-      marginRight: '3px',
+      borderStyle: 'solid',
+      borderWidth: '5px',
+      borderColor: bord,
+      marginRight: '4px'
     }
     const scaleStyle = {
       transform: `scale(${scaleX}, ${scaleY})`,
