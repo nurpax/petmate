@@ -102,43 +102,6 @@ class FbColorPicker_ extends Component {
 }
 const FbColorPicker = withHoverFade(FbColorPicker_)
 
-class BrushMenu_ extends Component {
-  handleClick = () => {
-    this.props.setSelectedTool(this.props.tool)
-    this.props.onToggleActive()
-  }
-
-  handleClickBrushSelect = () => {
-    this.props.onClickBrushSelect('select')
-  }
-
-  render () {
-    const { tool, active, ...props } = this.props
-    const buttons =
-      <div
-        className={classnames(styles.brushMenuContainer, this.props.fadeOut ? styles.fadeOut : null)}
-        onClick={this.handleClickBrushSelect}
-      >
-        <i
-          className={classnames(styles.icon, styles.brushButton, 'fas fa-crop-alt')}
-        />
-      </div>
-    // tooltip    {active ? null : 'Brush'}
-    return (
-      <Fragment>
-        <Icon
-          iconName='fa-brush'
-          tooltip={null}
-          onIconClick={this.handleClick}
-          {...props}
-        />
-        {active ? buttons : null}
-      </Fragment>
-    )
-  }
-}
-const BrushMenu = withHoverFade(BrushMenu_)
-
 class ToolbarView extends Component {
   state = {
     pickerActive: {
@@ -171,9 +134,6 @@ class ToolbarView extends Component {
 
   handleClickBrushSelect = (sub) => {
     this.setPickerActive('brush', false)
-    if (sub === 'select') {
-      this.props.Toolbar.setBrush(null)
-    }
   }
 
   handleSaveWorkspace = () => {
@@ -187,22 +147,6 @@ class ToolbarView extends Component {
   render() {
     if (this.props.framebuf === null) {
       return null
-    }
-    const brushMenu = (key) => {
-      const selectedClass = this.props.selectedTool === TOOL_BRUSH ? styles.selectedTool : null
-      return (
-        <BrushMenu
-          key={key}
-          pickerId='brush'
-          containerClassName={classnames(styles.tooltip, selectedClass)}
-          tool={TOOL_BRUSH}
-          setSelectedTool={this.props.Toolbar.setSelectedTool}
-          selectedTool={this.props.selectedTool}
-          active={this.state.pickerActive.brush}
-          onSetActive={this.setPickerActive}
-          onClickBrushSelect={this.handleClickBrushSelect}
-        />
-      )
     }
     const mkTool = ({ tool, iconName, tooltip }) => {
       return (
@@ -227,7 +171,11 @@ class ToolbarView extends Component {
         iconName: 'fa-highlighter',
         tooltip: 'Colorize'
       }),
-      brushMenu(TOOL_BRUSH)
+      mkTool({
+        tool: TOOL_BRUSH,
+        iconName: 'fa-brush',
+        tooltip: 'Brush'
+      })
     ]
     return (
       <div className={styles.toolbar}>
