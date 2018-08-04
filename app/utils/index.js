@@ -9,6 +9,9 @@ import {
   saveMarqC,
   saveExecutablePRG
 } from './exporters'
+import {
+  drawLine
+} from './line'
 
 const fs = require('fs')
 const path = require('path')
@@ -263,3 +266,5 @@ export function dialogImportFile(type, importFile) {
     console.error('wtf?!')
   }
 }
+
+export { drawLine }

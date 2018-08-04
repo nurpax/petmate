@@ -137,6 +137,8 @@ class FramebufferView_ extends Component {
 
   constructor (props) {
     super(props)
+
+    this.prevDragPos = null
   }
 
   setChar = (clickLoc) => {
@@ -186,13 +188,16 @@ class FramebufferView_ extends Component {
         this.brushDraw(coord)
       }
     }
+    this.prevDragPos = coord
   }
 
   dragMove = (coord) => {
     const { selectedTool, brush, brushRegion } = this.props
     if (selectedTool === TOOL_DRAW ||
         selectedTool === TOOL_COLORIZE) {
-      this.setChar(coord)
+      utils.drawLine((x,y) => {
+        this.setChar({ row:y, col:x })
+      }, this.prevDragPos.col, this.prevDragPos.row, coord.col, coord.row)
     } else if (selectedTool === TOOL_BRUSH) {
       if (brush !== null) {
         this.brushDraw(coord)
@@ -209,6 +214,8 @@ class FramebufferView_ extends Component {
     } else {
       console.error('not implemented')
     }
+
+    this.prevDragPos = coord
   }
 
   dragEnd = () => {
