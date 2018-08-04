@@ -55,7 +55,14 @@ export const withMouseCharPositionShiftLockAxis = (C, options) => {
       e.target.setPointerCapture(e.pointerId);
       this.prevCoord = charPos
       dragStart(charPos)
-      this.shiftLockAxis = this.props.shiftKey ? 'shift' : null
+
+      const lock = this.props.shiftKey
+      this.shiftLockAxis = lock ? 'shift' : null
+      if (lock) {
+        this.lockStartCoord = {
+          ...charPos
+        }
+      }
     }
 
     handleMouseUp = (e, dragEnd) => {
@@ -77,12 +84,6 @@ export const withMouseCharPositionShiftLockAxis = (C, options) => {
               this.shiftLockAxis = 'row'
             } else if (this.prevCoord.col === coord.col) {
               this.shiftLockAxis = 'col'
-            }
-          }
-
-          if (this.lockStartCoord === null) {
-            this.lockStartCoord = {
-              ...charPos
             }
           }
 
