@@ -257,7 +257,7 @@ export default class MenuBuilder {
           { label: 'Import',
             submenu: importers.map(decl => this.mkImportCmd(decl.label, decl.cmd))
           },
-          { label: 'Export',
+          { label: 'Export As',
             submenu: exporters.map(decl => this.mkExportCmd(decl.label, decl.cmd))
           },
           { type: 'separator' },
@@ -282,6 +282,12 @@ export default class MenuBuilder {
               this.sendMenuCommand('redo');
             }
           },
+          { type: 'separator' },
+          { label: 'Preferences', accelerator: 'Ctrl+P',
+            click: () => {
+              this.sendMenuCommand('preferences');
+            }
+          }
         ]
       },
       {
