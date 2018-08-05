@@ -7,11 +7,13 @@ export const LOAD = 'LOAD'
 export const SET_PALETTE = 'SET_PALETTE'
 export const SAVE_EDITS = 'SAVE_EDITS'
 export const CANCEL_EDITS = 'CANCEL_EDITS'
+export const SET_SELECTED_COLOR_PALETTE = 'SET_SELECTED_COLOR_PALETTE'
 
 const CONFIG_FILE_VERSION = 1
 
 const initialState = {
-  palettes: fp.mkArray(4, () => fp.mkArray(16, i => i))
+  palettes: fp.mkArray(4, () => fp.mkArray(16, i => i)),
+  selectedColorPalette: 'petmate'
 }
 
 function saveSettings(settings) {
@@ -35,7 +37,8 @@ function fromJson(json) {
   const init = initialState
   return {
     ...initialState,
-    palettes: json.palettes === undefined ? init.palettes : json.palettes
+    palettes: json.palettes === undefined ? init.palettes : json.palettes,
+    selectedColorPalette: json.selectedColorPalette === undefined ? init.selectedColorPalette : json.selectedColorPalette
   }
 }
 
@@ -73,6 +76,13 @@ export class Settings {
         idx,
         palette
       }
+    },
+    setSelectedColorPaletteName: (branch, name) => {
+      return {
+        type: SET_SELECTED_COLOR_PALETTE,
+        branch,
+        data: name
+      }
     }
   }
 
@@ -104,6 +114,16 @@ export class Settings {
           [branch]: {
             ...state[branch],
             palettes: fp.arraySet(state[branch].palettes, action.idx, action.palette)
+          }
+        }
+      case SET_SELECTED_COLOR_PALETTE: {
+          const branch = action.branch
+          return {
+            ...state,
+            [branch]: {
+              ...state[branch],
+              selectedColorPalette: action.data
+            }
           }
         }
       default:

@@ -6,29 +6,34 @@ import * as fp from '../utils/fp'
 
 import { SortableContainer, SortableElement, arrayMove } from 'react-sortable-hoc';
 
-const ColorBlock = ({ color }) => {
-  const bg = utils.colorIndexToCssRgb(color)
+const ColorBlock = ({ color, colorPalette, hover }) => {
+  const bg = utils.colorIndexToCssRgb(colorPalette, color)
   const style = {
     backgroundColor: bg,
     width: '16px',
     height: '16px',
     marginRight: '2px'
   }
-  const cls = styles.box
+  const cls = hover ? styles.box : styles.boxNoHover
   return (
     <div style={style} className={cls}/>
   )
 }
 
-const SortableItem = SortableElement(({color}) =>
-  <ColorBlock color={color} />
+const SortableItem = SortableElement(({color, colorPalette}) =>
+  <ColorBlock color={color} hover={true} colorPalette={colorPalette} />
 )
 
-const SortableList = SortableContainer(({items}) => {
+const SortableList = SortableContainer(({items, colorPalette}) => {
   return (
     <div className={styles.container}>
       {items.map((value, index) => (
-        <SortableItem key={`item-${index}`} index={index} color={value} />
+        <SortableItem
+          key={`item-${index}`}
+          index={index}
+          color={value}
+          colorPalette={colorPalette}
+        />
       ))}
     </div>
   );
@@ -45,6 +50,7 @@ export class SortableColorPalette extends Component {
         helperClass={styles.sortableHelper}
         axis='x'
         items={this.props.palette}
+        colorPalette={this.props.colorPalette}
         onSortEnd={this.onSortEnd}
       />
     )
@@ -60,7 +66,14 @@ export class ColorPalette extends Component {
         flexDirection: 'row'
       }}>
         {items.map((value,idx) => {
-          return <ColorBlock key={idx} color={value} />
+          return (
+            <ColorBlock
+              key={idx}
+              color={value}
+              hover={false}
+              colorPalette={this.props.colorPalette}
+            />
+          )
         })}
       </div>
     )
@@ -73,7 +86,7 @@ export default class ColorPicker extends Component {
   }
   render() {
     const colors = this.props.paletteRemap.map((idx) => {
-      const c = utils.palette[idx]
+      const c = this.props.colorPalette[idx]
       const bg = utils.rgbToCssRgb(c)
       const style = {
         backgroundColor: bg,

@@ -66,7 +66,8 @@ class FbColorPicker_ extends Component {
   }
 
   render () {
-    const bg = utils.colorIndexToCssRgb(this.props.color)
+    const { colorPalette } = this.props
+    const bg = utils.colorIndexToCssRgb(colorPalette, this.props.color)
     const s = {
       height: '40px',
       marginTop: '12px',
@@ -83,6 +84,7 @@ class FbColorPicker_ extends Component {
               color={this.props.color}
               onSelectColor={this.handleSelectColor}
               paletteRemap={this.props.paletteRemap}
+              colorPalette={colorPalette}
             />
           </div>
         </div>
@@ -197,6 +199,7 @@ class ToolbarView extends Component {
           onSetActive={this.setPickerActive}
           onSelectColor={this.handleSelectBorderColor}
           paletteRemap={this.props.paletteRemap}
+          colorPalette={this.props.colorPalette}
           tooltip='Border'
         />
         <FbColorPicker
@@ -207,6 +210,7 @@ class ToolbarView extends Component {
           onSetActive={this.setPickerActive}
           onSelectColor={this.handleSelectBgColor}
           paletteRemap={this.props.paletteRemap}
+          colorPalette={this.props.colorPalette}
           tooltip='Background'
         />
         <Icon
@@ -250,7 +254,8 @@ const mapStateToProps = state => {
     getFramebufByIndex: fid => selectors.getFramebufByIndex(state, fid),
     framebuf: framebuf,
     selectedTool: state.toolbar.selectedTool,
-    paletteRemap: selectors.getSettingsPaletteRemap(state)
+    paletteRemap: selectors.getSettingsPaletteRemap(state),
+    colorPalette: selectors.getSettingsCurrentColorPalette(state)
   }
 }
 export default connect(

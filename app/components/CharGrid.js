@@ -1,5 +1,6 @@
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types'
 import classnames from 'classnames'
 
 import * as utils from '../utils'
@@ -7,12 +8,12 @@ import * as utils from '../utils'
 const systemFontData = utils.systemFontData
 
 class CharsetCache {
-  constructor (ctx) {
+  constructor (ctx, colorPalette) {
     const data = systemFontData
     this.images = Array(16)
 
     for (let colorIdx = 0; colorIdx < 16; colorIdx++) {
-      const color = utils.palette[colorIdx]
+      const color = colorPalette[colorIdx]
       this.images[colorIdx] = []
 
       for (let c = 0; c < 256; c++) {
@@ -45,6 +46,9 @@ class CharsetCache {
 }
 
 export default class CharGrid extends Component {
+  static propTypes = {
+    colorPalette: PropTypes.arrayOf(PropTypes.object).isRequired
+  }
   static defaultProps = {
     srcX: 0,
     srcY: 0,
@@ -70,7 +74,8 @@ export default class CharGrid extends Component {
       this.props.charPos !== prevProps.charPos ||
       this.props.curScreencode !== prevProps.curScreencode ||
       this.props.textColor !== prevProps.textColor ||
-      this.props.backgroundColor !== prevProps.backgroundColor) {
+      this.props.backgroundColor !== prevProps.backgroundColor ||
+      this.props.colorPalette !== prevProps.colorPalette) {
       this.draw(prevProps)
     }
   }
@@ -78,9 +83,11 @@ export default class CharGrid extends Component {
   draw (prevProps) {
     const canvas = this.canvasRef.current
     const ctx = canvas.getContext("2d")
-
-    if (this.font === null) {
-      this.font = new CharsetCache(ctx)
+    const framebuf = this.props.framebuf
+    let invalidate = false
+    if (this.font === null || this.props.colorPalette !== prevProps.colorPalette) {
+      this.font = new CharsetCache(ctx, this.props.colorPalette)
+      invalidate = true
     }
 
     const { grid, srcX, srcY } = this.props
@@ -93,11 +100,12 @@ export default class CharGrid extends Component {
         (this.props.width !== prevProps.width ||
          this.props.height !== prevProps.height ||
          this.props.srcX !== prevProps.srcX ||
-         this.props.srcY !== prevProps.srcY)
+         this.props.srcY !== prevProps.srcY ||
+         invalidate)
         :
         true
     for (var y = 0; y < this.props.height; y++) {
-      const charRow = this.props.framebuf[y + srcY]
+      const charRow = framebuf[y + srcY]
       if (!dstSrcChanged && charRow === prevProps.framebuf[y + srcY]) {
         continue
       }
@@ -113,7 +121,7 @@ export default class CharGrid extends Component {
       const charPos = prevProps.charPos
       if (charPos.row >= 0 && charPos.row < this.props.height &&
           charPos.col >= 0 && charPos.col < this.props.width) {
-        const c = this.props.framebuf[charPos.row][charPos.col]
+        const c = framebuf[charPos.row][charPos.col]
         const img = this.font.getImage(c.code, c.color)
         ctx.putImageData(img, charPos.col*xScale, charPos.row*yScale)
       }
@@ -126,7 +134,7 @@ export default class CharGrid extends Component {
         const c = {
           code: this.props.curScreencode !== null ?
             this.props.curScreencode :
-            this.props.framebuf[charPos.row][charPos.col].code,
+            framebuf[charPos.row][charPos.col].code,
           color: this.props.textColor
         }
         const img = this.font.getImage(c.code, c.color)

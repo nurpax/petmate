@@ -1,5 +1,6 @@
 
 import React, { Component, Fragment, PureComponent } from 'react';
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import classnames from 'classnames'
 
@@ -75,6 +76,9 @@ function computeBrushDstPos (charPos, { width, height }) {
 }
 
 class BrushOverlay extends Component {
+  static propTypes = {
+    colorPalette: PropTypes.arrayOf(PropTypes.object).isRequired
+  }
   render () {
     if (this.props.brush === null) {
       return null
@@ -126,6 +130,7 @@ class BrushOverlay extends Component {
           srcY={srcY}
           grid={false}
           backgroundColor={backgroundColor}
+          colorPalette={this.props.colorPalette}
           framebuf={this.props.brush.framebuf}
         />
       </div>
@@ -234,7 +239,7 @@ class FramebufferView_ extends Component {
     // grid.
     const W = 40
     const H = 25
-    const backg = utils.colorIndexToCssRgb(this.props.backgroundColor)
+    const backg = utils.colorIndexToCssRgb(this.props.colorPalette, this.props.backgroundColor)
     const { selectedTool } = this.props
     let overlays = null
     let screencodeHighlight = this.props.curScreencode
@@ -249,6 +254,7 @@ class FramebufferView_ extends Component {
               framebufWidth={this.props.framebufWidth}
               framebufHeight={this.props.framebufHeight}
               backgroundColor={backg}
+              colorPalette={this.props.colorPalette}
               brush={this.props.brush}
             />
         } else {
@@ -293,6 +299,7 @@ class FramebufferView_ extends Component {
           charPos={this.props.isActive && highlightCharPos ? this.props.charPos : null}
           curScreencode={screencodeHighlight}
           textColor={this.props.textColor}
+          colorPalette={this.props.colorPalette}
         />
         {overlays}
       </div>
@@ -318,7 +325,8 @@ const FramebufferCont = connect(
       textColor: state.toolbar.textColor,
       brush: state.toolbar.brush,
       brushRegion: state.toolbar.brushRegion,
-      shiftKey: state.toolbar.shiftKey
+      shiftKey: state.toolbar.shiftKey,
+      colorPalette: selectors.getSettingsCurrentColorPalette(state)
     }
   },
   dispatch => {
@@ -339,7 +347,9 @@ class Editor extends Component {
     if (this.props.framebuf === null) {
       return null
     }
-    const borderColor = utils.colorIndexToCssRgb(this.props.framebuf.borderColor)
+    const { colorPalette } = this.props
+    const borderColor =
+      utils.colorIndexToCssRgb(colorPalette, this.props.framebuf.borderColor)
     const framebufStyle = {
       width: '640px', height:'400px',
       borderColor: borderColor
@@ -355,6 +365,7 @@ class Editor extends Component {
             <ColorPicker
               selected={this.props.textColor}
               paletteRemap={this.props.paletteRemap}
+              colorPalette={colorPalette}
               onSelectColor={this.handleSetColor}
             />
           </div>
@@ -376,7 +387,8 @@ const mapStateToProps = state => {
   return {
     framebuf,
     textColor: state.toolbar.textColor,
-    paletteRemap: selectors.getSettingsPaletteRemap(state)
+    paletteRemap: selectors.getSettingsPaletteRemap(state),
+    colorPalette: selectors.getSettingsCurrentColorPalette(state)
   }
 }
 

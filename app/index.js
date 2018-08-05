@@ -5,7 +5,7 @@ import Root from './containers/Root';
 import { configureStore, history } from './store/configureStore';
 import './app.global.css';
 
-import { formats } from './utils'
+import { formats, loadSettings } from './utils'
 import * as Screens from './redux/screens'
 import { Settings } from './redux/settings'
 import { Toolbar } from './redux/toolbar'
@@ -22,18 +22,7 @@ render(
   document.getElementById('root')
 );
 
-// TODO move to some utils file (or settings?)
-const electron = require('electron')
-const path = require('path')
-let settingsFile = path.join(electron.remote.app.getPath('userData'), 'Settings')
-var fs = require('fs');
-if (fs.existsSync(settingsFile)) {
-  const c = fs.readFileSync(settingsFile, 'utf-8')
-  const j = JSON.parse(c)
-  console.log(settingsFile, j)
-  store.dispatch(Settings.actions.load(j))
-}
-
+loadSettings((j) => store.dispatch(Settings.actions.load(j)))
 
 if (module.hot) {
   module.hot.accept('./containers/Root', () => {

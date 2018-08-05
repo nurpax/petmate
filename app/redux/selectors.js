@@ -1,4 +1,6 @@
 
+import { colorPalettes } from '../utils'
+
 // TODO memoize
 
 export const getScreens = (state) => {
@@ -48,4 +50,18 @@ export const getSettingsPaletteRemap = (state) => {
     return undefined
   }
   return palettes[idx]
+}
+
+export const getSettingsColorPaletteByName = (state, name) => {
+  return colorPalettes[name]
+}
+
+export const getSettingsCurrentColorPalette = (state) => {
+  const settings = getSettings(state)
+  return getSettingsColorPaletteByName(state, settings.selectedColorPalette)
+}
+
+export const getSettingsEditingCurrentColorPalette = (state) => {
+  const settings = getSettingsEditing(state)
+  return getSettingsColorPaletteByName(state, settings.selectedColorPalette)
 }

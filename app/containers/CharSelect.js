@@ -45,12 +45,15 @@ class CharSelect_ extends Component {
   render () {
     const W = 16
     const H = 16
+    const { colorPalette } = this.props
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
     const w = `${2*8*16+32}px`
     const h = `${2*8*16+32}px`
-    const backg = utils.colorIndexToCssRgb(this.props.backgroundColor)
+    const backg = utils.colorIndexToCssRgb(
+      colorPalette, this.props.backgroundColor
+    )
     const s = {width: w, height:h}
 
     if (this.prevTextColor !== this.props.textColor) {
@@ -74,6 +77,7 @@ class CharSelect_ extends Component {
             grid={true}
             framebuf={this.fb}
             selected={this.props.selected}
+            colorPalette={colorPalette}
           />
           {this.props.isActive ?
             <CharPosOverlay
@@ -115,7 +119,8 @@ const mapStateToProps = state => {
     backgroundColor: framebuf.backgroundColor,
     selected,
     curScreencode: utils.charScreencodeFromRowCol(selected),
-    textColor: state.toolbar.textColor
+    textColor: state.toolbar.textColor,
+    colorPalette: selectors.getSettingsCurrentColorPalette(state)
   }
 }
 

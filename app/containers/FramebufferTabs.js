@@ -33,8 +33,9 @@ class FramebufTab extends Component {
   render () {
     const { width, height, framebuf, backgroundColor, borderColor } =
       this.props.framebuf
-    const backg = utils.colorIndexToCssRgb(backgroundColor)
-    const bord = utils.colorIndexToCssRgb(borderColor)
+    const colorPalette = this.props.colorPalette
+    const backg = utils.colorIndexToCssRgb(colorPalette, backgroundColor)
+    const bord = utils.colorIndexToCssRgb(colorPalette, borderColor)
     const scaleX = 1.0/4
     const scaleY = 1.0/4
     const s = {
@@ -76,6 +77,7 @@ class FramebufTab extends Component {
               backgroundColor={backg}
               grid={false}
               framebuf={framebuf}
+              colorPalette={colorPalette}
             />
           </div>
         </div>
@@ -112,7 +114,8 @@ class FramebufferTabs_ extends Component {
           onRemoveTab={this.handleRemoveTab}
           onDuplicateTab={this.handleDuplicateTab}
           framebuf={this.props.getFramebufByIndex(framebufId)}
-          active={i === this.props.activeScreen} />
+          active={i === this.props.activeScreen}
+          colorPalette={this.props.colorPalette} />
       )
     })
     return (
@@ -140,7 +143,8 @@ const mapStateToProps = state => {
   return {
     activeScreen: selectors.getCurrentScreenIndex(state),
     screens: selectors.getScreens(state),
-    getFramebufByIndex: (idx) => selectors.getFramebufByIndex(state, idx)
+    getFramebufByIndex: (idx) => selectors.getFramebufByIndex(state, idx),
+    colorPalette: selectors.getSettingsCurrentColorPalette(state)
   }
 }
 export default connect(

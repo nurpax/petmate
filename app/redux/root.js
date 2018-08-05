@@ -3,13 +3,15 @@ import * as selectors from './selectors'
 import { ActionCreators } from 'redux-undo';
 
 import { Framebuffer } from './editor'
+import { Settings } from './settings'
 import { Toolbar } from './toolbar'
 import {
   dialogLoadWorkspace,
   dialogSaveAsWorkspace,
   dialogExportFile,
   dialogImportFile,
-  saveWorkspace
+  saveWorkspace,
+  loadSettings
 } from '../utils'
 
 export const RESET_STATE = 'RESET_STATE'
@@ -78,10 +80,14 @@ export const actions = {
   },
 
   resetState: () => {
-    return {
-      type: RESET_STATE
+    return (dispatch, getState) => {
+      dispatch({
+        type: RESET_STATE
+      })
+      loadSettings(j => dispatch(Settings.actions.load(j)))
     }
   },
+
   undo: () => {
     return (dispatch, getState) => {
       const framebufIndex = selectors.getCurrentScreenFramebufIndex(getState())
