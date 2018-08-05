@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import Toolbar from './Toolbar'
 import FramebufferTabs from './FramebufferTabs'
 import Settings from './Settings'
+import ExportModal from './ExportModal'
 
 import { Framebuffer } from '../redux/editor'
 import * as reduxToolbar from '../redux/toolbar'
@@ -68,6 +69,7 @@ class AppView extends Component {
           </div>
         </div>
         <Settings />
+        <ExportModal />
       </Fragment>
     )
   }

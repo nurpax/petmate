@@ -1,12 +1,12 @@
 
-import { systemFontData, palette } from '../../utils'
+import { systemFontData } from '../../utils'
 import { chunkArray, executablePrgTemplate } from '../../utils'
 
 const nativeImage = require('electron').nativeImage
 
 let fs = require('fs')
 
-export const savePNG = (filename, fb, palette) => {
+export const savePNG = (filename, fb, palette, options) => {
   try {
     const { width, height, framebuf, backgroundColor } = fb
     const dwidth = width*8
@@ -60,7 +60,7 @@ function bytesToCommaDelimited(dstLines, bytes, bytesPerLine) {
   }
 }
 
-export const saveMarqC = (filename, fb) => {
+export const saveMarqC = (filename, fb, options) => {
   try {
     const { width, height, framebuf, backgroundColor, borderColor } = fb
 
@@ -91,11 +91,11 @@ export const saveMarqC = (filename, fb) => {
   }
 }
 
-export const saveExecutablePRG = (filename, fb) => {
+export const saveExecutablePRG = (filename, fb, options) => {
   try {
     const { width, height, framebuf, backgroundColor, borderColor } = fb
 
-    if (width != 40 || height != 25) {
+    if (width !== 40 || height !== 25) {
       throw 'Only 40x25 framebuffer widths are supported!'
     }
 

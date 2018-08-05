@@ -71,12 +71,12 @@ export const actions = {
     }
   },
 
-  fileExportAs: (type) => {
+  fileExportAs: (type, options) => {
     return (dispatch, getState) => {
       const state = getState()
       const framebuf = selectors.getCurrentFramebuf(state)
       const palette = selectors.getSettingsCurrentColorPalette(state)
-      dialogExportFile(type, framebuf, palette)
+      dialogExportFile(type, framebuf, palette, options)
     }
   },
 
