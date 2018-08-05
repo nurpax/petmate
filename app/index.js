@@ -64,8 +64,8 @@ require('electron').ipcRenderer.on('menu', (event, message) => {
     case 'export-marq-c':
       dispatchExport(formats.c)
       return
-    case 'export-kickass':
-      alert('KickAssembler source export not implemented yet')
+    case 'export-asm':
+      dispatchExport(formats.asm)
       return
     case 'export-prg':
       dispatchExport(formats.prg)

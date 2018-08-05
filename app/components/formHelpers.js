@@ -17,3 +17,18 @@ export const Checkbox = ({label, onChange, checked}) => {
   )
 }
 
+export const RadioButton = ({label, onChange, checked, value}) => { // = ({label, onChange, checked}) => {
+  return (
+    <label className={styles.radioButtonContainer}>
+      {label}
+      <input
+        type='radio'
+        checked={true}
+        value={value}
+        onChange={onChange}
+        checked={checked}
+      />
+      <span className={styles.radiocheckmark}></span>
+    </label>
+  )
+}

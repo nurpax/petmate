@@ -32,6 +32,10 @@ export const formats = {
   prg: {
     name: 'Executable .prg',
     ext: 'prg'
+  },
+  asm: {
+    name: 'Assembler source .asm',
+    ext: 'asm'
   }
 }
 

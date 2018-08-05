@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux'
 
 import Modal from '../components/Modal'
-import { Checkbox } from '../components/formHelpers'
+import { Checkbox, RadioButton } from '../components/formHelpers'
 
 import { Toolbar } from '../redux/toolbar'
 import { Settings } from '../redux/settings'
@@ -30,18 +30,48 @@ class PNGExportForm extends Component {
         <br/>
         <Checkbox
           onChange={this.handleChangeAlpha}
-          checked={this.props.alphaPixel}
+          checked={this.props.png.alphaPixel}
           label='Alpha pixel work-around for Twitter'
         />
         <Checkbox
-          onChange={this.handleDoublePixels}
-          checked={this.props.doublePixels}
+          onChange={this.handleDoubleSize}
+          checked={this.props.png.doublePixels}
           label='Double pixels'
         />
       </Fragment>
     )
   }
 }
+
+class ASMExportForm extends Component {
+  handleChangeAssembler = (e) => {
+    this.props.setFormState('asm', { assembler: e.target.value })
+  }
+  render () {
+    return (
+      <Fragment>
+        <Title>Assembler export options</Title>
+        <br/>
+        <br/>
+        <RadioButton
+          label='KickAssembler'
+          value='kickass'
+          onChange={this.handleChangeAssembler}
+          checked={this.props.asm.assembler === 'kickass'}
+        />
+        <RadioButton
+          label='ACME'
+          value='acme'
+          onChange={this.handleChangeAssembler}
+          checked={this.props.asm.assembler === 'acme'}
+        />
+      </Fragment>
+    )
+  }
+}
+
+/*
+*/
 
 class ExportForm extends Component {
   render () {
@@ -60,6 +90,13 @@ class ExportForm extends Component {
             png={this.props.formatState.png}
           />
         )
+      case 'asm':
+        return (
+          <ASMExportForm
+            setFormState={this.props.setFormState}
+            asm={this.props.formatState.asm}
+          />
+        )
     }
   }
 }
@@ -69,7 +106,10 @@ class ExportModal_ extends Component {
     png: {
       alphaPixel: false,
       doublePixels: false
-    }
+    },
+    asm: {
+      assembler: 'kickass'
+    },
   }
 
   handleSetFormState = (subtree, values) => {
