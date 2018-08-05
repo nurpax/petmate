@@ -54,6 +54,21 @@ The settings are saved in the following location:
 
 ## Release history
 
+Petmate 0.2.2 (2018-08-06)
+
+- Color palette selection (vice, colodore, etc.) ([#21](https://github.com/nurpax/petmate/issues/21))
+- Add application icon ([#73](https://github.com/nurpax/petmate/issues/73))
+- BUGS in this version: color palette selection breaks .png export.
+
+Petmate 0.2.1 (2018-08-05)
+- Add "smart" vertical and horizontal mirroring ([#62](https://github.com/nurpax/petmate/issues/62))
+- Show border color on screen thumbnails ([#69](https://github.com/nurpax/petmate/issues/69))
+- Add a Preferences item in the app menu (macOS only), close preferences with ESC
+- Use 'q', 'e' instead of COMMAND-left/right to cycle currently selected color ([#58](https://github.com/nurpax/petmate/issues/58))
+- Remove secondary icon for brushes ([#53](https://github.com/nurpax/petmate/issues/53))
+- Fix shift axis locking bug ([#68](https://github.com/nurpax/petmate/issues/68))
+- Draw a line between current and previous drag position ([#68](https://github.com/nurpax/petmate/issues/68))
+
 Petmate 0.2.0 (2018-08-03)
 - Multiple, customizable palettes (saved in Preferences) ([#58](https://github.com/nurpax/petmate/issues/58))
 - Added keyboard shortcuts for selecting next/prev color and shortcuts to switch between color palettes.
