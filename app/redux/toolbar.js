@@ -25,6 +25,7 @@ const settables = reduxSettables([
   settable('Toolbar', 'metaKey', false),
   settable('Toolbar', 'shiftKey', false),
   settable('Toolbar', 'showSettings', false),
+  settable('Toolbar', 'showExport', {show: false}),
   settable('Toolbar', 'selectedPaletteRemap', 0),
 ])
 
@@ -60,6 +61,9 @@ export class Toolbar {
             }
             if (state.toolbar.showSettings) {
               dispatch(Toolbar.actions.setShowSettings(false))
+            }
+            if (state.toolbar.showExport) {
+              dispatch(Toolbar.actions.setShowExport({show:false}))
             }
           } else if (noMods && key === 'ArrowLeft') {
             dispatch(Screens.actions.nextScreen(-1))

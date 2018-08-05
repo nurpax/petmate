@@ -36,6 +36,10 @@ if (module.hot) {
   });
 }
 
+function dispatchExport(type) {
+  store.dispatch(Toolbar.actions.setShowExport({show:true, type}))
+}
+
 // Listen to commands from the main process
 require('electron').ipcRenderer.on('menu', (event, message) => {
   switch (message) {
@@ -55,16 +59,16 @@ require('electron').ipcRenderer.on('menu', (event, message) => {
       store.dispatch(ReduxRoot.actions.fileSaveWorkspace())
       return
     case 'export-png':
-      store.dispatch(ReduxRoot.actions.fileExportAs(formats.png))
+      dispatchExport(formats.png)
       return
     case 'export-marq-c':
-      store.dispatch(ReduxRoot.actions.fileExportAs(formats.c))
+      dispatchExport(formats.c)
       return
     case 'export-kickass':
       alert('KickAssembler source export not implemented yet')
       return
     case 'export-prg':
-      store.dispatch(ReduxRoot.actions.fileExportAs(formats.prg))
+      dispatchExport(formats.prg)
       return
     case 'import-marq-c':
       store.dispatch(ReduxRoot.actions.fileImport(formats.c))

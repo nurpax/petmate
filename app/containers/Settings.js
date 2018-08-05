@@ -15,6 +15,7 @@ import {
 
 import styles from './Settings.css'
 
+const ModalTitle = ({children}) => <h2>{children}</h2>
 const Title3 = ({children}) => <h3>{children}</h3>
 const Title = ({children}) => <h4>{children}</h4>
 
@@ -118,7 +119,7 @@ class Settings_ extends Component {
           }}>
 
             <div>
-              <h2>Preferences</h2>
+              <ModalTitle>Preferences</ModalTitle>
 
               <ColorPaletteSelector
                 colorPalette={colorPalette}

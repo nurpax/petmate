@@ -75,14 +75,14 @@ const framebufFields = (framebuf) => {
   }
 }
 
-export const saveFramebuf = (filename, framebuf, palette) => {
+export const saveFramebuf = (filename, framebuf, palette, options) => {
   const ext = path.extname(filename)
   if (ext === '.png') {
-    return savePNG(filename, framebuf, palette)
+    return savePNG(filename, framebuf, palette, options)
   } else if (ext === '.c') {
-    return saveMarqC(filename, framebuf)
+    return saveMarqC(filename, framebuf, options)
   } else if (ext === '.prg') {
-    return saveExecutablePRG(filename, framebuf)
+    return saveExecutablePRG(filename, framebuf, options)
   } else {
     alert(`Unsupported export format ${ext}!`)
   }
@@ -235,7 +235,7 @@ export function dialogSaveAsWorkspace(dispatch, screens, getFramebufByIndex, set
   setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename)
 }
 
-export function dialogExportFile(type, framebuf, palette) {
+export function dialogExportFile(type, framebuf, palette, options) {
   const {dialog} = require('electron').remote
   const filters = [
     {name: type.name, extensions: [type.ext]}
@@ -244,7 +244,7 @@ export function dialogExportFile(type, framebuf, palette) {
   if (filename === undefined) {
     return
   }
-  saveFramebuf(filename, framebuf, palette)
+  saveFramebuf(filename, framebuf, palette, options)
 }
 
 export function dialogImportFile(type, importFile) {
