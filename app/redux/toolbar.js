@@ -80,6 +80,12 @@ export class Toolbar {
             dispatch(Toolbar.actions.nextColor(-1))
           } else if (key === 'e') {
             dispatch(Toolbar.actions.nextColor(+1))
+          } else if (key === 'x') {
+            dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
+          } else if (key === 'c') {
+            dispatch(Toolbar.actions.setSelectedTool(TOOL_COLORIZE))
+          } else if (key === 'b') {
+            dispatch(Toolbar.actions.setSelectedTool(TOOL_BRUSH))
           }
         }
 
