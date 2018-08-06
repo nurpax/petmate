@@ -6,7 +6,7 @@ const nativeImage = require('electron').nativeImage
 
 let fs = require('fs')
 
-export const savePNG = (filename, fb) => {
+export const savePNG = (filename, fb, palette) => {
   try {
     const { width, height, framebuf, backgroundColor } = fb
     const dwidth = width*8

@@ -75,7 +75,8 @@ export const actions = {
     return (dispatch, getState) => {
       const state = getState()
       const framebuf = selectors.getCurrentFramebuf(state)
-      dialogExportFile(type, framebuf)
+      const palette = selectors.getSettingsCurrentColorPalette(state)
+      dialogExportFile(type, framebuf, palette)
     }
   },
 
