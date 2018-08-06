@@ -39,6 +39,8 @@ This project is work-in-progress.  You can view [github issues](https://github.c
 - `q`, `e`: Select prev/next color.
 - `⌘1-4 / Ctrl+1-4`: Switch between palettes.  Use the Preferences pane to configure palettes.
 - `h`, `v`: Flip brush horizontally/vertically
+- `x`, `c`, `b`: Select tool (draw, colorize, brush)
+- `1`, `2`, `3`: Same as x, c, b.
 
 Open/Save/Save As: use platform shortcuts (e.g., Save is `Ctrl+S` on Windows, `⌘S` on Mac).
 
@@ -53,6 +55,10 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.2.3 (2018-08-07)
+- Add keyboard shortcuts for choosing the current tool ('x'-draw, 'c'-colorize, 'b'-select brush, the same are mapped to '1', '2' and '3' too.) ([#54](https://github.com/nurpax/petmate/issues/54))
+- Fix png export bug introduced in 0.2.2
 
 Petmate 0.2.2 (2018-08-06)
 
