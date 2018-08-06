@@ -80,11 +80,11 @@ export class Toolbar {
             dispatch(Toolbar.actions.nextColor(-1))
           } else if (key === 'e') {
             dispatch(Toolbar.actions.nextColor(+1))
-          } else if (key === 'x') {
+          } else if (key === 'x' || key == '1') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
-          } else if (key === 'c') {
+          } else if (key === 'c' || key == '2') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_COLORIZE))
-          } else if (key === 'b') {
+          } else if (key === 'b' || key == '3') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_BRUSH))
           }
         }
