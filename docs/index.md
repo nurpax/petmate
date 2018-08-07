@@ -58,7 +58,7 @@ The settings are saved in the following location:
 ## Release history
 
 Petmate 0.2.4 (2018-08-08)
-- Add "pick character and color under cursor" with alt-left-click
+- Add "pick character and color under cursor" with alt-left-click ([#8](https://github.com/nurpax/petmate/issues/8), [#54](https://github.com/nurpax/petmate/issues/54))
 
 Petmate 0.2.3 (2018-08-07)
 - Add keyboard shortcuts for choosing the current tool ('x'-draw, 'c'-colorize, 'b'-select brush, the same are mapped to '1', '2' and '3' too.) ([#54](https://github.com/nurpax/petmate/issues/54))
