@@ -233,6 +233,17 @@ class FramebufferView_ extends Component {
     this.props.Toolbar.incUndoId()
   }
 
+  altClick = (charPos) => {
+    const x = charPos.col
+    const y = charPos.row
+    if (y >= 0 && y < this.props.framebufHeight &&
+      x >= 0 && x < this.props.framebufWidth) {
+      const { code, color } = this.props.framebuf[y][x]
+      this.props.Toolbar.setTextColor(color)
+      this.props.Toolbar.setScreencode(code)
+    }
+  }
+
   render () {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
@@ -276,6 +287,10 @@ class FramebufferView_ extends Component {
         if (selectedTool === TOOL_COLORIZE) {
           screencodeHighlight = null
         }
+        // Don't show current char/color when the ALT color/char picker is active
+        if (this.props.altKey) {
+          highlightCharPos = false
+        }
       }
     }
     const scale = {
@@ -286,7 +301,7 @@ class FramebufferView_ extends Component {
     return (
       <div
         style={scale}
-        onPointerDown={(e) => this.props.onMouseDown(e, this.dragStart)}
+        onPointerDown={(e) => this.props.onMouseDown(e, this.dragStart, this.altClick)}
         onPointerMove={(e) => this.props.onMouseMove(e, this.dragMove)}
         onPointerUp={(e) => this.props.onMouseUp(e, this.dragEnd)}
       >
@@ -326,6 +341,7 @@ const FramebufferCont = connect(
       brush: state.toolbar.brush,
       brushRegion: state.toolbar.brushRegion,
       shiftKey: state.toolbar.shiftKey,
+      altKey: state.toolbar.altKey,
       colorPalette: selectors.getSettingsCurrentColorPalette(state)
     }
   },

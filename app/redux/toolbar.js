@@ -20,9 +20,10 @@ const settables = reduxSettables([
   settable('Toolbar', 'brushRegion', null),
   settable('Toolbar', 'brush', null),
   settable('Toolbar', 'workspaceFilename', null),
-  settable('Toolbar', 'shiftKey', false),
-  settable('Toolbar', 'metaKey', false),
+  settable('Toolbar', 'altKey', false),
   settable('Toolbar', 'ctrlKey', false),
+  settable('Toolbar', 'metaKey', false),
+  settable('Toolbar', 'shiftKey', false),
   settable('Toolbar', 'showSettings', false),
   settable('Toolbar', 'selectedPaletteRemap', 0),
 ])
@@ -95,6 +96,8 @@ export class Toolbar {
           dispatch(Toolbar.actions.setMetaKey(true))
         } else if (key === 'Control') {
           dispatch(Toolbar.actions.setCtrlKey(true))
+        } else if (key === 'Alt') {
+          dispatch(Toolbar.actions.setAltKey(true))
         }
 
         if (metaOrCtrl) {
@@ -125,6 +128,8 @@ export class Toolbar {
           dispatch(Toolbar.actions.setMetaKey(false))
         } else if (key === 'Control') {
           dispatch(Toolbar.actions.setCtrlKey(false))
+        } else if (key === 'Alt') {
+          dispatch(Toolbar.actions.setAltKey(false))
         }
       }
     },
@@ -180,6 +185,11 @@ export class Toolbar {
           dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
         }
       }
+    },
+
+    setScreencode: (code) => {
+      const charPos = utils.rowColFromScreencode(code)
+      return Toolbar.actions.setSelectedChar(charPos)
     },
 
     captureBrush: (framebuf, brushRegion) => {

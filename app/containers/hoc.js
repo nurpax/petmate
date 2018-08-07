@@ -1,6 +1,7 @@
 
 import React, { Component } from 'react';
 import ReactCursorPosition from 'react-cursor-position'
+import PropTypes from 'prop-types'
 
 export const withMouseCharPosition = (C, options) => {
   class ToCharRowCol extends Component {
@@ -29,6 +30,10 @@ export const withMouseCharPosition = (C, options) => {
 
 export const withMouseCharPositionShiftLockAxis = (C, options) => {
   class ToCharRowCol extends Component {
+    static propTypes = {
+      altKey: PropTypes.bool.isRequired,
+      shiftKey: PropTypes.bool.isRequired
+    }
     constructor (props) {
       super(props)
 
@@ -49,8 +54,15 @@ export const withMouseCharPositionShiftLockAxis = (C, options) => {
       }
     }
 
-    handleMouseDown = (e, dragStart) => {
+    handleMouseDown = (e, dragStart, altClick) => {
       const charPos = this.currentCharPos()
+      // alt-left click doesn't start dragging
+      if (this.props.altKey) {
+        this.dragging = false
+        altClick(charPos)
+        return
+      }
+
       this.dragging = true
       e.target.setPointerCapture(e.pointerId);
       this.prevCoord = charPos
@@ -69,41 +81,47 @@ export const withMouseCharPositionShiftLockAxis = (C, options) => {
       this.dragging = false
       this.lockStartCoord = null
       this.shiftLockAxis = null
-      dragEnd()
+
+      if (this.dragging) {
+        dragEnd()
+      }
     }
 
     handleMouseMove = (e, dragMove) => {
       const charPos = this.currentCharPos()
-      if (this.dragging) {
-        const coord = charPos
-        if (this.prevCoord.row !== coord.row ||
-            this.prevCoord.col !== coord.col) {
 
-          if (this.shiftLockAxis === 'shift') {
-            if (this.prevCoord.row === coord.row) {
-              this.shiftLockAxis = 'row'
-            } else if (this.prevCoord.col === coord.col) {
-              this.shiftLockAxis = 'col'
-            }
+      if (!this.dragging) {
+        return
+      }
+
+      const coord = charPos
+      if (this.prevCoord.row !== coord.row ||
+          this.prevCoord.col !== coord.col) {
+
+        if (this.shiftLockAxis === 'shift') {
+          if (this.prevCoord.row === coord.row) {
+            this.shiftLockAxis = 'row'
+          } else if (this.prevCoord.col === coord.col) {
+            this.shiftLockAxis = 'col'
           }
-
-          if (this.shiftLockAxis !== null) {
-            let lockedCharPos = {
-              ...this.lockStartCoord
-            }
-
-            if (this.shiftLockAxis === 'row') {
-              lockedCharPos.col = charPos.col
-            } else if (this.shiftLockAxis === 'col') {
-              lockedCharPos.row = charPos.row
-            }
-            this.lockedCharPos = lockedCharPos
-            dragMove(lockedCharPos)
-          } else {
-            dragMove(charPos)
-          }
-          this.prevCoord = charPos
         }
+
+        if (this.shiftLockAxis !== null) {
+          let lockedCharPos = {
+            ...this.lockStartCoord
+          }
+
+          if (this.shiftLockAxis === 'row') {
+            lockedCharPos.col = charPos.col
+          } else if (this.shiftLockAxis === 'col') {
+            lockedCharPos.row = charPos.row
+          }
+          this.lockedCharPos = lockedCharPos
+          dragMove(lockedCharPos)
+        } else {
+          dragMove(charPos)
+        }
+        this.prevCoord = charPos
       }
     }
 

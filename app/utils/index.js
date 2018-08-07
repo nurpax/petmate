@@ -50,6 +50,19 @@ export const charScreencodeFromRowCol = ({row, col}) => {
   return charOrder[idx]
 }
 
+export const rowColFromScreencode = (code) => {
+  for (let i = 0; i < charOrder.length; i++) {
+    if (charOrder[i] === code) {
+      return {
+        row: Math.floor(i >> 4),
+        col: Math.floor(i & 15)
+      }
+    }
+  }
+  console.error('impossible')
+  return null
+}
+
 const FILE_VERSION = 1
 
 const framebufFields = (framebuf) => {

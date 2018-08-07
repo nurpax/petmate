@@ -41,6 +41,7 @@ This project is work-in-progress.  You can view [github issues](https://github.c
 - `h`, `v`: Flip brush horizontally/vertically
 - `x`, `c`, `b`: Select tool (draw, colorize, brush)
 - `1`, `2`, `3`: Same as x, c, b.
+- `Alt-leftclick`: Select character and color under cursor.
 
 Open/Save/Save As: use platform shortcuts (e.g., Save is `Ctrl+S` on Windows, `⌘S` on Mac).
 
