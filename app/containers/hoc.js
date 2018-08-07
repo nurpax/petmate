@@ -78,13 +78,13 @@ export const withMouseCharPositionShiftLockAxis = (C, options) => {
     }
 
     handleMouseUp = (e, dragEnd) => {
-      this.dragging = false
-      this.lockStartCoord = null
-      this.shiftLockAxis = null
-
       if (this.dragging) {
         dragEnd()
       }
+
+      this.dragging = false
+      this.lockStartCoord = null
+      this.shiftLockAxis = null
     }
 
     handleMouseMove = (e, dragMove) => {
