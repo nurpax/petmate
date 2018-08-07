@@ -7,7 +7,8 @@ import {
 import {
   savePNG,
   saveMarqC,
-  saveExecutablePRG
+  saveExecutablePRG,
+  saveAsm
 } from './exporters'
 import {
   drawLine
@@ -87,6 +88,8 @@ export const saveFramebufs = (filename, framebufs, palette, options) => {
     return savePNG(filename, selectedFramebuf, palette, options)
   } else if (ext === '.c') {
     return saveMarqC(filename, framebufs, options)
+  } else if (ext === '.asm') {
+    return saveAsm(filename, framebufs, options)
   } else if (ext === '.prg') {
     return saveExecutablePRG(filename, selectedFramebuf, options)
   } else {
