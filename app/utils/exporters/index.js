@@ -60,29 +60,34 @@ function bytesToCommaDelimited(dstLines, bytes, bytesPerLine) {
   }
 }
 
-export const saveMarqC = (filename, fb, options) => {
+function convertToMarqC(lines, fb, idx) {
+  const { width, height, framebuf, backgroundColor, borderColor } = fb
+
+  // TODO support multiple screens
+  const num = String(idx).padStart(4, '0')
+  lines.push(`unsigned char frame${num}[]={// border,bg,chars,colors`)
+
+  let bytes = []
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      bytes.push(framebuf[y][x].code)
+    }
+  }
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      bytes.push(framebuf[y][x].color)
+    }
+  }
+  lines.push(`${borderColor},${backgroundColor},`)
+  bytesToCommaDelimited(lines, bytes, width)
+  lines.push('};')
+  lines.push(`// META: ${width} ${height} C64 upper`)
+}
+
+export const saveMarqC = (filename, fbs, options) => {
   try {
-    const { width, height, framebuf, backgroundColor, borderColor } = fb
-
     let lines = []
-    // TODO support multiple screens
-    lines.push(`unsigned char frame0000[]={// border,bg,chars,colors`)
-
-    let bytes = []
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        bytes.push(framebuf[y][x].code)
-      }
-    }
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        bytes.push(framebuf[y][x].color)
-      }
-    }
-    lines.push(`${borderColor},${backgroundColor},`)
-    bytesToCommaDelimited(lines, bytes, width)
-    lines.push('};')
-    lines.push(`// META: ${width} ${height} C64 upper`)
+    fbs.forEach((fb,idx) => convertToMarqC(lines, fb, idx))
     fs.writeFileSync(filename, lines.join('\n') + '\n', null)
   }
   catch(e) {
