@@ -1,7 +1,7 @@
 {
   "name": "petmate",
   "productName": "petmate",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "C64 PETSCII Editor",
   "main": "./main.prod.js",
   "author": {

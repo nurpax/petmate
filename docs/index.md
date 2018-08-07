@@ -12,8 +12,8 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.2.0.dmg'>Petmate-0.2.0.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.2.0.exe'>Petmate Setup 0.2.0.exe</a>
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.2.4.dmg'>Petmate-0.2.4.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.2.4.exe'>Petmate Setup 0.2.4.exe</a>
 * Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.2.0_amd64.deb'>petmate_0.2.0_amd64.deb</a> (untested!)
 
 ## Features
@@ -56,6 +56,9 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.2.4 (2018-08-08)
+- Add "pick character and color under cursor" with alt-left-click
 
 Petmate 0.2.3 (2018-08-07)
 - Add keyboard shortcuts for choosing the current tool ('x'-draw, 'c'-colorize, 'b'-select brush, the same are mapped to '1', '2' and '3' too.) ([#54](https://github.com/nurpax/petmate/issues/54))
