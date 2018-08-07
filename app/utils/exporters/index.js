@@ -81,13 +81,19 @@ function convertToMarqC(lines, fb, idx) {
   lines.push(`${borderColor},${backgroundColor},`)
   bytesToCommaDelimited(lines, bytes, width)
   lines.push('};')
-  lines.push(`// META: ${width} ${height} C64 upper`)
 }
 
 export const saveMarqC = (filename, fbs, options) => {
   try {
     let lines = []
     fbs.forEach((fb,idx) => convertToMarqC(lines, fb, idx))
+    let width = 0
+    let height = 0
+    if (fbs.length >= 1) {
+      width = fbs[0].width
+      height = fbs[0].height
+    }
+    lines.push(`// META: ${width} ${height} C64 upper`)
     fs.writeFileSync(filename, lines.join('\n') + '\n', null)
   }
   catch(e) {
