@@ -47,6 +47,12 @@ class ASMExportForm extends Component {
   handleChangeAssembler = (e) => {
     this.props.setFormState('asm', { assembler: e.target.value })
   }
+  handleCurrentScreenOnly = (e) => {
+    this.props.setFormState('asm', { currentScreenOnly: e.target.checked })
+  }
+  handleStandalone = (e) => {
+    this.props.setFormState('asm', { standalone: e.target.checked })
+  }
   render () {
     return (
       <Fragment>
@@ -64,6 +70,17 @@ class ASMExportForm extends Component {
           value='acme'
           onChange={this.handleChangeAssembler}
           checked={this.props.asm.assembler === 'acme'}
+        />
+        <br/>
+        <Checkbox
+          onChange={this.handleCurrentScreenOnly}
+          checked={this.props.asm.currentScreenOnly}
+          label='Current screen only'
+        />
+        <Checkbox
+          onChange={this.handleStandalone}
+          checked={this.props.asm.standalone}
+          label='Make output compilable to a .prg'
         />
       </Fragment>
     )
@@ -108,7 +125,9 @@ class ExportModal_ extends Component {
       doublePixels: false
     },
     asm: {
-      assembler: 'kickass'
+      assembler: 'kickass',
+      currentScreenOnly: true,
+      standalone: false
     },
   }
 

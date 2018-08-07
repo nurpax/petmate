@@ -2,11 +2,13 @@
 import { systemFontData } from '../../utils'
 import { chunkArray, executablePrgTemplate } from '../../utils'
 
+import { saveAsm } from './asm'
+
 const nativeImage = require('electron').nativeImage
 
 let fs = require('fs')
 
-export const savePNG = (filename, fb, palette, options) => {
+const savePNG = (filename, fb, palette, options) => {
   try {
     const { width, height, framebuf, backgroundColor } = fb
     const dwidth = width*8
@@ -83,7 +85,7 @@ function convertToMarqC(lines, fb, idx) {
   lines.push('};')
 }
 
-export const saveMarqC = (filename, fbs, options) => {
+const saveMarqC = (filename, fbs, options) => {
   try {
     let lines = []
     fbs.forEach((fb,idx) => convertToMarqC(lines, fb, idx))
@@ -102,7 +104,7 @@ export const saveMarqC = (filename, fbs, options) => {
   }
 }
 
-export const saveExecutablePRG = (filename, fb, options) => {
+const saveExecutablePRG = (filename, fb, options) => {
   try {
     const { width, height, framebuf, backgroundColor, borderColor } = fb
 
@@ -135,3 +137,11 @@ export const saveExecutablePRG = (filename, fb, options) => {
     console.error(e)
   }
 }
+
+export {
+  savePNG,
+  saveMarqC,
+  saveExecutablePRG,
+  saveAsm
+}
+
