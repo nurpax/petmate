@@ -61,6 +61,26 @@ class ASMExportForm extends Component {
   }
 }
 
+class BASICExportForm extends Component {
+  render () {
+    return (
+      <Form state={this.props.state} setField={this.props.setField}>
+        <Title>Assembler export options</Title>
+        <br/>
+        <br/>
+        <Checkbox
+          name='currentScreenOnly'
+          label='Current screen only'
+        />
+        <Checkbox
+          name='standalone'
+          label='Add BASIC code to display the image'
+        />
+      </Form>
+    )
+  }
+}
+
 class ExportForm extends Component {
   render () {
     if (this.props.ext === null) {
@@ -79,6 +99,10 @@ class ExportForm extends Component {
         return (
           <ASMExportForm {...connectFormState(this.props, 'asm')} />
         )
+      case 'bas':
+        return (
+          <BASICExportForm {...connectFormState(this.props, 'bas')} />
+        )
       default:
         console.error('unknown export format', this.props.ext)
     }
@@ -96,6 +120,10 @@ class ExportModal_ extends Component {
       currentScreenOnly: true,
       standalone: false
     },
+    bas: {
+      currentScreenOnly: true,
+      standalone: false
+    }
   }
 
   handleOK = () => {

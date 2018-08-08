@@ -8,7 +8,8 @@ import {
   savePNG,
   saveMarqC,
   saveExecutablePRG,
-  saveAsm
+  saveAsm,
+  saveBASIC
 } from './exporters'
 import {
   drawLine
@@ -37,6 +38,10 @@ export const formats = {
   asm: {
     name: 'Assembler source .asm',
     ext: 'asm'
+  },
+  basic: {
+    name: 'BASIC listing .bas',
+    ext: 'bas'
   }
 }
 
@@ -92,6 +97,8 @@ export const saveFramebufs = (filename, framebufs, palette, options) => {
     return saveAsm(filename, framebufs, options)
   } else if (ext === '.prg') {
     return saveExecutablePRG(filename, selectedFramebuf, options)
+  } else if (ext === '.bas') {
+    return saveBASIC(filename, framebufs, options)
   } else {
     alert(`Unsupported export format ${ext}!`)
   }

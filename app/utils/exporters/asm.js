@@ -75,7 +75,6 @@ function bytesToCommaDelimited(dstLines, bytes, bytesPerLine) {
 function convertToKickass(lines, fb, idx) {
   const { width, height, framebuf, backgroundColor, borderColor } = fb
 
-  // TODO support multiple screens
   const num = String(idx).padStart(4, '0')
   lines.push(`frame${num}:`)
 

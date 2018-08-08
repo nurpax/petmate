@@ -3,6 +3,7 @@ import { systemFontData } from '../../utils'
 import { chunkArray, executablePrgTemplate } from '../../utils'
 
 import { saveAsm } from './asm'
+import { saveBASIC } from './basic'
 
 const nativeImage = require('electron').nativeImage
 
@@ -142,6 +143,7 @@ export {
   savePNG,
   saveMarqC,
   saveExecutablePRG,
-  saveAsm
+  saveAsm,
+  saveBASIC
 }
 

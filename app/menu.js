@@ -9,7 +9,8 @@ const exporters = [
   { label: 'PNG (.png)', cmd: 'export-png' },
   { label: 'PETSCII (.c)', cmd: 'export-marq-c' },
   { label: 'Executable (.prg)', cmd: 'export-prg' },
-  { label: 'Assembler source (.asm)', cmd: 'export-asm' }
+  { label: 'Assembler source (.asm)', cmd: 'export-asm' },
+  { label: 'BASIC (.bas)', cmd: 'export-basic' }
 ]
 
 export default class MenuBuilder {
