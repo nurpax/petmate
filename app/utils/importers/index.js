@@ -61,45 +61,48 @@ export const loadMarqCFramebuf = (filename, importFile) => {
     const content = fs.readFileSync(filename, 'utf-8')
     const lines = content.split('\n')
 
-    let mode = undefined
-    let frame = undefined
+    let frames = []
     let bytes = []
     for (let li = 0; li < lines.length; li++) {
       let line = lines[li]
-      let m;
-      if (m = /unsigned char (.*)\[\].*/.exec(line)) {
-        frame = m[1]
-        mode = 'bytes'
+      if (/unsigned char (.*)\[\].*/.exec(line)) {
         continue
       }
-      if (m = /};.*/.exec(line)) {
+      if (/};.*/.exec(line)) {
+        frames.push(bytes)
+        bytes = []
+        continue
+      }
+      if (/\/\/ META:/.exec(line)) {
         break
       }
-      if (mode === 'bytes') {
-        let str = line.trim()
-        if (str[str.length-1] == ',') {
-          str = str.substring(0, str.length - 1);
-        }
-        let arr = JSON.parse(`[${str}]`)
-        arr.forEach((byte) => {
-          bytes.push(byte)
-        })
+
+      let str = line.trim()
+      if (str[str.length-1] == ',') {
+        str = str.substring(0, str.length - 1);
       }
+      let arr = JSON.parse(`[${str}]`)
+      arr.forEach((byte) => {
+        bytes.push(byte)
+      })
     }
 
     // TODO support parsing the META tag after the array for machine make,
     // width, height
-    const charcodes = bytes.slice(2, 1002)
-    const colors = bytes.slice(1002, 2002)
-    const codes = screencodeColorMap(charcodes, colors)
-    importFile({
-      width: 40,
-      height: 25,
-      backgroundColor: bytes[1],
-      borderColor: bytes[0],
-      framebuf: chunkArray(codes, 40)
+    const framebufs = frames.map(frame => {
+      const bytes = frame
+      const charcodes = bytes.slice(2, 1002)
+      const colors = bytes.slice(1002, 2002)
+      const codes = screencodeColorMap(charcodes, colors)
+      return {
+        width: 40,
+        height: 25,
+        backgroundColor: bytes[1],
+        borderColor: bytes[0],
+        framebuf: chunkArray(codes, 40)
+      }
     })
-
+    importFile(framebufs)
   } catch(e) {
     alert(`Failed to load file '${filename}'!`)
     console.error(e)

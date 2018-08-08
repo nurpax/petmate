@@ -2,13 +2,14 @@
 import * as Screens from '../redux/screens'
 import { Framebuffer } from '../redux/editor'
 import * as Root from '../redux/root'
+import * as selectors from '../redux/selectors'
 import { ActionCreators } from 'redux-undo';
 
 export function load(dispatch, workspace) {
   dispatch(Root.actions.resetState())
 
   const { screens, framebufs } = workspace
-  workspace.screens.forEach((fbIdx, screenIdx) => {
+  screens.forEach((fbIdx, screenIdx) => {
     if (fbIdx !== screenIdx) {
       console.warn('fbidx should be screenIdx, this should be ensured by workspace save code')
     }
@@ -20,4 +21,29 @@ export function load(dispatch, workspace) {
     })
   })
   dispatch(Screens.actions.setCurrentScreenIndex(0))
+}
+
+
+export function importFramebufs(dispatch, framebufs, append) {
+  if (!append) {
+    console.error('FAIL! unsupported')
+  }
+  let firstNewScreenIdx = null
+  framebufs.forEach((framebuf, sourceFbIdx) => {
+    dispatch(Screens.actions.newScreen())
+    dispatch((dispatch, getState) => {
+      const state = getState()
+      const newScreenIdx = selectors.getCurrentScreenIndex(state)
+      if (firstNewScreenIdx === null) {
+        firstNewScreenIdx = newScreenIdx
+      }
+      const newFramebufIdx = selectors.getScreens(state)[newScreenIdx]
+      dispatch(Framebuffer.actions.importFile(framebufs[sourceFbIdx], newFramebufIdx))
+      dispatch({
+        ...ActionCreators.clearHistory(),
+        framebufIndex: newFramebufIdx
+      })
+    })
+  })
+  dispatch(Screens.actions.setCurrentScreenIndex(firstNewScreenIdx))
 }

@@ -74,7 +74,7 @@ require('electron').ipcRenderer.on('menu', (event, message) => {
       dispatchExport(formats.prg)
       return
     case 'import-marq-c':
-      store.dispatch(ReduxRoot.actions.fileImport(formats.c))
+      store.dispatch(ReduxRoot.actions.fileImportAppend(formats.c))
       return
     case 'preferences':
       store.dispatch(Toolbar.actions.setShowSettings(true))

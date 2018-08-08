@@ -280,7 +280,6 @@ export function dialogImportFile(type, importFile) {
 }
 
 export function loadSettings(dispatchSettingsLoad) {
-  // TODO move to some utils file (or settings?)
   const electron = require('electron')
   const path = require('path')
   let settingsFile = path.join(electron.remote.app.getPath('userData'), 'Settings')
@@ -293,4 +292,6 @@ export function loadSettings(dispatchSettingsLoad) {
   }
 }
 
-export { drawLine, colorPalettes }
+const importFramebufs = workspace.importFramebufs
+
+export { drawLine, colorPalettes, importFramebufs }
