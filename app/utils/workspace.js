@@ -5,6 +5,7 @@ import * as Root from '../redux/root'
 import * as selectors from '../redux/selectors'
 import { ActionCreators } from 'redux-undo';
 
+// TODO this should in fact be a thunk action creator and reside under redux
 export function load(dispatch, workspace) {
   dispatch(Root.actions.resetState())
 
@@ -23,7 +24,7 @@ export function load(dispatch, workspace) {
   dispatch(Screens.actions.setCurrentScreenIndex(0))
 }
 
-
+// TODO this should in fact be a thunk action creator and reside under redux
 export function importFramebufs(dispatch, framebufs, append) {
   if (!append) {
     console.error('FAIL! unsupported')
