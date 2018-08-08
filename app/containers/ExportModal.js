@@ -1,8 +1,9 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment } from 'react'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
 import Modal from '../components/Modal'
-import { Checkbox, RadioButton } from '../components/formHelpers'
+import { connectFormState, Form, Checkbox, RadioButton } from '../components/formHelpers'
 
 import { Toolbar } from '../redux/toolbar'
 import { Settings } from '../redux/settings'
@@ -16,79 +17,49 @@ const Title3 = ({children}) => <h3>{children}</h3>
 const Title = ({children}) => <h4>{children}</h4>
 
 class PNGExportForm extends Component {
-  handleChangeAlpha = (e) => {
-    this.props.setFormState('png', { alphaPixel: e.target.checked })
-  }
-  handleDoubleSize = (e) => {
-    this.props.setFormState('png', { doublePixels: e.target.checked })
-  }
   render () {
     return (
-      <Fragment>
+      <Form state={this.props.state} setField={this.props.setField}>
         <Title>PNG export options</Title>
         <br/>
         <br/>
-        <Checkbox
-          onChange={this.handleChangeAlpha}
-          checked={this.props.png.alphaPixel}
-          label='Alpha pixel work-around for Twitter'
-        />
-        <Checkbox
-          onChange={this.handleDoubleSize}
-          checked={this.props.png.doublePixels}
-          label='Double pixels'
-        />
-      </Fragment>
+        <Checkbox name='alphaPixel' label='Alpha pixel work-around for Twitter' />
+        <Checkbox name='doublePixels' label='Double pixels' />
+      </Form>
     )
   }
 }
 
 class ASMExportForm extends Component {
-  handleChangeAssembler = (e) => {
-    this.props.setFormState('asm', { assembler: e.target.value })
-  }
-  handleCurrentScreenOnly = (e) => {
-    this.props.setFormState('asm', { currentScreenOnly: e.target.checked })
-  }
-  handleStandalone = (e) => {
-    this.props.setFormState('asm', { standalone: e.target.checked })
-  }
   render () {
     return (
-      <Fragment>
+      <Form state={this.props.state} setField={this.props.setField}>
         <Title>Assembler export options</Title>
         <br/>
         <br/>
         <RadioButton
-          label='KickAssembler'
+          name='assembler'
           value='kickass'
-          onChange={this.handleChangeAssembler}
-          checked={this.props.asm.assembler === 'kickass'}
+          label='KickAssembler'
         />
         <RadioButton
-          label='ACME'
+          name='assembler'
           value='acme'
-          onChange={this.handleChangeAssembler}
-          checked={this.props.asm.assembler === 'acme'}
+          label='ACME'
         />
         <br/>
         <Checkbox
-          onChange={this.handleCurrentScreenOnly}
-          checked={this.props.asm.currentScreenOnly}
+          name='currentScreenOnly'
           label='Current screen only'
         />
         <Checkbox
-          onChange={this.handleStandalone}
-          checked={this.props.asm.standalone}
+          name='standalone'
           label='Make output compilable to a .prg'
         />
-      </Fragment>
+      </Form>
     )
   }
 }
-
-/*
-*/
 
 class ExportForm extends Component {
   render () {
@@ -102,18 +73,14 @@ class ExportForm extends Component {
         return null
       case 'png':
         return (
-          <PNGExportForm
-            setFormState={this.props.setFormState}
-            png={this.props.formatState.png}
-          />
+          <PNGExportForm {...connectFormState(this.props, 'png')} />
         )
       case 'asm':
         return (
-          <ASMExportForm
-            setFormState={this.props.setFormState}
-            asm={this.props.formatState.asm}
-          />
+          <ASMExportForm {...connectFormState(this.props, 'asm')} />
         )
+      default:
+        console.error('unknown export format', this.props.ext)
     }
   }
 }
@@ -131,17 +98,6 @@ class ExportModal_ extends Component {
     },
   }
 
-  handleSetFormState = (subtree, values) => {
-    this.setState(state => {
-      return {
-        [subtree]: {
-          ...state[subtree],
-          ...values
-        }
-      }
-    })
-  }
-
   handleOK = () => {
     const { showExport } = this.props
     this.props.Toolbar.setShowExport({show:false})
@@ -151,6 +107,12 @@ class ExportModal_ extends Component {
 
   handleCancel = () => {
     this.props.Toolbar.setShowExport({show:false})
+  }
+
+  handleSetState = (cb) => {
+    this.setState(prevState => {
+      return cb(prevState)
+    })
   }
 
   render () {
@@ -170,8 +132,8 @@ class ExportModal_ extends Component {
               <ModalTitle>Export Options</ModalTitle>
               <ExportForm
                 ext={exportExt}
-                formatState={this.state}
-                setFormState={this.handleSetFormState}
+                state={this.state}
+                setState={this.handleSetState}
               />
             </div>
 
