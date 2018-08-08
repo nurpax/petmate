@@ -152,18 +152,12 @@ class ExportModal_ extends Component {
 export default connect(
   (state) => {
     return {
-      showExport: state.toolbar.showExport,
-      palette0: selectors.getSettingsEditing(state).palettes[1],
-      palette1: selectors.getSettingsEditing(state).palettes[2],
-      palette2: selectors.getSettingsEditing(state).palettes[3],
-      colorPalette: selectors.getSettingsEditingCurrentColorPalette(state),
-      selectedColorPaletteName: selectors.getSettingsEditing(state).selectedColorPalette
+      showExport: state.toolbar.showExport
     }
   },
   (dispatch) => {
     return {
       Toolbar: Toolbar.bindDispatch(dispatch),
-      Settings: Settings.bindDispatch(dispatch),
       fileExportAs: (fmt, options) => dispatch(ReduxRoot.actions.fileExportAs(fmt, options))
     }
   }
