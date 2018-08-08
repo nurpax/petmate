@@ -238,9 +238,8 @@ class FramebufferView_ extends Component {
     const y = charPos.row
     if (y >= 0 && y < this.props.framebufHeight &&
       x >= 0 && x < this.props.framebufWidth) {
-      const { code, color } = this.props.framebuf[y][x]
-      this.props.Toolbar.setTextColor(color)
-      this.props.Toolbar.setScreencode(code)
+      const pix = this.props.framebuf[y][x]
+      this.props.Toolbar.setCurrentScreencodeAndColor(pix)
     }
   }
 

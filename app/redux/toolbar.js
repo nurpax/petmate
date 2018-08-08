@@ -171,6 +171,11 @@ export class Toolbar {
       }
     },
 
+    setScreencode: (code) => {
+      const charPos = utils.rowColFromScreencode(code)
+      return Toolbar.actions.setSelectedChar(charPos)
+    },
+
     setCurrentColor: (color) => {
       return (dispatch, getState) => {
         const state = getState()
@@ -185,15 +190,22 @@ export class Toolbar {
       return (dispatch, getState) => {
         const state = getState()
         dispatch(Toolbar.actions.setSelectedChar(charPos))
-        if (state.toolbar.selectedTool === TOOL_BRUSH) {
+        if (state.toolbar.selectedTool === TOOL_BRUSH ||
+          state.toolbar.selectedTool === TOOL_COLORIZE) {
           dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
         }
       }
     },
 
-    setScreencode: (code) => {
-      const charPos = utils.rowColFromScreencode(code)
-      return Toolbar.actions.setSelectedChar(charPos)
+    setCurrentScreencodeAndColor: (pix) => {
+      return (dispatch, getState) => {
+        const state = getState()
+        dispatch(Toolbar.actions.setTextColor(pix.color))
+        dispatch(Toolbar.actions.setScreencode(pix.code))
+        if (state.toolbar.selectedTool === TOOL_BRUSH) {
+          dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
+        }
+      }
     },
 
     captureBrush: (framebuf, brushRegion) => {
