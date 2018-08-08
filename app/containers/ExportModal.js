@@ -138,8 +138,8 @@ class ExportModal_ extends Component {
             </div>
 
             <div style={{alignSelf: 'flex-end'}}>
-              <button className='primary' onClick={this.handleOK}>Export</button>
               <button className='cancel' onClick={this.handleCancel}>Cancel</button>
+              <button className='primary' onClick={this.handleOK}>Export</button>
             </div>
           </div>
 

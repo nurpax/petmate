@@ -152,8 +152,8 @@ class Settings_ extends Component {
             </div>
 
             <div style={{alignSelf: 'flex-end'}}>
-              <button className='primary' onClick={this.handleOK}>OK</button>
               <button className='cancel' onClick={this.handleCancel}>Cancel</button>
+              <button className='primary' onClick={this.handleOK}>OK</button>
             </div>
           </div>
 
