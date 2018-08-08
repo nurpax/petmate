@@ -12,9 +12,9 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.2.4.dmg'>Petmate-0.2.4.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.2.4.exe'>Petmate Setup 0.2.4.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.2.0_amd64.deb'>petmate_0.2.0_amd64.deb</a> (untested!)
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.2.5.dmg'>Petmate-0.2.5.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.2.5.exe'>Petmate Setup 0.2.5.exe</a>
+* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.2.5_amd64.deb'>petmate_0.2.5_amd64.deb</a> (untested but reported to work!)
 
 ## Features
 
@@ -56,6 +56,15 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.2.5 (2018-08-09)
+- New export options for PNG ([#55](https://github.com/nurpax/petmate/issues/55))
+  - Double width & height for PNG export
+  - Add transparent pixel to prevent Twitter from transcoding a PNG to JPEG
+- Add support for exporting to assembly listing (KickAssembler only in this version) ([#13](https://github.com/nurpax/petmate/issues/13))
+- Import all screens from a .c PETSCII file (not just the first one) ([#15](https://github.com/nurpax/petmate/issues/15))
+- Work-in-progress BASIC listing export ([#14](https://github.com/nurpax/petmate/issues/14))
+- Alt-leftclick will select the draw mode if used when the brush mode is active.  Similarly, switch to draw mode from brush or colorize modes when the user selects a new screencode from the character select pane.
 
 Petmate 0.2.4 (2018-08-08)
 - Add "pick character and color under cursor" with alt-left-click ([#8](https://github.com/nurpax/petmate/issues/8), [#54](https://github.com/nurpax/petmate/issues/54))
