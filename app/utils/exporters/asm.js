@@ -3,7 +3,7 @@ import { chunkArray } from '../../utils'
 
 let fs = require('fs')
 
-const initCode = ({
+const initCodeKickAss = ({
   borderColor,
   backgroundColor
 }) => `
@@ -29,14 +29,14 @@ start: {
 loop:
     .for(var i=0; i<3; i++) {
         lda frame0000+2+i*$100,x
-        sta $0400+[i*$100],x
+        sta $0400+i*$100,x
         lda frame0000+2+25*40+i*$100,x
-        sta $d800+[i*$100],x
+        sta $d800+i*$100,x
     }
-    lda frame0000+2+[$2e8],x
-    sta $0400+[$2e8],x
-    lda frame0000+2+25*40+[$2e8],x
-    sta $d800+[$2e8],x
+    lda frame0000+2+$2e8,x
+    sta $0400+$2e8,x
+    lda frame0000+2+25*40+$2e8,x
+    sta $d800+$2e8,x
     inx
     bne loop
 
@@ -64,19 +64,81 @@ wait_first_line:
 }
 `
 
-function bytesToCommaDelimited(dstLines, bytes, bytesPerLine) {
+const c64tassStartSequence = `
+*   = $0801
+    .word (+), 2005
+    .null $9e, format("%d", start)
++ .word 0
+
+*   = $1000
+`
+
+const ACMEStartSequence = `
+* = $0801                             ; BASIC start address (#2049)
+!byte $0d,$08,$dc,$07,$9e,$20,$34,$39 ; BASIC loader to start at $c000...
+!byte $31,$35,$32,$00,$00,$00         ; puts BASIC line 2012 SYS 49152
+* = $c000                             ; start address for 6502 code
+`
+
+const initCode64tassOrACME = startSequence => ({
+  borderColor,
+  backgroundColor
+}) => `
+${startSequence}
+start
+    lda #${borderColor}
+    sta $d020
+    lda #${backgroundColor}
+    sta $d021
+
+    ldx #$00
+loop
+    lda frame0000+2+0*$100,x
+    sta $0400+0*$100,x
+    lda frame0000+2+25*40+0*$100,x
+    sta $d800+0*$100,x
+
+    lda frame0000+2+1*$100,x
+    sta $0400+1*$100,x
+    lda frame0000+2+25*40+1*$100,x
+    sta $d800+1*$100,x
+
+    lda frame0000+2+2*$100,x
+    sta $0400+2*$100,x
+    lda frame0000+2+25*40+2*$100,x
+    sta $d800+2*$100,x
+
+    lda frame0000+2+$2e8,x
+    sta $0400+$2e8,x
+    lda frame0000+2+25*40+$2e8,x
+    sta $d800+$2e8,x
+    inx
+    bne loop
+
+infloop
+wait_first_line
+    ldx $d012
+    lda $d011
+    and #$80
+    bne wait_first_line
+    cpx #0
+    bne wait_first_line
+    jmp infloop
+`
+
+function bytesToCommaDelimited(dstLines, bytes, bytesPerLine, byte) {
   let lines = chunkArray(bytes, bytesPerLine)
   for (let i = 0; i < lines.length; i++) {
-    const s = `.byte ${lines[i].join(',')}`
+    const s = `${byte} ${lines[i].join(',')}`
     dstLines.push(s)
   }
 }
 
-function convertToKickass(lines, fb, idx) {
+function convertToAsm(lines, fb, idx, {mkLabel, byte}) {
   const { width, height, framebuf, backgroundColor, borderColor } = fb
 
   const num = String(idx).padStart(4, '0')
-  lines.push(`frame${num}:`)
+  lines.push(mkLabel(`frame${num}`))
 
   let bytes = []
   for (let y = 0; y < height; y++) {
@@ -89,18 +151,44 @@ function convertToKickass(lines, fb, idx) {
       bytes.push(framebuf[y][x].color)
     }
   }
-  lines.push(`.byte ${borderColor},${backgroundColor}`)
-  bytesToCommaDelimited(lines, bytes, width)
+  lines.push(`${byte} ${borderColor},${backgroundColor}`)
+  bytesToCommaDelimited(lines, bytes, width, byte)
 }
 
-const saveKickass = (filename, fbs, options) => {
+const saveAsm = (filename, fbs, options) => {
+  let mkInitCode = null
+  let syntaxParams = null
+  if (options.assembler === 'kickass') {
+    mkInitCode = initCodeKickAss
+    syntaxParams = {
+      mkLabel: lbl => `${lbl}:`,
+      byte: '.byte'
+    }
+  } else if (options.assembler === 'c64tass') {
+    mkInitCode = initCode64tassOrACME(c64tassStartSequence)
+    syntaxParams = {
+      mkLabel: lbl => lbl,
+      byte: '.byte'
+    }
+  } else if (options.assembler === 'acme') {
+    mkInitCode = initCode64tassOrACME(ACMEStartSequence)
+    syntaxParams = {
+      mkLabel: lbl => lbl,
+      byte: '!byte'
+    }
+  }
+
+  if (mkInitCode === null) {
+    alert(`asm output format ${options.assembler} is currently unsupported`)
+  }
+
   try {
     let lines = []
     // Single screen export?
     if (options.currentScreenOnly) {
-      convertToKickass(lines, fbs[options.selectedFramebufIndex], 0)
+      convertToAsm(lines, fbs[options.selectedFramebufIndex], 0, syntaxParams)
     } else {
-      fbs.forEach((fb,idx) => convertToKickass(lines, fb, idx))
+      fbs.forEach((fb,idx) => convertToAsm(lines, fb, idx, syntaxParams))
     }
     let backgroundColor
     let borderColor
@@ -112,7 +200,7 @@ const saveKickass = (filename, fbs, options) => {
       backgroundColor,
       borderColor
     }
-    const init = options.standalone ? initCode(initCodeOptions) : ''
+    const init = options.standalone ? mkInitCode(initCodeOptions) : ''
     fs.writeFileSync(
       filename,
       init + '\n' + lines.join('\n') + '\n', null
@@ -121,14 +209,6 @@ const saveKickass = (filename, fbs, options) => {
   catch(e) {
     alert(`Failed to save file '${filename}'!`)
     console.error(e)
-  }
-}
-
-const saveAsm = (filename, fbs, options) => {
-  if (options.assembler === 'kickass') {
-    saveKickass(filename, fbs, options)
-  } else {
-    alert(`asm output format ${options.asm.assembler} is currently unsupported`)
   }
 }
 

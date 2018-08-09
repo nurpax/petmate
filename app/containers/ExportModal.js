@@ -47,6 +47,11 @@ class ASMExportForm extends Component {
           value='acme'
           label='ACME'
         />
+        <RadioButton
+          name='assembler'
+          value='c64tass'
+          label='64tass'
+        />
         <br/>
         <Checkbox
           name='currentScreenOnly'
