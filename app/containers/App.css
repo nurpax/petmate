@@ -14,6 +14,7 @@
 .topmenu {
   composes: topPadding;
   grid-area: topmenu;
+  overflow-x: auto;
 }
 
 .leftmenubar {

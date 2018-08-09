@@ -21,7 +21,6 @@ class FramebufTab extends Component {
   handleSelect = () => {
     this.props.onSetActiveTab(this.props.id)
   }
-
   handleMenuDuplicate = () => {
     this.props.onDuplicateTab(this.props.id)
   }
@@ -93,18 +92,23 @@ class FramebufferTabs_ extends Component {
 
   handleNewTab = () => {
     this.props.Screens.newScreen()
+    // Context menu eats the ctrl key up event, so force it to false
+    this.props.Toolbar.setCtrlKey(false)
   }
 
   handleRemoveTab = (idx) => {
     this.props.Screens.removeScreen(idx)
+    // Context menu eats the ctrl key up event, so force it to false
+    this.props.Toolbar.setCtrlKey(false)
   }
 
   handleDuplicateTab = (idx) => {
     this.props.Screens.cloneScreen(idx)
+    // Context menu eats the ctrl key up event, so force it to false
+    this.props.Toolbar.setCtrlKey(false)
   }
 
   render () {
-    const disableRemove = this.props.screens.length == 1
     const lis = this.props.screens.map((framebufId, i) => {
       return (
         <FramebufTab
