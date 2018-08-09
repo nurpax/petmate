@@ -6,14 +6,17 @@ let fs = require('fs')
 const initCode = ({
   borderColor,
   backgroundColor
-}) => `
-10 POKE 53280,${borderColor}
-20 POKE 53281,${backgroundColor}
-30 REM TODO add data listing and loader code
-`
+}) => `10 rem created with petmate
+20 poke 53280,${borderColor}
+30 poke 53281,${backgroundColor}
+100 for i = 1024 to 1024 + 999
+110 read a: poke i,a: next i
+120 for i = 55296 to 55296 + 999
+130 read a: poke i,a: next i
+140 goto 140`
 
 function bytesToCommaDelimited(dstLines, bytes, bytesPerLine) {
-  let lines = chunkArray(bytes, bytesPerLine)
+  let lines = chunkArray(bytes, 16)
   for (let i = 0; i < lines.length; i++) {
     const s = `${lines[i].join(',')}`
     dstLines.push(s)
@@ -22,8 +25,6 @@ function bytesToCommaDelimited(dstLines, bytes, bytesPerLine) {
 
 function convertToBASIC(lines, fb, idx) {
   const { width, height, framebuf, backgroundColor, borderColor } = fb
-
-  const num = String(idx).padStart(4, '0')
 
   let bytes = []
   for (let y = 0; y < height; y++) {
@@ -36,19 +37,15 @@ function convertToBASIC(lines, fb, idx) {
       bytes.push(framebuf[y][x].color)
     }
   }
-  lines.push(`${borderColor},${backgroundColor}`)
   bytesToCommaDelimited(lines, bytes, width)
 }
 
 const saveBASIC = (filename, fbs, options) => {
   try {
     let lines = []
-    // Single screen export?
-    if (options.currentScreenOnly) {
-      convertToBASIC(lines, fbs[options.selectedFramebufIndex], 0)
-    } else {
-      fbs.forEach((fb,idx) => convertToBASIC(lines, fb, idx))
-    }
+    // Single screen export
+    convertToBASIC(lines, fbs[options.selectedFramebufIndex], 0)
+
     let backgroundColor
     let borderColor
     if (fbs.length >= 1) {
@@ -59,9 +56,9 @@ const saveBASIC = (filename, fbs, options) => {
       backgroundColor,
       borderColor
     }
-    const init = options.standalone ? initCode(initCodeOptions) : ''
+    const init = initCode(initCodeOptions)
     let dataLines = lines.map((line,idx) => {
-      return `${idx+100} DATA ${line}`
+      return `${idx+200} data ${line}`
     })
     fs.writeFileSync(
       filename,
