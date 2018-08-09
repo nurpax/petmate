@@ -39,9 +39,9 @@ This project is work-in-progress.  You can view [github issues](https://github.c
 - `q`, `e`: Select prev/next color.
 - `⌘1-4 / Ctrl+1-4`: Switch between palettes.  Use the Preferences pane to configure palettes.
 - `h`, `v`: Flip brush horizontally/vertically
-- `x`, `c`, `b`: Select tool (draw, colorize, brush)
-- `1`, `2`, `3`: Same as x, c, b.
-- `Alt-leftclick`: Select character and color under cursor.
+- `x`, `c`, `3`, `b`: Select tool (draw/colorize/char-only draw/brush)
+- `1`, `2`, `3`, `4`: draw/colorize/char-only draw/brush
+- `Alt-Left Click`: Select character and color under cursor.
 
 Open/Save/Save As: use platform shortcuts (e.g., Save is `Ctrl+S` on Windows, `⌘S` on Mac).
 
