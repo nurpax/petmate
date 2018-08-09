@@ -11,7 +11,8 @@ import * as brush from './brush'
 
 export const TOOL_DRAW = 0
 export const TOOL_COLORIZE = 1
-export const TOOL_BRUSH = 2
+export const TOOL_CHAR_DRAW = 2
+export const TOOL_BRUSH = 3
 
 const settables = reduxSettables([
   settable('Toolbar', 'textColor', 14),
@@ -89,7 +90,9 @@ export class Toolbar {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
           } else if (key === 'c' || key == '2') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_COLORIZE))
-          } else if (key === 'b' || key == '3') {
+          } else if (key === 'v' || key == '3') {
+            dispatch(Toolbar.actions.setSelectedTool(TOOL_CHAR_DRAW))
+          } else if (key === 'b' || key == '4') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_BRUSH))
           }
         }

@@ -23,6 +23,7 @@ import {
   Toolbar,
   TOOL_DRAW,
   TOOL_COLORIZE,
+  TOOL_CHAR_DRAW,
   TOOL_BRUSH
 } from '../redux/toolbar'
 import { selectChar } from '../actions/editor'
@@ -149,16 +150,24 @@ class FramebufferView_ extends Component {
   setChar = (clickLoc) => {
     const params = {
       ...clickLoc,
-      color: this.props.textColor,
       undoId: this.props.undoId
     }
     if (this.props.selectedTool === TOOL_DRAW) {
       this.props.Framebuffer.setPixel({
         ...params,
+        color: this.props.textColor,
         screencode: this.props.curScreencode
       })
     } else if (this.props.selectedTool === TOOL_COLORIZE) {
-      this.props.Framebuffer.setPixel(params)
+      this.props.Framebuffer.setPixel({
+        ...params,
+        color: this.props.textColor,
+      })
+    } else if (this.props.selectedTool === TOOL_CHAR_DRAW) {
+      this.props.Framebuffer.setPixel({
+        ...params,
+        screencode: this.props.curScreencode
+      })
     } else {
       console.error('shouldn\'t get here')
     }
@@ -181,7 +190,8 @@ class FramebufferView_ extends Component {
   dragStart = (coord) => {
     const { selectedTool } = this.props
     if (selectedTool === TOOL_DRAW ||
-        selectedTool === TOOL_COLORIZE) {
+        selectedTool === TOOL_COLORIZE ||
+        selectedTool === TOOL_CHAR_DRAW) {
       this.setChar(coord)
     } else if (selectedTool === TOOL_BRUSH) {
       if (this.props.brush === null) {
@@ -199,7 +209,8 @@ class FramebufferView_ extends Component {
   dragMove = (coord) => {
     const { selectedTool, brush, brushRegion } = this.props
     if (selectedTool === TOOL_DRAW ||
-        selectedTool === TOOL_COLORIZE) {
+        selectedTool === TOOL_COLORIZE ||
+        selectedTool === TOOL_CHAR_DRAW) {
       utils.drawLine((x,y) => {
         this.setChar({ row:y, col:x })
       }, this.prevDragPos.col, this.prevDragPos.row, coord.col, coord.row)
@@ -253,6 +264,7 @@ class FramebufferView_ extends Component {
     const { selectedTool } = this.props
     let overlays = null
     let screencodeHighlight = this.props.curScreencode
+    let colorHighlight = this.props.textColor
     let highlightCharPos = true
     if (this.props.isActive) {
       if (selectedTool === TOOL_BRUSH) {
@@ -276,7 +288,11 @@ class FramebufferView_ extends Component {
               brushRegion={this.props.brushRegion}
             />
         }
-      } else if (selectedTool === TOOL_DRAW || selectedTool === TOOL_COLORIZE) {
+      } else if (
+        selectedTool === TOOL_DRAW ||
+        selectedTool === TOOL_COLORIZE ||
+        selectedTool === TOOL_CHAR_DRAW
+      ) {
         overlays =
           <CharPosOverlay
             framebufWidth={this.props.framebufWidth}
@@ -285,6 +301,8 @@ class FramebufferView_ extends Component {
         />
         if (selectedTool === TOOL_COLORIZE) {
           screencodeHighlight = null
+        } else if (selectedTool === TOOL_CHAR_DRAW) {
+          colorHighlight = null
         }
         // Don't show current char/color when the ALT color/char picker is active
         if (this.props.altKey) {
@@ -312,7 +330,7 @@ class FramebufferView_ extends Component {
           framebuf={this.props.framebuf}
           charPos={this.props.isActive && highlightCharPos ? this.props.charPos : null}
           curScreencode={screencodeHighlight}
-          textColor={this.props.textColor}
+          textColor={colorHighlight}
           colorPalette={this.props.colorPalette}
         />
         {overlays}

@@ -20,6 +20,9 @@ function setChar(fbState, {row, col, screencode, color}) {
           if (screencode === undefined) {
             return { ...pix, color }
           }
+          if (color === undefined) {
+            return { ...pix, code:screencode }
+          }
           return { code:screencode, color }
         }
         return pix

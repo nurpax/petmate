@@ -11,6 +11,7 @@ import {
   Toolbar,
   TOOL_DRAW,
   TOOL_COLORIZE,
+  TOOL_CHAR_DRAW,
   TOOL_BRUSH
 } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
@@ -23,7 +24,8 @@ import { withHoverFade } from './hoc'
 
 class Icon extends Component {
   static defaultProps = {
-    bottom: false
+    bottom: false,
+    subIcon: null
   }
   render () {
     const selectedClass = this.props.selected !== undefined && this.props.selected ? styles.selectedTool : null
@@ -38,6 +40,7 @@ class Icon extends Component {
         <i
           className={classnames(styles.icon, `fas ${this.props.iconName}`)}
         />
+        {this.props.subIcon !== null ? this.props.subIcon() : null}
         {tooltip}
       </div>
     )
@@ -104,6 +107,40 @@ class FbColorPicker_ extends Component {
 }
 const FbColorPicker = withHoverFade(FbColorPicker_)
 
+const renderColorizeSubIcon = () => {
+  return (
+    <div style={{
+      backgroundColor: '#d77',
+      position: 'absolute',
+      width: '9px',
+      height: '9px',
+      top: '24px',
+      left: '30px',
+      borderRadius:'50%'
+    }}>
+    </div>
+  )
+}
+
+const renderCharSubIcon = () => {
+  return (
+    <div style={{
+      position: 'absolute',
+      width: '9px',
+      height: '9px',
+      top: '17px',
+      left: '30px',
+    }}>
+      <i
+        className='fas fa-font'
+        style={{
+          fontSize: '10px'
+        }}
+      />
+    </div>
+  )
+}
+
 class ToolbarView extends Component {
   state = {
     pickerActive: {
@@ -150,7 +187,7 @@ class ToolbarView extends Component {
     if (this.props.framebuf === null) {
       return null
     }
-    const mkTool = ({ tool, iconName, tooltip }) => {
+    const mkTool = ({ tool, iconName, tooltip, subIcon }) => {
       return (
         <SelectableTool
           key={tool}
@@ -159,6 +196,7 @@ class ToolbarView extends Component {
           selectedTool={this.props.selectedTool}
           iconName={iconName}
           tooltip={tooltip}
+          subIcon={subIcon}
         />
       )
     }
@@ -170,8 +208,15 @@ class ToolbarView extends Component {
       }),
       mkTool({
         tool: TOOL_COLORIZE,
-        iconName: 'fa-highlighter',
-        tooltip: 'Colorize'
+        iconName: 'fa-pencil-alt',
+        tooltip: 'Colorize',
+        subIcon: renderColorizeSubIcon
+      }),
+      mkTool({
+        tool: TOOL_CHAR_DRAW,
+        iconName: 'fa-pencil-alt',
+        tooltip: 'Character',
+        subIcon: renderCharSubIcon
       }),
       mkTool({
         tool: TOOL_BRUSH,

@@ -135,7 +135,9 @@ export default class CharGrid extends Component {
           code: this.props.curScreencode !== null ?
             this.props.curScreencode :
             framebuf[charPos.row][charPos.col].code,
-          color: this.props.textColor
+          color: this.props.textColor !== null ?
+            this.props.textColor :
+            framebuf[charPos.row][charPos.col].color
         }
         const img = this.font.getImage(c.code, c.color)
         ctx.putImageData(img, charPos.col*xScale, charPos.row*yScale)
