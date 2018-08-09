@@ -90,7 +90,7 @@ export class Toolbar {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
           } else if (key === 'c' || key == '2') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_COLORIZE))
-          } else if (key === 'v' || key == '3') {
+          } else if (key == '3') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_CHAR_DRAW))
           } else if (key === 'b' || key == '4') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_BRUSH))
