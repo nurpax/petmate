@@ -71,7 +71,6 @@ class ColorPaletteSelector extends Component {
       return { value, label: value, colorPalette: utils.colorPalettes[value]}
     })
     const { selectedColorPaletteName } = this.props
-    console.log()
     return (
       <Fragment>
         <Title3>Select C64 color palette:</Title3>

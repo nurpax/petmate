@@ -31,14 +31,28 @@ const settables = reduxSettables([
   settable('Toolbar', 'canvasGrid', false)
 ])
 
+const initialBrushValue = {
+  brush: null,
+  brushRegion: null,
+  brushTransform: {
+    mirror: 0,
+    rotate: 0
+  }
+}
+
 export class Toolbar {
   static RESET_BRUSH = `${Toolbar.name}/RESET_BRUSH`
   static RESET_BRUSH_REGION = `${Toolbar.name}/RESET_BRUSH_REGION`
   static CAPTURE_BRUSH = `${Toolbar.name}/CAPTURE_BRUSH`
   static MIRROR_BRUSH =  `${Toolbar.name}/MIRROR_BRUSH`
+  static ROTATE_BRUSH =  `${Toolbar.name}/ROTATE_BRUSH`
   static NEXT_CHARCODE = `${Toolbar.name}/NEXT_CHARCODE`
   static NEXT_COLOR = `${Toolbar.name}/NEXT_COLOR`
   static INC_UNDO_ID = `${Toolbar.name}/INC_UNDO_ID`
+
+  static MIRROR_X = 1
+  static MIRROR_Y = 2
+
 
   static actions = {
     ...settables.actions,
@@ -80,9 +94,11 @@ export class Toolbar {
           } else if (key === 'w') {
             dispatch(Toolbar.actions.nextCharcode({ row: -1, col: 0}))
           } else if (key === 'v') {
-            dispatch(Toolbar.actions.mirrorBrush('v', true))
+            dispatch(Toolbar.actions.mirrorBrush(Toolbar.MIRROR_Y))
           } else if (key === 'h') {
-            dispatch(Toolbar.actions.mirrorBrush('h', true))
+            dispatch(Toolbar.actions.mirrorBrush(Toolbar.MIRROR_X))
+          } else if (key === 'r') {
+            dispatch(Toolbar.actions.rotateBrush())
           } else if (key === 'q') {
             dispatch(Toolbar.actions.nextColor(-1))
           } else if (key === 'e') {
@@ -230,40 +246,44 @@ export class Toolbar {
         data: {
           framebuf:capfb,
           brushRegion: {
-            min: {row: 0, col: 0},
-            max: {row: h-1, col: w-1}
+            min: { row: 0, col: 0 },
+            max: { row: h-1, col: w-1 }
           }
         }
       }
     },
 
     mirrorBrush: (axis) => {
-      // TODO grab charset from current fb
       return {
         type: Toolbar.MIRROR_BRUSH,
         data: {
-          charset: utils.systemFontData,
-          axis
+          mirror: axis
         }
+      }
+    },
+
+    rotateBrush: () => {
+      return {
+        type: Toolbar.ROTATE_BRUSH,
       }
     }
   }
 
   static reducer(state = {
       ...settables.initialValues,
+      ...initialBrushValue,
       undoId: 0
     }, action) {
     switch (action.type) {
       case Toolbar.RESET_BRUSH:
         return {
           ...state,
-          brush: null,
-          brushRegion: null
+          ...initialBrushValue
         }
       case Toolbar.CAPTURE_BRUSH:
         return {
           ...state,
-          brushRegion: null,
+          ...initialBrushValue,
           brush: action.data
         }
       case Toolbar.NEXT_CHARCODE:
@@ -293,7 +313,18 @@ export class Toolbar {
       case Toolbar.MIRROR_BRUSH:
         return {
           ...state,
-          brush: brush.mirrorBrush(state.brush, action.data)
+          brushTransform: {
+            ...state.brushTransform,
+            mirror: state.brushTransform.mirror ^ action.data.mirror
+          }
+        }
+      case Toolbar.ROTATE_BRUSH:
+        return {
+          ...state,
+          brushTransform: {
+            ...state.brushTransform,
+            rotate: (state.brushTransform.rotate + 90) % 360
+          }
         }
       default:
         return settables.reducer(state, action)

@@ -1,5 +1,6 @@
 
 import { colorPalettes } from '../utils'
+import { mirrorBrush } from './brush'
 
 // TODO memoize
 
@@ -64,4 +65,8 @@ export const getSettingsCurrentColorPalette = (state) => {
 export const getSettingsEditingCurrentColorPalette = (state) => {
   const settings = getSettingsEditing(state)
   return getSettingsColorPaletteByName(state, settings.selectedColorPalette)
+}
+
+export const transformBrush = (brush, transform) => {
+  return mirrorBrush(brush, transform)
 }

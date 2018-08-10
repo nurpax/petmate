@@ -357,7 +357,7 @@ const FramebufferCont = connect(
       curScreencode: utils.charScreencodeFromRowCol(selected),
       selectedTool: state.toolbar.selectedTool,
       textColor: state.toolbar.textColor,
-      brush: state.toolbar.brush,
+      brush: selectors.transformBrush(state.toolbar.brush, state.toolbar.brushTransform),
       brushRegion: state.toolbar.brushRegion,
       shiftKey: state.toolbar.shiftKey,
       altKey: state.toolbar.altKey,
