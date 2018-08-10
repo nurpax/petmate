@@ -91,6 +91,9 @@ class ExportForm extends Component {
     if (this.props.ext === null) {
       return null
     }
+    if (!utils.formats[this.props.ext].exportOptions) {
+      return null
+    }
     switch (this.props.ext) {
       case 'c':
         return null

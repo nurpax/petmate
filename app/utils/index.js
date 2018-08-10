@@ -25,23 +25,28 @@ const path = require('path')
 export const formats = {
   png: {
     name: 'PNG .png',
-    ext: 'png'
+    ext: 'png',
+    exportOptions: true
   },
   c: {
     name: 'PETSCII .c',
-    ext: 'c'
+    ext: 'c',
+    exportOptions: false
   },
   prg: {
     name: 'Executable .prg',
-    ext: 'prg'
+    ext: 'prg',
+    exportOptions: false
   },
   asm: {
     name: 'Assembler source .asm',
-    ext: 'asm'
+    ext: 'asm',
+    exportOptions: true
   },
   basic: {
     name: 'BASIC listing .bas',
-    ext: 'bas'
+    ext: 'bas',
+    exportOptions: false
   }
 }
 
