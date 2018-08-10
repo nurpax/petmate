@@ -28,6 +28,7 @@ const settables = reduxSettables([
   settable('Toolbar', 'showSettings', false),
   settable('Toolbar', 'showExport', {show: false}),
   settable('Toolbar', 'selectedPaletteRemap', 0),
+  settable('Toolbar', 'canvasGrid', false)
 ])
 
 export class Toolbar {
@@ -94,6 +95,11 @@ export class Toolbar {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_CHAR_DRAW))
           } else if (key === 'b' || key == '4') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_BRUSH))
+          } else if (key === 'g') {
+            dispatch((dispatch, getState) => {
+              const { canvasGrid } = getState().toolbar
+              dispatch(Toolbar.actions.setCanvasGrid(!canvasGrid))
+            })
           }
         }
 

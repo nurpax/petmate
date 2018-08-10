@@ -7,6 +7,7 @@ import classnames from 'classnames'
 import ColorPicker from '../components/ColorPicker'
 import CharGrid from '../components/CharGrid'
 import CharPosOverlay from '../components/CharPosOverlay'
+import GridOverlay from '../components/GridOverlay'
 
 import CharSelect from './CharSelect'
 
@@ -334,6 +335,7 @@ class FramebufferView_ extends Component {
           colorPalette={this.props.colorPalette}
         />
         {overlays}
+        {this.props.canvasGrid ? <GridOverlay width={W} height={H} /> : null}
       </div>
     )
   }
@@ -359,7 +361,8 @@ const FramebufferCont = connect(
       brushRegion: state.toolbar.brushRegion,
       shiftKey: state.toolbar.shiftKey,
       altKey: state.toolbar.altKey,
-      colorPalette: selectors.getSettingsCurrentColorPalette(state)
+      colorPalette: selectors.getSettingsCurrentColorPalette(state),
+      canvasGrid: state.toolbar.canvasGrid
     }
   },
   dispatch => {
