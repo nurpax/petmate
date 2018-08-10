@@ -38,21 +38,73 @@ class ModalBase extends Component {
   }
 }
 
+class ModalAnimWrapper extends Component {
+  state = {
+    init: true
+  }
+  constructor (props) {
+    super(props)
+    this.ref = null
+  }
+
+  componentDidMount () {
+    // This is required to trigger the CSS animation
+    const ANIMATION_TIMEOUT = 20
+    setTimeout(() => {
+      // This is for to force a repaint,
+      // which is necessary in order to transition styles.
+      // (jjhellst: or so I think..  From https://github.com/reactjs/react-transition-group/blob/780e8e5bf62efa655a2683c216cdabd7f7a09897/src/CSSTransition.js#L210-L217)
+      /* eslint-disable no-unused-expressions */
+      this.ref && this.ref.scrollTop
+      /* eslint-enable no-unused-expressions */
+      this.setState({init: false})
+    }, ANIMATION_TIMEOUT)
+  }
+
+  render () {
+    return (
+      <Fragment>
+        <div ref={(r) => this.ref = r}>
+          <div
+            className={styles.modalBackground}
+            style={{
+              opacity: this.state.init ? 0.0 : 1.0,
+              transition: 'opacity 0.2s linear'
+            }}
+          />
+          <div
+            onKeyDown={this.props.onKeyDown}
+            className={styles.modal}
+            style={{
+              opacity: this.state.init ? 0.0 : 1.0,
+              transform: this.state.init ? 'translate(-50%, -40%)' : 'translate(-50%, -50%)',
+              transition: 'opacity 0.2s linear, transform 0.2s linear'
+            }}>
+            {this.props.children}
+          </div>
+        </div>
+      </Fragment>
+    )
+  }
+}
+
 export default class Modal extends Component {
   handleModalClose = () => {
     this.props.onModalClose()
   }
 
+  modalBody = () => {
+    return (
+      <ModalAnimWrapper>
+        {this.props.children}
+      </ModalAnimWrapper>
+    )
+  }
+
   render () {
     return (
       <ModalBase>
-        <div className={classnames(styles.modalBackground, this.props.showModal ? styles.show : styles.hide)}>
-          <div
-            onKeyDown={this.props.onKeyDown}
-            className={classnames(styles.modal, this.props.showModal ? styles.show : styles.hide)}>
-            {this.props.children}
-          </div>
-        </div>
+        {this.props.showModal ? this.modalBody() : null}
       </ModalBase>
     )
   }
