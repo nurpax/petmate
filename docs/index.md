@@ -12,9 +12,9 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.2.5.dmg'>Petmate-0.2.5.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.2.5.exe'>Petmate Setup 0.2.5.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.2.5_amd64.deb'>petmate_0.2.5_amd64.deb</a> (untested but reported to work!)
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.3.0.dmg'>Petmate-0.3.0.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.3.0.exe'>Petmate Setup 0.3.0.exe</a>
+* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.3.0_amd64.deb'>petmate_0.3.0_amd64.deb</a> (untested but reported to work!)
 
 ## Features
 
@@ -58,6 +58,13 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.3.0 (2018-08-11)
+- Add brush rotation ([#70](https://github.com/nurpax/petmate/issues/70))
+- Add "character only" drawing mode (e.g., change screencode but leave color untouched) ([#50](https://github.com/nurpax/petmate/issues/50))
+- Add t64ass and ACME .asm export ([#13](https://github.com/nurpax/petmate/issues/13))
+- Add BASIC export (w/ BASIC display code from @Esshahn) ([#14](https://github.com/nurpax/petmate/issues/14))
+- Add togglable grid on top of painting canvas ([#16](https://github.com/nurpax/petmate/issues/16))
 
 Petmate 0.2.5 (2018-08-09)
 - New export options for PNG ([#55](https://github.com/nurpax/petmate/issues/55))
