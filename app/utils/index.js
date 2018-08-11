@@ -43,7 +43,7 @@ export const formats = {
     ext: 'asm',
     exportOptions: true
   },
-  basic: {
+  bas: {
     name: 'BASIC listing .bas',
     ext: 'bas',
     exportOptions: false

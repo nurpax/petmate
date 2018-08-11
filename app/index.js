@@ -74,7 +74,7 @@ require('electron').ipcRenderer.on('menu', (event, message) => {
       dispatchExport(formats.asm)
       return
     case 'export-basic':
-      dispatchExport(formats.basic)
+      dispatchExport(formats.bas)
       return
     case 'export-prg':
       dispatchExport(formats.prg)
