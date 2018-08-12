@@ -13,8 +13,8 @@
 .topmenu {
   composes: topPadding;
   grid-area: topmenu;
-  margin-left: 10px;
   overflow-x: auto;
+  padding-left: 10px;
 }
 
 .leftmenubar {
@@ -27,7 +27,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-left: 10px;
+  padding-left: 10px;
 }
 
 .appGrid {
