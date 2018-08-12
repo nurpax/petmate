@@ -16,7 +16,7 @@ export const TOOL_BRUSH = 3
 
 const settables = reduxSettables([
   settable('Toolbar', 'textColor', 14),
-  settable('Toolbar', 'selectedChar', {row: 0, col: 0}),
+  settable('Toolbar', 'selectedChar', {row: 8, col: 0}),
   settable('Toolbar', 'selectedTool', TOOL_DRAW),
   settable('Toolbar', 'brushRegion', null),
   settable('Toolbar', 'brush', null),
