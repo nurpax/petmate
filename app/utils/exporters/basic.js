@@ -24,7 +24,7 @@ function bytesToCommaDelimited(dstLines, bytes, bytesPerLine) {
 }
 
 function convertToBASIC(lines, fb, idx) {
-  const { width, height, framebuf, backgroundColor, borderColor } = fb
+  const { width, height, framebuf } = fb
 
   let bytes = []
   for (let y = 0; y < height; y++) {
@@ -44,14 +44,11 @@ const saveBASIC = (filename, fbs, options) => {
   try {
     let lines = []
     // Single screen export
-    convertToBASIC(lines, fbs[options.selectedFramebufIndex], 0)
+    const selectedFb = fbs[options.selectedFramebufIndex]
+    convertToBASIC(lines, selectedFb, 0)
 
-    let backgroundColor
-    let borderColor
-    if (fbs.length >= 1) {
-      backgroundColor = fbs[0].backgroundColor
-      borderColor = fbs[0].borderColor
-    }
+    let backgroundColor = selectedFb.backgroundColor
+    let borderColor = selectedFb.borderColor
     const initCodeOptions = {
       backgroundColor,
       borderColor

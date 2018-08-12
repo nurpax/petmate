@@ -185,17 +185,14 @@ const saveAsm = (filename, fbs, options) => {
   try {
     let lines = []
     // Single screen export?
+    const selectedFb = fbs[options.selectedFramebufIndex]
     if (options.currentScreenOnly) {
-      convertToAsm(lines, fbs[options.selectedFramebufIndex], 0, syntaxParams)
+      convertToAsm(lines, selectedFb, 0, syntaxParams)
     } else {
       fbs.forEach((fb,idx) => convertToAsm(lines, fb, idx, syntaxParams))
     }
-    let backgroundColor
-    let borderColor
-    if (fbs.length >= 1) {
-      backgroundColor = fbs[0].backgroundColor
-      borderColor = fbs[0].borderColor
-    }
+    let backgroundColor = selectedFb.backgroundColor
+    let borderColor = selectedFb.borderColor
     const initCodeOptions = {
       backgroundColor,
       borderColor
