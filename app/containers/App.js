@@ -49,15 +49,9 @@ class AppView extends Component {
   }
 
   render() {
-    const icon = <img style={{paddingLeft:'3px'}}width={56} src={require('assets/appicon.png')} />
     return (
       <Fragment>
         <div className={s.appGrid}>
-          <div className={s.empty}>
-            <ExtLink href='https://nurpax.github.io/petmate/'>
-              {icon}
-            </ExtLink>
-          </div>
           <div className={s.topmenu}>
             <FramebufferTabs />
           </div>

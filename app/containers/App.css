@@ -1,6 +1,5 @@
 
 .topPadding {
-  background-color: #000;
   padding-top: 10px;
   padding-bottom: 10px;
 }
@@ -14,6 +13,7 @@
 .topmenu {
   composes: topPadding;
   grid-area: topmenu;
+  margin-left: 10px;
   overflow-x: auto;
 }
 
@@ -25,8 +25,9 @@
 .editor {
   grid-area: editor;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
+  margin-left: 10px;
 }
 
 .appGrid {
@@ -37,7 +38,7 @@
   grid-template-rows: auto 1fr;
 
   grid-template-areas:
-    "empty topmenu"
+    "leftmenu topmenu"
     "leftmenu editor";
 }
 
