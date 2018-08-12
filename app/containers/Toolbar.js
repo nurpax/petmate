@@ -204,18 +204,18 @@ class ToolbarView extends Component {
       mkTool({
         tool: TOOL_DRAW,
         iconName: 'fa-pencil-alt',
-        tooltip: 'Draw'
+        tooltip: 'Char & Color'
       }),
       mkTool({
         tool: TOOL_COLORIZE,
         iconName: 'fa-pencil-alt',
-        tooltip: 'Colorize',
+        tooltip: 'Color only',
         subIcon: renderColorizeSubIcon
       }),
       mkTool({
         tool: TOOL_CHAR_DRAW,
         iconName: 'fa-pencil-alt',
-        tooltip: 'Character',
+        tooltip: 'Char only',
         subIcon: renderCharSubIcon
       }),
       mkTool({
