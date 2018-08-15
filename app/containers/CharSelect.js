@@ -12,18 +12,25 @@ import {
 
 import CharGrid from '../components/CharGrid'
 import CharPosOverlay from '../components/CharPosOverlay'
+import { CharSelectStatusbar } from '../components/Statusbar'
+
 import * as utils from '../utils'
 import * as fp from '../utils/fp'
 import * as selectors from '../redux/selectors'
-import { withMouseCharPosition } from './hoc'
+import { CharPosition } from './hoc'
 
 import styles from './CharSelect.css'
 import { charGridScaleStyle }  from './inlineStyles'
 
-class CharSelect_ extends Component {
+class CharSelect extends Component {
   constructor (props) {
     super(props)
     this.computeCachedFb(0)
+
+    this.state = {
+      charPos: { row:0, col: 0 },
+      isActive: false
+    }
   }
 
   computeCachedFb(textColor) {
@@ -39,7 +46,15 @@ class CharSelect_ extends Component {
   }
 
   handleClick = () => {
-    this.props.Toolbar.setCurrentChar(this.props.charPos)
+    this.props.Toolbar.setCurrentChar(this.state.charPos)
+  }
+
+  handleCharPosChanged = (charPos) => {
+    this.setState({ charPos })
+  }
+
+  handleActivationChanged = ({isActive}) => {
+    this.setState({ isActive })
   }
 
   render () {
@@ -61,50 +76,58 @@ class CharSelect_ extends Component {
     }
 
     return (
-      <div className={styles.csContainer} style={s}>
-        <div
-          style={{
-            ...charGridScaleStyle,
-            width: W*9,
-            height: H*9
-          }}
-          onClick={this.handleClick}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        <CharPosition
+          grid={true}
+          onCharPosChanged={this.handleCharPosChanged}
+          onActivationChanged={this.handleActivationChanged}
         >
-          <CharGrid
-            width={W}
-            height={H}
-            backgroundColor={backg}
-            grid={true}
-            framebuf={this.fb}
-            selected={this.props.selected}
-            colorPalette={colorPalette}
-          />
-          {this.props.isActive ?
-            <CharPosOverlay
-              framebufWidth={W}
-              framebufHeight={H}
-              grid={true}
-              opacity={0.5}
-              charPos={this.props.charPos}
-            />
-            : null}
-          {this.props.selected ?
-            <CharPosOverlay
-              framebufWidth={W}
-              framebufHeight={H}
-              grid={true}
-              opacity={1.0}
-              charPos={this.props.selected} />
-            : null}
-        </div>
+          <div className={styles.csContainer} style={s}>
+            <div
+              style={{
+                ...charGridScaleStyle,
+                width: W*9,
+                height: H*9
+              }}
+              onClick={this.handleClick}
+            >
+              <CharGrid
+                width={W}
+                height={H}
+                backgroundColor={backg}
+                grid={true}
+                framebuf={this.fb}
+                selected={this.props.selected}
+                colorPalette={colorPalette}
+              />
+              {this.state.isActive ?
+                <CharPosOverlay
+                  framebufWidth={W}
+                  framebufHeight={H}
+                  grid={true}
+                  opacity={0.5}
+                  charPos={this.state.charPos}
+                />
+                : null}
+              {this.props.selected ?
+                <CharPosOverlay
+                  framebufWidth={W}
+                  framebufHeight={H}
+                  grid={true}
+                  opacity={1.0}
+                  charPos={this.props.selected} />
+                : null}
+            </div>
+          </div>
+        </CharPosition>
+        <CharSelectStatusbar curScreencode={this.props.curScreencode} />
       </div>
     )
   }
 }
-
-const CharSelect = withMouseCharPosition(CharSelect_, {
-  grid: true
-})
 
 const mapDispatchToProps = dispatch => {
   return {

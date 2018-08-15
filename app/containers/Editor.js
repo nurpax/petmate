@@ -8,6 +8,7 @@ import ColorPicker from '../components/ColorPicker'
 import CharGrid from '../components/CharGrid'
 import CharPosOverlay from '../components/CharPosOverlay'
 import GridOverlay from '../components/GridOverlay'
+import { CanvasStatusbar } from '../components/Statusbar'
 
 import CharSelect from './CharSelect'
 
@@ -144,7 +145,6 @@ class FramebufferView_ extends Component {
 
   constructor (props) {
     super(props)
-
     this.prevDragPos = null
   }
 
@@ -317,25 +317,27 @@ class FramebufferView_ extends Component {
       height: H*8
     }
     return (
-      <div
-        style={scale}
-        onPointerDown={(e) => this.props.onMouseDown(e, this.dragStart, this.altClick)}
-        onPointerMove={(e) => this.props.onMouseMove(e, this.dragMove)}
-        onPointerUp={(e) => this.props.onMouseUp(e, this.dragEnd)}
-      >
-        <CharGrid
-          width={W}
-          height={H}
-          grid={false}
-          backgroundColor={backg}
-          framebuf={this.props.framebuf}
-          charPos={this.props.isActive && highlightCharPos ? this.props.charPos : null}
-          curScreencode={screencodeHighlight}
-          textColor={colorHighlight}
-          colorPalette={this.props.colorPalette}
-        />
-        {overlays}
-        {this.props.canvasGrid ? <GridOverlay width={W} height={H} /> : null}
+      <div>
+        <div
+          style={scale}
+          onPointerDown={(e) => this.props.onMouseDown(e, this.dragStart, this.altClick)}
+          onPointerMove={(e) => this.props.onMouseMove(e, this.dragMove)}
+          onPointerUp={(e) => this.props.onMouseUp(e, this.dragEnd)}
+        >
+          <CharGrid
+            width={W}
+            height={H}
+            grid={false}
+            backgroundColor={backg}
+            framebuf={this.props.framebuf}
+            charPos={this.props.isActive && highlightCharPos ? this.props.charPos : null}
+            curScreencode={screencodeHighlight}
+            textColor={colorHighlight}
+            colorPalette={this.props.colorPalette}
+          />
+          {overlays}
+          {this.props.canvasGrid ? <GridOverlay width={W} height={H} /> : null}
+        </div>
       </div>
     )
   }
@@ -375,8 +377,25 @@ const FramebufferCont = connect(
 )(FramebufferView)
 
 class Editor extends Component {
+  state = {
+    isActive: false,
+    charPos: null
+  }
+
   handleSetColor = (color) => {
     this.props.Toolbar.setCurrentColor(color)
+  }
+
+  handleCharPosChange = ({charPos}) => {
+    this.setState({
+      charPos
+    })
+  }
+
+  handleActivationChanged = ({isActive}) => {
+    this.setState({
+      isActive
+    })
   }
 
   render() {
@@ -392,8 +411,19 @@ class Editor extends Component {
     }
     return (
       <div className={styles.editorLayoutContainer}>
-        <div className={styles.fbContainer} style={framebufStyle}>
-          {this.props.framebuf ? <FramebufferCont /> : null}
+        <div>
+          <div className={styles.fbContainer} style={framebufStyle}>
+            {this.props.framebuf ?
+              <FramebufferCont
+                onActivationChanged={this.handleActivationChanged}
+                onCharPosChange={this.handleCharPosChange} /> :
+              null}
+          </div>
+          <CanvasStatusbar
+            framebuf={this.props.framebuf}
+            isActive={this.state.isActive}
+            charPos={this.state.charPos}
+          />
         </div>
         <div style={{marginLeft: '5px'}}>
           <CharSelect />

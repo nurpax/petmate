@@ -3,28 +3,54 @@ import React, { Component } from 'react';
 import ReactCursorPosition from 'react-cursor-position'
 import PropTypes from 'prop-types'
 
-export const withMouseCharPosition = (C, options) => {
-  class ToCharRowCol extends Component {
-    constructor (props) {
-      super(props)
-    }
-    render () {
-      const grid = options !== undefined ? options.grid : false
-      const { position, ...props } = this.props
-      const scl = grid ? 18 : 16
-      const col = Math.floor(this.props.position.x / scl)
-      const row = Math.floor(this.props.position.y / scl)
-      return <C charPos={{row, col}} grid={grid} {...props} />
+export class CharPosition extends Component {
+
+  static defaultProps = {
+    grid: false
+  }
+
+  constructor (props) {
+    super(props)
+    this.prevCharPos = null
+  }
+
+  toCharPos = ({x, y}) => {
+    const { grid } = this.props
+    const scl = grid ? 18 : 16
+    const col = Math.floor(x / scl)
+    const row = Math.floor(y / scl)
+    return { row, col }
+  }
+
+  // The parent component needs to know if the cursor is active (inside the
+  // child div) to conditionally render sibling components like cursor pos,
+  // char under cursor, etc.
+  handleActivationChanged = ({isActive})  => {
+    this.props.onActivationChanged({isActive})
+  }
+
+  // The parent component needs to know what the current charpos is inside the
+  // child div).
+  handlePositionChanged = (vals)  => {
+    const { row, col } = this.toCharPos(vals.position)
+    if (this.prevCharPos === null ||
+      row !== this.prevCharPos.row ||
+      col !== this.prevCharPos.col) {
+      this.props.onCharPosChanged(this.toCharPos(vals.position))
+      this.prevCharPos = { row, col }
     }
   }
-  return class extends Component {
-    render () {
-      return (
-        <ReactCursorPosition>
-          <ToCharRowCol {...this.props}/>
-        </ReactCursorPosition>
-      )
-    }
+
+  render () {
+    return (
+      <ReactCursorPosition
+        onActivationChanged={this.handleActivationChanged}
+        onPositionChanged={this.handlePositionChanged}
+        shouldDecorateChildren={false}
+      >
+        {this.props.children}
+      </ReactCursorPosition>
+    )
   }
 }
 
@@ -37,6 +63,7 @@ export const withMouseCharPositionShiftLockAxis = (C, options) => {
     constructor (props) {
       super(props)
 
+      this.prevCharPos = null
       this.dragging = false
       this.prevCoord = null
       this.lockStartCoord = null
@@ -89,6 +116,13 @@ export const withMouseCharPositionShiftLockAxis = (C, options) => {
 
     handleMouseMove = (e, dragMove) => {
       const charPos = this.currentCharPos()
+
+      if (this.prevCharPos === null ||
+        this.prevCharPos.row !== charPos.row ||
+        this.prevCharPos.col !== charPos.col) {
+        this.prevCharPos = {...charPos}
+        this.props.onCharPosChange({isActive:this.props.isActive, charPos})
+      }
 
       if (!this.dragging) {
         return
@@ -148,7 +182,8 @@ export const withMouseCharPositionShiftLockAxis = (C, options) => {
   return class extends Component {
     render () {
       return (
-        <ReactCursorPosition>
+        <ReactCursorPosition
+          onActivationChanged={this.props.onActivationChanged}>
           <ToCharRowCol {...this.props}/>
         </ReactCursorPosition>
       )
