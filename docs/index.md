@@ -12,9 +12,9 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.3.0.dmg'>Petmate-0.3.0.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.3.0.exe'>Petmate Setup 0.3.0.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.3.0_amd64.deb'>petmate_0.3.0_amd64.deb</a> (untested but reported to work!)
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.3.1.dmg'>Petmate-0.3.1.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.3.1.exe'>Petmate Setup 0.3.1.exe</a>
+* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.3.1_amd64.deb'>petmate_0.3.1_amd64.deb</a> (untested but reported to work!)
 
 ## Features
 
@@ -27,6 +27,7 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
   - Bitmap .png (export)
   - PETSCII .c format (import, export)
   - Executable .prg (export)
+  - Assembler .asm (export for KickAssembler, 64tass and ACME)
 
 This project is work-in-progress.  You can view [github issues](https://github.com/nurpax/petmate/issues) for upcoming features/fixes.
 
@@ -58,6 +59,13 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.3.1 (2018-08-16)
+- Display current mouse x,y character coordinates and screencode under cursor ([#88](https://github.com/nurpax/petmate/issues/88))
+- Fix a bug where exporting a PETSCII screen in BASIC or asm would pick the border and background colors from the first screen and not the currently active screen ([#78](https://github.com/nurpax/petmate/issues/78))
+- Default to 'inverted space' (e.g., 8x8 block) character on application init ([#83](https://github.com/nurpax/petmate/issues/83))
+- UI layout clean up ([#77](https://github.com/nurpax/petmate/issues/77), [#76](https://github.com/nurpax/petmate/issues/76))
+
 
 Petmate 0.3.0 (2018-08-11)
 - Add brush rotation ([#70](https://github.com/nurpax/petmate/issues/70))
