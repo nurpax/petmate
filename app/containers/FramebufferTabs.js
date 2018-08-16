@@ -35,11 +35,11 @@ class FramebufTab extends Component {
     const colorPalette = this.props.colorPalette
     const backg = utils.colorIndexToCssRgb(colorPalette, backgroundColor)
     const bord = utils.colorIndexToCssRgb(colorPalette, borderColor)
-    const scaleX = 1.0/4
-    const scaleY = 1.0/4
+    const scaleX = 1.0/4*1.5
+    const scaleY = 1.0/4*1.5
     const s = {
-      width: 40*2,
-      height: 25*2,
+      width: 40*2*1.5,
+      height: 25*2*1.5,
       backgroundColor: '#000',
       borderStyle: 'solid',
       borderWidth: '5px',
