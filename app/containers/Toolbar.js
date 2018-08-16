@@ -82,14 +82,13 @@ class FbColorPicker_ extends Component {
     if (this.props.active) {
       picker =
         <div className={classnames(styles.colorpicker, this.props.fadeOut ? styles.fadeOut : null)}>
-          <div style={{transform: 'scale(2,2)', transformOrigin:'0% 0%'}}>
-            <ColorPicker
-              color={this.props.color}
-              onSelectColor={this.handleSelectColor}
-              paletteRemap={this.props.paletteRemap}
-              colorPalette={colorPalette}
-            />
-          </div>
+          <ColorPicker
+            color={this.props.color}
+            onSelectColor={this.handleSelectColor}
+            paletteRemap={this.props.paletteRemap}
+            colorPalette={colorPalette}
+            twoRows={true}
+          />
         </div>
       tooltip = null
     } else {

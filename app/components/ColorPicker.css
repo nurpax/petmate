@@ -4,28 +4,28 @@
 }
 
 .box {
-    outline-style: solid;
-    outline-color: rgba(255, 255, 255, 0);
-    outline-width: 2px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0);
+    border-width: 2px;
 }
 
 .boxNoHover {
-    outline-style: solid;
-    outline-color: rgba(255, 255, 255, 0);
-    outline-width: 2px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0);
+    border-width: 2px;
 }
 
 .box:hover {
-    outline-style: solid;
-    outline-color: rgba(255, 255, 255, 0.5);
-    outline-width: 2px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.5);
+    border-width: 2px;
     z-index: 1;
 }
 
 .boxSelected {
-    outline-style: solid;
-    outline-color: rgba(255, 255, 255, 1);
-    outline-width: 2px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 1);
+    border-width: 2px;
     z-index: 1;
 }
 

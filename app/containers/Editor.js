@@ -425,16 +425,18 @@ class Editor extends Component {
             charPos={this.state.charPos}
           />
         </div>
-        <div style={{marginLeft: '5px'}}>
-          <CharSelect />
-          <div style={{marginTop: '5px'}}>
+        <div style={{marginLeft: '8px'}}>
+          <div style={{marginBottom: '10px'}}>
             <ColorPicker
               selected={this.props.textColor}
               paletteRemap={this.props.paletteRemap}
               colorPalette={colorPalette}
               onSelectColor={this.handleSetColor}
+              twoRows={true}
+              scale2x={true}
             />
           </div>
+          <CharSelect />
         </div>
       </div>
     )

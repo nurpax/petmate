@@ -10,8 +10,8 @@ const ColorBlock = ({ color, colorPalette, hover }) => {
   const bg = utils.colorIndexToCssRgb(colorPalette, color)
   const style = {
     backgroundColor: bg,
-    width: '16px',
-    height: '16px',
+    width: '13px',
+    height: '13px',
     marginRight: '2px'
   }
   const cls = hover ? styles.box : styles.boxNoHover
@@ -82,16 +82,20 @@ export class ColorPalette extends Component {
 
 export default class ColorPicker extends Component {
   static defaultProps = {
-    paletteRemap: fp.mkArray(16, i => i)
+    paletteRemap: fp.mkArray(16, i => i),
+    twoRows: false,
+    scale2x: false
   }
   render() {
+    const scale2x = this.props
+    const blockSize = scale2x ? 32 : 16
     const colors = this.props.paletteRemap.map((idx) => {
       const c = this.props.colorPalette[idx]
       const bg = utils.rgbToCssRgb(c)
       const style = {
         backgroundColor: bg,
-        width: '16px',
-        height: '16px'
+        width: `${blockSize}px`,
+        height: `${blockSize}px`
       }
       const cls = this.props.selected === idx ? styles.boxSelected : styles.box
       return (
@@ -102,8 +106,19 @@ export default class ColorPicker extends Component {
           className={cls}/>
       )
     })
+    let doubleRowsStyle = {}
+    if (this.props.twoRows) {
+      doubleRowsStyle = {
+        width: `${8*blockSize+8*4}px`,
+        height: `${2*blockSize+2*4}px`,
+        flexWrap: 'wrap'
+      }
+    }
     return (
-      <div className={styles.container}>
+      <div
+        className={styles.container}
+        style={doubleRowsStyle}
+      >
         {colors}
       </div>
     );
