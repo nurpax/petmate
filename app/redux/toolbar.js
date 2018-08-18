@@ -48,6 +48,7 @@ export class Toolbar {
   static ROTATE_BRUSH =  `${Toolbar.name}/ROTATE_BRUSH`
   static NEXT_CHARCODE = `${Toolbar.name}/NEXT_CHARCODE`
   static NEXT_COLOR = `${Toolbar.name}/NEXT_COLOR`
+  static CLEAR_MOD_KEY_STATE = `${Toolbar.name}/CLEAR_MOD_KEY_STATE`
   static INC_UNDO_ID = `${Toolbar.name}/INC_UNDO_ID`
 
   static MIRROR_X = 1
@@ -182,6 +183,12 @@ export class Toolbar {
       return {
         type: Toolbar.NEXT_CHARCODE,
         data: dir
+      }
+    },
+
+    clearModKeyState: () => {
+      return {
+        type: Toolbar.CLEAR_MOD_KEY_STATE
       }
     },
 
@@ -325,6 +332,14 @@ export class Toolbar {
             ...state.brushTransform,
             rotate: (state.brushTransform.rotate + 90) % 360
           }
+        }
+      case Toolbar.CLEAR_MOD_KEY_STATE:
+        return {
+          ...state,
+          altKey: false,
+          ctrlKey: false,
+          metaKey: false,
+          shiftKey: false
         }
       default:
         return settables.reducer(state, action)

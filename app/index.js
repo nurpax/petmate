@@ -46,6 +46,10 @@ function dispatchExport(type) {
   }
 }
 
+require('electron').ipcRenderer.on('window-focus', (event, message) => {
+  store.dispatch(Toolbar.actions.clearModKeyState())
+})
+
 // Listen to commands from the main process
 require('electron').ipcRenderer.on('menu', (event, message) => {
   switch (message) {
