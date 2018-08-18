@@ -96,7 +96,7 @@ app.on('ready', async () => {
     mainWindow.setTitle(arg)
   })
 
-  app.on('browser-window-focus', () => {
-    mainWindow.webContents.send('window-focus')
+  app.on('browser-window-blur', () => {
+    mainWindow.webContents.send('window-blur')
   })
 });

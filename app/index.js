@@ -46,7 +46,7 @@ function dispatchExport(type) {
   }
 }
 
-require('electron').ipcRenderer.on('window-focus', (event, message) => {
+require('electron').ipcRenderer.on('window-blur', (event, message) => {
   store.dispatch(Toolbar.actions.clearModKeyState())
 })
 

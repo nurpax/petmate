@@ -74,6 +74,10 @@ class CharSelect extends Component {
     if (this.prevTextColor !== this.props.textColor) {
       this.computeCachedFb(this.props.textColor)
     }
+    let screencode = this.props.curScreencode
+    if (this.state.isActive) {
+      screencode = utils.charScreencodeFromRowCol(this.state.charPos)
+    }
 
     return (
       <div style={{
@@ -123,7 +127,7 @@ class CharSelect extends Component {
             </div>
           </div>
         </CharPosition>
-        <CharSelectStatusbar curScreencode={this.props.curScreencode} />
+        <CharSelectStatusbar curScreencode={screencode} />
       </div>
     )
   }
