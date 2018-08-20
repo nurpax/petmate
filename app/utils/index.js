@@ -296,7 +296,6 @@ export function loadSettings(dispatchSettingsLoad) {
   if (fs.existsSync(settingsFile)) {
     const c = fs.readFileSync(settingsFile, 'utf-8')
     const j = JSON.parse(c)
-    console.log(settingsFile, j)
     dispatchSettingsLoad(j)
   }
 }

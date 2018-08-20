@@ -5,20 +5,19 @@ import PropTypes from 'prop-types'
 
 export class CharPosition extends Component {
 
-  static defaultProps = {
-    grid: false
-  }
-
   constructor (props) {
     super(props)
     this.prevCharPos = null
   }
 
-  toCharPos = ({x, y}) => {
-    const { grid } = this.props
-    const scl = grid ? 18 : 16
-    const col = Math.floor(x / scl)
-    const row = Math.floor(y / scl)
+  toCharPos = ({position, elementDimensions}) => {
+    if (elementDimensions === null) {
+      return null
+    }
+    const { x, y } = position
+    const { width, height } = elementDimensions
+    const col = Math.floor(x / width * 16)
+    const row = Math.floor(y / height * 16)
     return { row, col }
   }
 
@@ -32,11 +31,14 @@ export class CharPosition extends Component {
   // The parent component needs to know what the current charpos is inside the
   // child div).
   handlePositionChanged = (vals)  => {
-    const { row, col } = this.toCharPos(vals.position)
+    if (vals.elementDimensions === undefined) {
+      return
+    }
+    const { row, col } = this.toCharPos(vals)
     if (this.prevCharPos === null ||
       row !== this.prevCharPos.row ||
       col !== this.prevCharPos.col) {
-      this.props.onCharPosChanged(this.toCharPos(vals.position))
+      this.props.onCharPosChanged(this.toCharPos(vals))
       this.prevCharPos = { row, col }
     }
   }
@@ -54,7 +56,7 @@ export class CharPosition extends Component {
   }
 }
 
-export const withMouseCharPositionShiftLockAxis = (C, options) => {
+export const withMouseCharPositionShiftLockAxis = C => {
   class ToCharRowCol extends Component {
     static propTypes = {
       altKey: PropTypes.bool.isRequired,
@@ -72,12 +74,16 @@ export const withMouseCharPositionShiftLockAxis = (C, options) => {
     }
 
     currentCharPos = () => {
-      const grid = options !== undefined ? options.grid : false
-      const { position, ...props } = this.props
-      const scl = grid ? 18 : 16
+      const {
+        position,
+        elementDimensions,
+        framebufWidth,
+        framebufHeight
+      } = this.props
+      const { width, height } = elementDimensions
       return {
-        col: Math.floor(this.props.position.x / scl),
-        row: Math.floor(this.props.position.y / scl)
+        col: Math.floor(position.x / width * framebufWidth),
+        row: Math.floor(position.y / height * framebufHeight)
       }
     }
 
@@ -160,17 +166,16 @@ export const withMouseCharPositionShiftLockAxis = (C, options) => {
     }
 
     render () {
-      const grid = options !== undefined ? options.grid : false
-      const { position, ...props } = this.props
-      const scl = grid ? 18 : 16
-      const col = Math.floor(this.props.position.x / scl)
-      const row = Math.floor(this.props.position.y / scl)
+      const { framebufWidth, framebufHeight } = this.props
+      const { position, elementDimensions, ...props } = this.props
+      const { width, height } = elementDimensions
+      const col = Math.floor(this.props.position.x / width * framebufWidth)
+      const row = Math.floor(this.props.position.y / height * framebufHeight)
       const locked = this.shiftLockAxis === 'row' || this.shiftLockAxis === 'col'
       const charPos = locked ? this.lockedCharPos : {row, col}
       return (
         <C
           charPos={charPos}
-          grid={grid}
           onMouseDown={this.handleMouseDown}
           onMouseUp={this.handleMouseUp}
           onMouseMove={this.handleMouseMove}
@@ -183,6 +188,9 @@ export const withMouseCharPositionShiftLockAxis = (C, options) => {
     render () {
       return (
         <ReactCursorPosition
+          style={{
+            ...this.props.containerSize
+          }}
           onActivationChanged={this.props.onActivationChanged}>
           <ToCharRowCol {...this.props}/>
         </ReactCursorPosition>

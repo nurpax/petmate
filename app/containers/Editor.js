@@ -32,7 +32,6 @@ import { selectChar } from '../actions/editor'
 import * as utils from '../utils';
 
 import styles from './Editor.css';
-import { charGridScaleStyle }  from './inlineStyles'
 
 const brushOverlayStyleBase = {
   outlineColor: 'rgba(128, 255, 128, 0.5)',
@@ -311,33 +310,34 @@ class FramebufferView_ extends Component {
         }
       }
     }
+    const { scaleX, scaleY } = this.props.canvasScale
     const scale = {
-      ...charGridScaleStyle,
       width: W*8,
-      height: H*8
+      height: H*8,
+      transform: `scale(${scaleX},${scaleY})`,
+      transformOrigin: '0% 0%',
+      imageRendering: 'pixelated'
     }
     return (
-      <div>
-        <div
-          style={scale}
-          onPointerDown={(e) => this.props.onMouseDown(e, this.dragStart, this.altClick)}
-          onPointerMove={(e) => this.props.onMouseMove(e, this.dragMove)}
-          onPointerUp={(e) => this.props.onMouseUp(e, this.dragEnd)}
-        >
-          <CharGrid
-            width={W}
-            height={H}
-            grid={false}
-            backgroundColor={backg}
-            framebuf={this.props.framebuf}
-            charPos={this.props.isActive && highlightCharPos ? this.props.charPos : null}
-            curScreencode={screencodeHighlight}
-            textColor={colorHighlight}
-            colorPalette={this.props.colorPalette}
-          />
-          {overlays}
-          {this.props.canvasGrid ? <GridOverlay width={W} height={H} /> : null}
-        </div>
+      <div
+        style={scale}
+        onPointerDown={(e) => this.props.onMouseDown(e, this.dragStart, this.altClick)}
+        onPointerMove={(e) => this.props.onMouseMove(e, this.dragMove)}
+        onPointerUp={(e) => this.props.onMouseUp(e, this.dragEnd)}
+      >
+        <CharGrid
+          width={W}
+          height={H}
+          grid={false}
+          backgroundColor={backg}
+          framebuf={this.props.framebuf}
+          charPos={this.props.isActive && highlightCharPos ? this.props.charPos : null}
+          curScreencode={screencodeHighlight}
+          textColor={colorHighlight}
+          colorPalette={this.props.colorPalette}
+        />
+        {overlays}
+        {this.props.canvasGrid ? <GridOverlay width={W} height={H} /> : null}
       </div>
     )
   }
@@ -405,16 +405,37 @@ class Editor extends Component {
     const { colorPalette } = this.props
     const borderColor =
       utils.colorIndexToCssRgb(colorPalette, this.props.framebuf.borderColor)
+
+    let scaleX = 1
+    if (this.props.containerSize !== null) {
+      scaleX = this.props.containerSize.width/510.0
+    }
+    const scaleY = scaleX
+    const { width: charW, height: charH } = this.props.framebuf
+    const fbWidth = Math.floor(charW*8 * scaleX)
+    const fbHeight = Math.floor(charH*8 * scaleY)
+    const framebufSize = {
+      width: `${fbWidth}px`,
+      height: `${fbHeight}px`,
+    }
     const framebufStyle = {
-      width: '640px', height:'400px',
-      borderColor: borderColor
+      ...framebufSize,
+      borderColor: borderColor,
+      borderStyle: 'solid',
+      borderWidth: `${scaleX*16}px`
     }
     return (
-      <div className={styles.editorLayoutContainer}>
+      <div
+        className={styles.editorLayoutContainer}
+      >
         <div>
-          <div className={styles.fbContainer} style={framebufStyle}>
+          <div
+            className={styles.fbContainer}
+            style={framebufStyle}>
             {this.props.framebuf ?
               <FramebufferCont
+                containerSize={framebufSize}
+                canvasScale={{scaleX, scaleY}}
                 onActivationChanged={this.handleActivationChanged}
                 onCharPosChange={this.handleCharPosChange} /> :
               null}
@@ -433,10 +454,10 @@ class Editor extends Component {
               colorPalette={colorPalette}
               onSelectColor={this.handleSetColor}
               twoRows={true}
-              scale2x={true}
+              scale={{scaleX, scaleY}}
             />
           </div>
-          <CharSelect />
+          <CharSelect  canvasScale={{scaleX, scaleY}}/>
         </div>
       </div>
     )

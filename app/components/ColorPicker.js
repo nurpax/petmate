@@ -84,18 +84,21 @@ export default class ColorPicker extends Component {
   static defaultProps = {
     paletteRemap: fp.mkArray(16, i => i),
     twoRows: false,
-    scale2x: false
+    scale: { scaleX:1, scaleY:1 }
   }
   render() {
-    const scale2x = this.props
-    const blockSize = scale2x ? 32 : 16
+    const { scaleX, scaleY } = this.props.scale
+    const w = Math.floor(scaleX * 18 * 8)
+    const h = Math.floor(scaleY * 4 * 8) + 2*2
+    const blockWidth = (w / 8) - 4
+    const blockHeight = blockWidth
     const colors = this.props.paletteRemap.map((idx) => {
       const c = this.props.colorPalette[idx]
       const bg = utils.rgbToCssRgb(c)
       const style = {
         backgroundColor: bg,
-        width: `${blockSize}px`,
-        height: `${blockSize}px`
+        width: `${blockWidth}px`,
+        height: `${blockHeight}px`
       }
       const cls = this.props.selected === idx ? styles.boxSelected : styles.box
       return (
@@ -109,8 +112,8 @@ export default class ColorPicker extends Component {
     let doubleRowsStyle = {}
     if (this.props.twoRows) {
       doubleRowsStyle = {
-        width: `${8*blockSize+8*4}px`,
-        height: `${2*blockSize+2*4}px`,
+        width: `${w}px`,
+        height: `${h}px`,
         flexWrap: 'wrap'
       }
     }

@@ -1,11 +1,13 @@
 
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux'
+import ResizeObserver from 'resize-observer-polyfill'
 
 import Toolbar from './Toolbar'
 import FramebufferTabs from './FramebufferTabs'
 import Settings from './Settings'
 import ExportModal from './ExportModal'
+import Editor from './Editor';
 
 import { Framebuffer } from '../redux/editor'
 import * as reduxToolbar from '../redux/toolbar'
@@ -28,15 +30,51 @@ class ExtLink extends Component {
   }
 }
 
+class DivSize extends Component {
+  constructor (props) {
+    super(props)
+    this.ref = React.createRef()
+
+    this.state = {
+      containerSize: null
+    }
+
+    this.ro = new ResizeObserver(entries => {
+      const e = entries[0]
+      this.setState({
+        containerSize: {
+          width: e.contentRect.width,
+          height: e.contentRect.height
+        }
+      })
+    })
+  }
+
+  componentDidMount () {
+    this.ro.observe(this.ref.current)
+  }
+
+  componentWillUnmount () {
+    this.ro.unobserve(this.ref.current)
+  }
+
+
+  render () {
+    const { children } = this.props;
+    const childrenWithProps = React.Children.map(children, child =>
+      React.cloneElement(child, { containerSize: this.state.containerSize }))
+    return (
+      <div
+        className={this.props.className}
+        ref={this.ref}
+      >
+        {childrenWithProps}
+      </div>
+    )
+  }
+}
+
 class AppView extends Component {
-
-  handleKeyDown = (event) => {
-    this.props.Toolbar.keyDown(event.key)
-  }
-
-  handleKeyUp = (event) => {
-    this.props.Toolbar.keyUp(event.key)
-  }
 
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyDown);
@@ -46,6 +84,14 @@ class AppView extends Component {
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleKeyDown);
     document.removeEventListener('keyup', this.handleKeyUp);
+  }
+
+  handleKeyDown = (event) => {
+    this.props.Toolbar.keyDown(event.key)
+  }
+
+  handleKeyUp = (event) => {
+    this.props.Toolbar.keyUp(event.key)
   }
 
   render() {
@@ -58,9 +104,9 @@ class AppView extends Component {
           <div className={s.leftmenubar}>
             <Toolbar />
           </div>
-          <div className={s.editor}>
-            {this.props.children}
-          </div>
+          <DivSize className={s.editor}>
+            <Editor />
+          </DivSize>
         </div>
         <Settings />
         <ExportModal />

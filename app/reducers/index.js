@@ -1,7 +1,6 @@
 // @flow
 import { combineReducers } from 'redux'
 import undoable from 'redux-undo'
-import { routerReducer as router } from 'react-router-redux'
 import { Toolbar } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
 import { Settings } from '../redux/settings'
@@ -13,8 +12,7 @@ const rootReducer = combineReducers({
   framebufList: framebufList.reducer,
   toolbar: Toolbar.reducer,
   screens: Screens.reducer,
-  settings: Settings.reducer,
-  router
+  settings: Settings.reducer
 })
 
 const rootReducerTop = (state, action) => {

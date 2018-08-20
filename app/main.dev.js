@@ -63,7 +63,9 @@ app.on('ready', async () => {
   mainWindow = new BrowserWindow({
     show: false,
     width: 1100,
-    height: 728
+    height: 680,
+    minWidth: 768,
+    minHeight: 500
   });
 
   mainWindow.on('page-title-updated', (event, message) => {

@@ -20,7 +20,6 @@ import * as selectors from '../redux/selectors'
 import { CharPosition } from './hoc'
 
 import styles from './CharSelect.css'
-import { charGridScaleStyle }  from './inlineStyles'
 
 class CharSelect extends Component {
   constructor (props) {
@@ -64,13 +63,13 @@ class CharSelect extends Component {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
-    const w = `${2*8*16+32}px`
-    const h = `${2*8*16+32}px`
+    const { scaleX, scaleY } = this.props.canvasScale
+    const w = `${Math.floor(scaleX*8*16+scaleX*16)}px`
+    const h = `${Math.floor(scaleY*8*16+scaleY*16)}px`
     const backg = utils.colorIndexToCssRgb(
       colorPalette, this.props.backgroundColor
     )
     const s = {width: w, height:h}
-
     if (this.prevTextColor !== this.props.textColor) {
       this.computeCachedFb(this.props.textColor)
     }
@@ -85,14 +84,15 @@ class CharSelect extends Component {
         flexDirection: 'column'
       }}>
         <CharPosition
-          grid={true}
           onCharPosChanged={this.handleCharPosChanged}
           onActivationChanged={this.handleActivationChanged}
         >
           <div className={styles.csContainer} style={s}>
             <div
               style={{
-                ...charGridScaleStyle,
+                imageRendering: 'pixelated',
+                transform: `scale(${scaleX}, ${scaleY})`,
+                transformOrigin: '0% 0%',
                 width: W*9,
                 height: H*9
               }}

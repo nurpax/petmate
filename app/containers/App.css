@@ -26,8 +26,10 @@
   grid-area: editor;
   display: flex;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 20px;
   padding-left: 10px;
+  overflow-y: hidden;
 }
 
 .appGrid {
