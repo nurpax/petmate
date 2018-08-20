@@ -82,6 +82,26 @@ const findTransformed = (charset, code, mirror, angle) => {
   return code
 }
 
+export const findInverseChar = (code) => {
+  const offs = code*8
+  const charset = systemFontData
+  let bits = charset.slice(offs, offs+8).map(v => (~v) & 255)
+
+  for (let ci = 0; ci < 256; ci++) {
+    let equals = true
+    for (let i = 0; i < 8; i++) {
+      if (charset[ci*8 + i] !== bits[i]) {
+        equals = false
+        break
+      }
+    }
+    if (equals) {
+      return ci
+    }
+  }
+  return code
+}
+
 export const mirrorBrush = (brush, brushTransform) => {
   if (brush === null) {
     return null

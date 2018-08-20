@@ -48,12 +48,12 @@ export class Toolbar {
   static ROTATE_BRUSH =  `${Toolbar.name}/ROTATE_BRUSH`
   static NEXT_CHARCODE = `${Toolbar.name}/NEXT_CHARCODE`
   static NEXT_COLOR = `${Toolbar.name}/NEXT_COLOR`
+  static INVERT_CHAR = `${Toolbar.name}/INVERT_CHAR`
   static CLEAR_MOD_KEY_STATE = `${Toolbar.name}/CLEAR_MOD_KEY_STATE`
   static INC_UNDO_ID = `${Toolbar.name}/INC_UNDO_ID`
 
   static MIRROR_X = 1
   static MIRROR_Y = 2
-
 
   static actions = {
     ...settables.actions,
@@ -98,6 +98,8 @@ export class Toolbar {
             dispatch(Toolbar.actions.mirrorBrush(Toolbar.MIRROR_Y))
           } else if (key === 'h') {
             dispatch(Toolbar.actions.mirrorBrush(Toolbar.MIRROR_X))
+          } else if (key === 'f') {
+            dispatch(Toolbar.actions.invertChar())
           } else if (key === 'r') {
             dispatch(Toolbar.actions.rotateBrush())
           } else if (key === 'q') {
@@ -183,6 +185,12 @@ export class Toolbar {
       return {
         type: Toolbar.NEXT_CHARCODE,
         data: dir
+      }
+    },
+
+    invertChar: () => {
+      return {
+        type: Toolbar.INVERT_CHAR
       }
     },
 
@@ -302,6 +310,14 @@ export class Toolbar {
             col: Math.max(0, Math.min(15, state.selectedChar.col + dir.col)),
           }
         }
+      case Toolbar.INVERT_CHAR: {
+        const curScreencode = utils.charScreencodeFromRowCol(state.selectedChar)
+        const inverseRowCol = utils.rowColFromScreencode(brush.findInverseChar(curScreencode))
+        return {
+          ...state,
+          selectedChar: inverseRowCol
+        }
+      }
       case Toolbar.NEXT_COLOR: {
         const remap = action.paletteRemap
         const idx = remap.indexOf(state.textColor)
