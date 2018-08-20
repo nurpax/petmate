@@ -13,10 +13,13 @@ const FixedWidthCoord = ({axis, number}) => {
 
 export class CharSelectStatusbar extends PureComponent {
   render () {
+    const { curScreencode } = this.props
+    const screencodeStr = curScreencode !== null ?
+      curScreencode.toString(16).toUpperCase() :
+      null
     return (
       <div style={{paddingTop: '4px', fontSize: '0.8em', display: 'flex', flexDirection:'row'}}>
-        <FixedWidthCoord axis='C'
-          number={`$${this.props.curScreencode.toString(16).toUpperCase()}`}
+        <FixedWidthCoord axis='C' number={`$${screencodeStr}`}
         />
       </div>
     )
