@@ -12,9 +12,9 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.3.1.dmg'>Petmate-0.3.1.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.3.1.exe'>Petmate Setup 0.3.1.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.3.1_amd64.deb'>petmate_0.3.1_amd64.deb</a> (untested but reported to work!)
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.3.2.dmg'>Petmate-0.3.2.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.3.2.exe'>Petmate Setup 0.3.2.exe</a>
+* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.3.2_amd64.deb'>petmate_0.3.2_amd64.deb</a>
 
 ## Features
 
@@ -33,18 +33,19 @@ This project is work-in-progress.  You can view [github issues](https://github.c
 
 ## Keyboard shortcuts
 
-- `ESC` - reset brush selection
-- `a`, `s`, `d`, `w` - move left/down/right/up in the character selector.
-- `q`, `e`: Select prev/next color.
+- `ESC`: Reset brush selection
+- `a`, `s`, `d`, `w`: Move left/down/right/up in the character selector
+- `q`, `e`: Select prev/next color
+- `f`: Select the inverted version of the currently selected char.
 - `h`, `v`: Flip brush horizontally/vertically
 - `r`: Rotate current brush counterclockwise
 - `x`, `c`, `3`, `b`: Select tool (draw/colorize/char-only draw/brush)
-- `1`, `2`, `3`, `4`: draw/colorize/char-only draw/brush
+- `1`, `2`, `3`, `4`: Select tool (draw/colorize/char-only draw/brush)
 - `g`: Toggle grid
-- `Alt-Left Click`: Select character and color under cursor.
-- `Start drawing while holding SHIFT` - lock vertical or horizontal movement for drawing straight lines.
-- `⌘1-4 / Ctrl+1-4`: Switch between palettes.  Use the Preferences pane to configure palettes.
-- `Left/right arrows` - move to previous/next screen
+- `Alt-Left Click`: Select character and color under cursor
+- `Start drawing while holding SHIFT`: Lock vertical or horizontal movement for drawing straight lines
+- `⌘1-4 / Ctrl+1-4`: Switch between palettes.  Use the Preferences pane to configure palettes
+- `Left/right arrows`: Move to previous/next screen
 
 Open/Save/Save As: use platform shortcuts (e.g., Save is `Ctrl+S` on Windows, `⌘S` on Mac).
 
@@ -59,6 +60,11 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.3.2 (2018-08-21)
+- Layout changes: change the size and position of the color picker ([#93](https://github.com/nurpax/petmate/issues/93)) and make the top thumbnails bigger ([#91](https://github.com/nurpax/petmate/issues/91))
+- Add 'find the inverted version of the current char' feature.  This is bound to the 'f' key
+- Bug fix: The Alt key (or Ctrl on macOS) would get stuck in down state when tabbing in and out of Petmate ([#94](https://github.com/nurpax/petmate/issues/94))
 
 Petmate 0.3.1 (2018-08-16)
 - Display current mouse x,y character coordinates and screencode under cursor ([#88](https://github.com/nurpax/petmate/issues/88))
