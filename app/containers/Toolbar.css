@@ -28,7 +28,7 @@
 .tooltip .tooltiptext {
   visibility: hidden;
   width: 120px;
-  background-color: black;
+  background-color: #111;
   color: #fff;
   text-align: center;
   padding: 5px 0;
@@ -39,6 +39,8 @@
   top: 7px;
   left: 50px;
   z-index: 1;
+
+  filter: drop-shadow(3px 3px 2px #000);
 }
 
 .tooltip:hover .tooltiptext {

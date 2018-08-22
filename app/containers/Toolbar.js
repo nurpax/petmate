@@ -81,7 +81,12 @@ class FbColorPicker_ extends Component {
     let tooltip = null
     if (this.props.active) {
       picker =
-        <div className={classnames(styles.colorpicker, this.props.fadeOut ? styles.fadeOut : null)}>
+        <div
+          className={classnames(styles.colorpicker, this.props.fadeOut ? styles.fadeOut : null)}
+          style={{
+            filter: 'drop-shadow(3px 3px 3px #000)'
+          }}
+        >
           <ColorPicker
             color={this.props.color}
             onSelectColor={this.handleSelectColor}
