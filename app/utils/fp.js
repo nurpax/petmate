@@ -24,3 +24,17 @@ export const arrayInsertAt = (arr, idx, val) => {
 export const arrayRemoveAt = (arr, idx) => {
   return [...arr.slice(0, idx), ...arr.slice(idx + 1)]
 }
+
+export const maybeDefault = (val, defaultVal) => {
+  if (val === undefined || val === null) {
+    return defaultVal
+  }
+  return val
+}
+
+export const maybe = (val, defaultVal, f) => {
+  if (val === undefined || val === null) {
+    return defaultVal
+  }
+  return f(val)
+}

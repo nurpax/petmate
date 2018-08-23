@@ -5,6 +5,20 @@ import * as Root from '../redux/root'
 import * as selectors from '../redux/selectors'
 import { ActionCreators } from 'redux-undo';
 
+import * as fp from './fp'
+
+export const framebufFromJson = (c) => {
+  return {
+    width: c.width,
+    height: c.height,
+    backgroundColor: c.backgroundColor,
+    borderColor: c.borderColor,
+    framebuf: c.framebuf,
+    charset: fp.maybeDefault(c.charset, 'upper')
+  }
+}
+
+
 // TODO this should in fact be a thunk action creator and reside under redux
 export function load(dispatch, workspace) {
   dispatch(Root.actions.resetState())
@@ -15,7 +29,12 @@ export function load(dispatch, workspace) {
       console.warn('fbidx should be screenIdx, this should be ensured by workspace save code')
     }
     dispatch(Screens.actions.newScreen())
-    dispatch(Framebuffer.actions.importFile(framebufs[fbIdx], fbIdx))
+
+    dispatch(Framebuffer.actions.importFile(
+      framebufFromJson(framebufs[fbIdx]),
+      fbIdx
+    ))
+
     dispatch({
       ...ActionCreators.clearHistory(),
       framebufIndex: fbIdx

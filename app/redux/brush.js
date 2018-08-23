@@ -1,7 +1,6 @@
 
 import { Toolbar } from './toolbar'
 
-import { systemFontData } from '../utils'
 import * as fp from '../utils/fp'
 
 const MIRROR_X = Toolbar.MIRROR_X
@@ -82,15 +81,15 @@ const findTransformed = (charset, code, mirror, angle) => {
   return code
 }
 
-export const findInverseChar = (code) => {
+export const findInverseChar = (font, code) => {
+  const fontData = font.bits
   const offs = code*8
-  const charset = systemFontData
-  let bits = charset.slice(offs, offs+8).map(v => (~v) & 255)
+  let bits = fontData.slice(offs, offs+8).map(v => (~v) & 255)
 
   for (let ci = 0; ci < 256; ci++) {
     let equals = true
     for (let i = 0; i < 8; i++) {
-      if (charset[ci*8 + i] !== bits[i]) {
+      if (fontData[ci*8 + i] !== bits[i]) {
         equals = false
         break
       }
@@ -102,7 +101,8 @@ export const findInverseChar = (code) => {
   return code
 }
 
-export const mirrorBrush = (brush, brushTransform) => {
+export const mirrorBrush = (brush, brushTransform, font) => {
+  const fontData = font.bits
   if (brush === null) {
     return null
   }
@@ -111,7 +111,7 @@ export const mirrorBrush = (brush, brushTransform) => {
     return brush
   }
   const { framebuf } = brush
-  const charset = systemFontData
+  const charset = fontData
   const { max } = brush.brushRegion
   let width = max.col+1
   let height = max.row+1

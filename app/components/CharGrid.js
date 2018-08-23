@@ -3,13 +3,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types'
 import classnames from 'classnames'
 
-import * as utils from '../utils'
-
-const systemFontData = utils.systemFontData
-
 class CharsetCache {
-  constructor (ctx, colorPalette) {
-    const data = systemFontData
+  constructor (ctx, fontBits, colorPalette) {
+    const data = fontBits
     this.images = Array(16)
 
     for (let colorIdx = 0; colorIdx < 16; colorIdx++) {
@@ -75,6 +71,7 @@ export default class CharGrid extends Component {
       this.props.curScreencode !== prevProps.curScreencode ||
       this.props.textColor !== prevProps.textColor ||
       this.props.backgroundColor !== prevProps.backgroundColor ||
+      this.props.font !== prevProps.font ||
       this.props.colorPalette !== prevProps.colorPalette) {
       this.draw(prevProps)
     }
@@ -85,8 +82,10 @@ export default class CharGrid extends Component {
     const ctx = canvas.getContext("2d")
     const framebuf = this.props.framebuf
     let invalidate = false
-    if (this.font === null || this.props.colorPalette !== prevProps.colorPalette) {
-      this.font = new CharsetCache(ctx, this.props.colorPalette)
+    if (this.font === null ||
+      this.props.font !== prevProps.font ||
+      this.props.colorPalette !== prevProps.colorPalette) {
+      this.font = new CharsetCache(ctx, this.props.font.bits, this.props.colorPalette)
       invalidate = true
     }
 

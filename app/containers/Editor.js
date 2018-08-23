@@ -133,6 +133,7 @@ class BrushOverlay extends Component {
           grid={false}
           backgroundColor={backgroundColor}
           colorPalette={this.props.colorPalette}
+          font={this.props.font}
           framebuf={this.props.brush.framebuf}
         />
       </div>
@@ -277,6 +278,7 @@ class FramebufferView_ extends Component {
               framebufHeight={this.props.framebufHeight}
               backgroundColor={backg}
               colorPalette={this.props.colorPalette}
+              font={this.props.font}
               brush={this.props.brush}
             />
         } else {
@@ -334,6 +336,7 @@ class FramebufferView_ extends Component {
           charPos={this.props.isActive && highlightCharPos ? this.props.charPos : null}
           curScreencode={screencodeHighlight}
           textColor={colorHighlight}
+          font={this.props.font}
           colorPalette={this.props.colorPalette}
         />
         {overlays}
@@ -348,6 +351,7 @@ const FramebufferCont = connect(
   state => {
     const selected = state.toolbar.selectedChar
     const framebuf = selectors.getCurrentFramebuf(state)
+    const font = selectors.getCurrentFramebufFont(state)
     return {
       framebufIndex: selectors.getCurrentScreenFramebufIndex(state),
       framebuf: framebuf.framebuf,
@@ -359,10 +363,11 @@ const FramebufferCont = connect(
       curScreencode: utils.charScreencodeFromRowCol(selected),
       selectedTool: state.toolbar.selectedTool,
       textColor: state.toolbar.textColor,
-      brush: selectors.transformBrush(state.toolbar.brush, state.toolbar.brushTransform),
+      brush: selectors.transformBrush(state.toolbar.brush, state.toolbar.brushTransform, font),
       brushRegion: state.toolbar.brushRegion,
       shiftKey: state.toolbar.shiftKey,
       altKey: state.toolbar.altKey,
+      font,
       colorPalette: selectors.getSettingsCurrentColorPalette(state),
       canvasGrid: state.toolbar.canvasGrid
     }
@@ -457,7 +462,7 @@ class Editor extends Component {
               scale={{scaleX, scaleY}}
             />
           </div>
-          <CharSelect  canvasScale={{scaleX, scaleY}}/>
+          <CharSelect canvasScale={{scaleX, scaleY}}/>
         </div>
       </div>
     )

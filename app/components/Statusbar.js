@@ -6,7 +6,7 @@ const FixedWidthCoord = ({axis, number}) => {
   return (
     <div style={{display: 'flex', flexDirection:'row'}}>
       <div style={{width: '15px', color:'rgb(120,120,120)'}}>{axis}:</div>
-      <div style={{width: '20px', color:'rgb(173,173,173)'}}>{number !== null ? number : null}</div>
+      <div style={{width: '25px', color:'rgb(173,173,173)'}}>{number !== null ? number : null}</div>
     </div>
   )
 }
@@ -18,7 +18,7 @@ export class CharSelectStatusbar extends PureComponent {
       curScreencode.toString(16).toUpperCase() :
       null
     return (
-      <div style={{paddingTop: '4px', fontSize: '0.8em', display: 'flex', flexDirection:'row'}}>
+      <div style={{fontSize: '0.8em', display: 'flex', flexDirection:'row'}}>
         <FixedWidthCoord axis='C' number={`$${screencodeStr}`}
         />
       </div>

@@ -89,7 +89,11 @@ export const actions = {
       const screens = selectors.getScreens(state)
       const currentScreen = selectors.getCurrentScreenIndex(state)
       const framebufs = screens.map(idx => {
-        return selectors.getFramebufByIndex(state, idx)
+        const framebuf = selectors.getFramebufByIndex(state, idx)
+        return {
+          ...framebuf,
+          font: selectors.getFramebufFont(state, framebuf)
+        }
       })
       const palette = selectors.getSettingsCurrentColorPalette(state)
       dialogExportFile(type, framebufs, palette, {

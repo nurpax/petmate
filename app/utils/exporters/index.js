@@ -1,5 +1,4 @@
 
-import { systemFontData } from '../../utils'
 import { chunkArray, executablePrgTemplate } from '../../utils'
 
 import { saveAsm } from './asm'
@@ -39,7 +38,8 @@ function doublePixels(buf, w, h) {
 
 const savePNG = (filename, fb, palette, options) => {
   try {
-    const { width, height, framebuf, backgroundColor } = fb
+    const { width, height, framebuf, backgroundColor, font } = fb
+    const fontData = font.bits
     const dwidth = width*8
     const dheight = height*8
     const buf = Buffer.alloc(dwidth * dheight * 4)
@@ -55,7 +55,7 @@ const savePNG = (filename, fb, palette, options) => {
         const color = palette[col]
 
         for (let cy = 0; cy < 8; cy++) {
-          const p = systemFontData[boffs + cy]
+          const p = fontData[boffs + cy]
           for (let i = 0; i < 8; i++) {
             const set = ((128 >> i) & p) !== 0
             const offs = (y*8+cy) * dwidth + (x*8 + i)

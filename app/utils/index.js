@@ -90,6 +90,7 @@ const framebufFields = (framebuf) => {
     height: framebuf.height,
     backgroundColor: framebuf.backgroundColor,
     borderColor: framebuf.borderColor,
+    charset: framebuf.charset,
     framebuf: framebuf.framebuf
   }
 }
@@ -151,13 +152,7 @@ const loadJsonFramebuf = (filename, importFile) => {
     const content = fs.readFileSync(filename, 'utf-8')
     const c = JSON.parse(content)
     if (c.version === 1) {
-      importFile({
-        width: c.width,
-        height: c.height,
-        backgroundColor: c.backgroundColor,
-        borderColor: c.borderColor,
-        framebuf: c.framebuf
-      })
+      importFile(workspace.framebufFromJson(c))
     } else {
       alert(`Unknown file format version ${c.version}!`)
     }
@@ -223,6 +218,7 @@ export const loadAppFile = (filename) => {
 }
 
 export const systemFontData = loadAppFile('./assets/system-charset.bin')
+export const systemFontDataLower = loadAppFile('./assets/system-charset-lower.bin')
 export const executablePrgTemplate = loadAppFile('./assets/template.prg')
 
 function setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename) {

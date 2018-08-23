@@ -30,8 +30,14 @@ class FramebufTab extends Component {
   }
 
   render () {
-    const { width, height, framebuf, backgroundColor, borderColor } =
-      this.props.framebuf
+    const {
+      width,
+      height,
+      framebuf,
+      backgroundColor,
+      borderColor
+    } = this.props.framebuf
+    const font = this.props.font
     const colorPalette = this.props.colorPalette
     const backg = utils.colorIndexToCssRgb(colorPalette, backgroundColor)
     const bord = utils.colorIndexToCssRgb(colorPalette, borderColor)
@@ -76,6 +82,7 @@ class FramebufTab extends Component {
               backgroundColor={backg}
               grid={false}
               framebuf={framebuf}
+              font={font}
               colorPalette={colorPalette}
             />
           </div>
@@ -110,6 +117,7 @@ class FramebufferTabs_ extends Component {
 
   render () {
     const lis = this.props.screens.map((framebufId, i) => {
+      const framebuf = this.props.getFramebufByIndex(framebufId)
       return (
         <FramebufTab
           key={framebufId}
@@ -117,8 +125,9 @@ class FramebufferTabs_ extends Component {
           onSetActiveTab={this.handleActiveClick}
           onRemoveTab={this.handleRemoveTab}
           onDuplicateTab={this.handleDuplicateTab}
-          framebuf={this.props.getFramebufByIndex(framebufId)}
+          framebuf={framebuf}
           active={i === this.props.activeScreen}
+          font={this.props.getFont(framebuf)}
           colorPalette={this.props.colorPalette} />
       )
     })
@@ -148,6 +157,7 @@ const mapStateToProps = state => {
     activeScreen: selectors.getCurrentScreenIndex(state),
     screens: selectors.getScreens(state),
     getFramebufByIndex: (idx) => selectors.getFramebufByIndex(state, idx),
+    getFont: (fb) => selectors.getFramebufFont(state, fb),
     colorPalette: selectors.getSettingsCurrentColorPalette(state)
   }
 }

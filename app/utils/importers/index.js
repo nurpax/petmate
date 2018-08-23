@@ -1,5 +1,6 @@
 const fs = require('fs')
 
+import { framebufFromJson } from '../workspace'
 import { chunkArray } from '../../utils'
 
 function screencodeColorMap(charcodes, colors) {
@@ -43,13 +44,13 @@ export const loadCalTxtFramebuf = (filename, importFile) => {
       }
     })
     const codes = screencodeColorMap(charcodes, colors)
-    importFile({
+    importFile(framebufFromJson({
       width: 40,
       height: 25,
       backgroundColor: 0,
       borderColor: 0,
       framebuf: chunkArray(codes, 40)
-    })
+    }))
   }
   catch(e) {
     alert(`Failed to load file '${filename}'!`)
@@ -94,13 +95,13 @@ export const loadMarqCFramebuf = (filename, importFile) => {
       const charcodes = bytes.slice(2, 1002)
       const colors = bytes.slice(1002, 2002)
       const codes = screencodeColorMap(charcodes, colors)
-      return {
+      return framebufFromJson({
         width: 40,
         height: 25,
         backgroundColor: bytes[1],
         borderColor: bytes[0],
         framebuf: chunkArray(codes, 40)
-      }
+      })
     })
     importFile(framebufs)
   } catch(e) {

@@ -1,5 +1,6 @@
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
 import { Framebuffer } from '../redux/editor'
@@ -9,6 +10,7 @@ import {
   TOOL_COLORIZE,
   TOOL_BRUSH
 } from '../redux/toolbar'
+import { framebufIndexMergeProps } from '../redux/utils'
 
 import CharGrid from '../components/CharGrid'
 import CharPosOverlay from '../components/CharPosOverlay'
@@ -20,6 +22,60 @@ import * as selectors from '../redux/selectors'
 import { CharPosition } from './hoc'
 
 import styles from './CharSelect.css'
+
+const SelectButton = ({name, current, setCharset, children}) => {
+  return (
+    <div style={{
+      marginLeft: '5px',
+      paddingTop: '2px',
+      paddingBottom: '2px',
+      paddingLeft: '4px',
+      paddingRight: '4px',
+      color: 'rgb(173,173,173)',
+      borderStyle: 'solid',
+      borderWidth: '1px',
+      borderColor: name === current ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.0)',
+      cursor: 'default'
+    }}
+    onClick={() => setCharset(name)}
+    >
+      {children}
+    </div>
+  )
+}
+
+class FontSelector extends Component {
+  static propTypes = {
+    currentCharset: PropTypes.string.isRequired,
+    setCharset: PropTypes.func.isRequired
+  }
+
+  render () {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        paddingLeft: '10px',
+        fontSize: '0.8em',
+        color: 'rgb(120,120,120)'
+      }}>
+        <div>Charset: </div>
+        <SelectButton
+          name='upper'
+          current={this.props.currentCharset}
+          setCharset={this.props.setCharset}>
+          ABC
+        </SelectButton>
+        <SelectButton
+          name='lower'
+          current={this.props.currentCharset}
+          setCharset={this.props.setCharset}>
+          abc
+        </SelectButton>
+      </div>
+    )
+  }
+}
 
 class CharSelect extends Component {
   constructor (props) {
@@ -77,7 +133,6 @@ class CharSelect extends Component {
     if (this.state.isActive) {
       screencode = utils.charScreencodeFromRowCol(this.state.charPos)
     }
-
     return (
       <div style={{
         display: 'flex',
@@ -105,6 +160,7 @@ class CharSelect extends Component {
                 grid={true}
                 framebuf={this.fb}
                 selected={this.props.selected}
+                font={this.props.font}
                 colorPalette={colorPalette}
               />
               {this.state.isActive ?
@@ -127,7 +183,21 @@ class CharSelect extends Component {
             </div>
           </div>
         </CharPosition>
-        <CharSelectStatusbar curScreencode={screencode} />
+        <div style={{
+          display: 'flex',
+          flexDirection: 'row',
+          marginTop:'4px',
+          alignItems:'center',
+          justifyContent: 'space-between'
+        }}>
+          <CharSelectStatusbar
+            curScreencode={screencode}
+          />
+          <FontSelector
+            currentCharset={this.props.font.charset}
+            setCharset={this.props.Framebuffer.setCharset}
+          />
+        </div>
       </div>
     )
   }
@@ -135,6 +205,7 @@ class CharSelect extends Component {
 
 const mapDispatchToProps = dispatch => {
   return {
+    Framebuffer: Framebuffer.bindDispatch(dispatch),
     Toolbar: Toolbar.bindDispatch(dispatch)
   }
 }
@@ -143,16 +214,19 @@ const mapStateToProps = state => {
   const selected = state.toolbar.selectedChar
   const framebuf = selectors.getCurrentFramebuf(state)
   return {
+    framebufIndex: selectors.getCurrentScreenFramebufIndex(state),
     backgroundColor: framebuf.backgroundColor,
     selected,
     curScreencode: utils.charScreencodeFromRowCol(selected),
     textColor: state.toolbar.textColor,
+    font: selectors.getCurrentFramebufFont(state),
     colorPalette: selectors.getSettingsCurrentColorPalette(state)
   }
 }
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
+  framebufIndexMergeProps
 )(CharSelect)
 

@@ -1,6 +1,7 @@
 
-import { colorPalettes } from '../utils'
+import { colorPalettes, systemFontData, systemFontDataLower } from '../utils'
 import { mirrorBrush } from './brush'
+import { CHARSET_UPPER, CHARSET_LOWER } from './editor'
 
 // TODO memoize
 
@@ -30,6 +31,27 @@ export const getFramebufByIndex = (state, idx) => {
 
 export const getCurrentFramebuf = (state) => {
   return getFramebufByIndex(state, getCurrentScreenFramebufIndex(state))
+}
+
+export const getFramebufFont = (state, framebuf) => {
+  const { charset } = framebuf
+  if (charset !== CHARSET_UPPER && charset !== CHARSET_LOWER) {
+    console.error('unknown charset ', charset)
+  }
+
+  let bits = systemFontData
+  if (charset === CHARSET_LOWER) {
+    bits = systemFontDataLower
+  }
+  return {
+    charset,
+    bits
+  }
+}
+
+export const getCurrentFramebufFont = (state) => {
+  const fb = getCurrentFramebuf(state)
+  return getFramebufFont(state, fb)
 }
 
 export const getSettings = (state) => {
@@ -67,6 +89,6 @@ export const getSettingsEditingCurrentColorPalette = (state) => {
   return getSettingsColorPaletteByName(state, settings.selectedColorPalette)
 }
 
-export const transformBrush = (brush, transform) => {
-  return mirrorBrush(brush, transform)
+export const transformBrush = (brush, transform, font) => {
+  return mirrorBrush(brush, transform, font)
 }

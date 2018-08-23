@@ -4,6 +4,9 @@ import { bindActionCreators } from 'redux'
 import { settable, reduxSettables } from './settable'
 import { Toolbar } from './toolbar'
 
+export const CHARSET_UPPER = 'upper'
+export const CHARSET_LOWER = 'lower'
+
 const FB_WIDTH = 40
 const FB_HEIGHT = 25
 
@@ -59,7 +62,8 @@ function emptyFramebuf () {
 
 const settables = reduxSettables([
   settable('Framebuffer', 'backgroundColor', 6),
-  settable('Framebuffer', 'borderColor', 14)
+  settable('Framebuffer', 'borderColor', 14),
+  settable('Framebuffer', 'charset', CHARSET_UPPER)
 ])
 
 export class Framebuffer {
@@ -145,7 +149,8 @@ export class Framebuffer {
           width: c.width,
           height: c.height,
           backgroundColor: c.backgroundColor,
-          borderColor: c.borderColor
+          borderColor: c.borderColor,
+          charset: c.charset
         }
       default:
         return settables.reducer(state, action)

@@ -189,8 +189,14 @@ export class Toolbar {
     },
 
     invertChar: () => {
-      return {
-        type: Toolbar.INVERT_CHAR
+      return (dispatch, getState) => {
+        const font = selectors.getCurrentFramebufFont(getState())
+        dispatch({
+          type: Toolbar.INVERT_CHAR,
+          data: {
+            font
+          }
+        })
       }
     },
 
@@ -259,7 +265,7 @@ export class Toolbar {
       return {
         type: Toolbar.CAPTURE_BRUSH,
         data: {
-          framebuf:capfb,
+          framebuf: capfb,
           brushRegion: {
             min: { row: 0, col: 0 },
             max: { row: h-1, col: w-1 }
@@ -312,7 +318,7 @@ export class Toolbar {
         }
       case Toolbar.INVERT_CHAR: {
         const curScreencode = utils.charScreencodeFromRowCol(state.selectedChar)
-        const inverseRowCol = utils.rowColFromScreencode(brush.findInverseChar(curScreencode))
+        const inverseRowCol = utils.rowColFromScreencode(brush.findInverseChar(action.data.font, curScreencode))
         return {
           ...state,
           selectedChar: inverseRowCol
