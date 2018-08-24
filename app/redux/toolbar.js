@@ -218,8 +218,12 @@ export class Toolbar {
     },
 
     setScreencode: (code) => {
-      const charPos = utils.rowColFromScreencode(code)
-      return Toolbar.actions.setSelectedChar(charPos)
+      return (dispatch, getState) => {
+        const state = getState()
+        const font = selectors.getCurrentFramebufFont(state)
+        const charPos = utils.rowColFromScreencode(font, code)
+        dispatch(Toolbar.actions.setSelectedChar(charPos))
+      }
     },
 
     setCurrentColor: (color) => {
