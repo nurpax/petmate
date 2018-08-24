@@ -208,6 +208,7 @@
     "electron-debug": "^2.0.0",
     "electron-is-dev": "^0.3.0",
     "eslint-config-react-app": "^2.1.0",
+    "fast-memoize": "^2.5.1",
     "react": "^16.4.1",
     "react-cursor-position": "^2.5.0",
     "react-dom": "^16.4.1",

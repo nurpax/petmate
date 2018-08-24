@@ -1,4 +1,5 @@
 
+import memoize  from 'fast-memoize'
 import { colorPalettes, systemFontData, systemFontDataLower } from '../utils'
 import { mirrorBrush } from './brush'
 import { CHARSET_UPPER, CHARSET_LOWER } from './editor'
@@ -33,12 +34,10 @@ export const getCurrentFramebuf = (state) => {
   return getFramebufByIndex(state, getCurrentScreenFramebufIndex(state))
 }
 
-export const getFramebufFont = (state, framebuf) => {
-  const { charset } = framebuf
+const getFontBits = (charset) => {
   if (charset !== CHARSET_UPPER && charset !== CHARSET_LOWER) {
     console.error('unknown charset ', charset)
   }
-
   let bits = systemFontData
   if (charset === CHARSET_LOWER) {
     bits = systemFontDataLower
@@ -47,6 +46,16 @@ export const getFramebufFont = (state, framebuf) => {
     charset,
     bits
   }
+}
+
+// getFontBits returns a new object every time it's called.  This causes
+// serious cache invalidates in rendering the canvas (since it thinks the font
+// changed).  So memoize the returned object from getFontBits in case it's
+// called with the same value.
+const getFontBitsMemoized = memoize(getFontBits)
+
+export const getFramebufFont = (state, framebuf) => {
+  return getFontBitsMemoized(framebuf.charset)
 }
 
 export const getCurrentFramebufFont = (state) => {
