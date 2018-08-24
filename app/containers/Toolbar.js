@@ -189,7 +189,7 @@ class ToolbarView extends Component {
   }
 
   render() {
-    if (this.props.framebufIndex === null) {
+    if (this.props.backgroundColor === null) {
       return null
     }
     const mkTool = ({ tool, iconName, tooltip, subIcon }) => {
@@ -301,8 +301,8 @@ const mapStateToProps = state => {
   return {
     framebufIndex: selectors.getCurrentScreenFramebufIndex(state),
     screens: selectors.getScreens(state),
-    backgroundColor: fp.maybeDefault(framebuf.backgroundColor, null),
-    borderColor: fp.maybeDefault(framebuf.borderColor, null),
+    backgroundColor: fp.maybe(framebuf, null, fb => fb.backgroundColor),
+    borderColor: fp.maybe(framebuf, null, fb => fb.borderColor),
     selectedTool: state.toolbar.selectedTool,
     paletteRemap: selectors.getSettingsPaletteRemap(state),
     colorPalette: selectors.getSettingsCurrentColorPalette(state)
