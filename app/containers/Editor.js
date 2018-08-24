@@ -415,7 +415,6 @@ class Editor extends Component {
     if (this.props.containerSize !== null) {
       scaleX = this.props.containerSize.width/515.0
     }
-    console.log('SCALE X XXXXXX', scaleX)
     const scaleY = scaleX
     const { width: charW, height: charH } = this.props.framebuf
     const fbWidth = Math.floor(charW*8 * scaleX)
