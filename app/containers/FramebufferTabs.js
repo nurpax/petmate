@@ -1,5 +1,5 @@
 
-import React, { Component } from 'react';
+import React, { Component, PureComponent } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
@@ -17,7 +17,7 @@ import * as selectors from '../redux/selectors'
 
 import * as utils from '../utils'
 
-class FramebufTab extends Component {
+class FramebufTab extends PureComponent {
   handleSelect = () => {
     this.props.onSetActiveTab(this.props.id)
   }

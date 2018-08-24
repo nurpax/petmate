@@ -1,5 +1,5 @@
 
-import React, { Component } from 'react';
+import React, { Component, PureComponent } from 'react';
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
@@ -44,7 +44,7 @@ const SelectButton = ({name, current, setCharset, children}) => {
   )
 }
 
-class FontSelector extends Component {
+class FontSelector extends PureComponent {
   static propTypes = {
     currentCharset: PropTypes.string.isRequired,
     setCharset: PropTypes.func.isRequired

@@ -1,5 +1,5 @@
 
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, PureComponent } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import classnames from 'classnames'
@@ -7,6 +7,7 @@ import { ActionCreators } from 'redux-undo';
 
 import ColorPicker from '../components/ColorPicker'
 import * as utils from '../utils'
+import * as fp from '../utils/fp'
 import {
   Toolbar,
   TOOL_DRAW,
@@ -22,7 +23,7 @@ import styles from './Toolbar.css';
 
 import { withHoverFade } from './hoc'
 
-class Icon extends Component {
+class Icon extends PureComponent {
   static defaultProps = {
     bottom: false,
     subIcon: null
@@ -47,7 +48,7 @@ class Icon extends Component {
   }
 }
 
-class SelectableTool extends Component {
+class SelectableTool extends PureComponent {
   handleClick = () => {
     this.props.setSelectedTool(this.props.tool)
   }
@@ -63,7 +64,7 @@ class SelectableTool extends Component {
   }
 }
 
-class FbColorPicker_ extends Component {
+class FbColorPicker_ extends PureComponent {
   handleSelectColor = (idx) => {
     this.props.onSelectColor(idx, null)
   }
@@ -188,7 +189,7 @@ class ToolbarView extends Component {
   }
 
   render() {
-    if (this.props.framebuf === null) {
+    if (this.props.framebufIndex === null) {
       return null
     }
     const mkTool = ({ tool, iconName, tooltip, subIcon }) => {
@@ -244,7 +245,7 @@ class ToolbarView extends Component {
           pickerId='border'
           containerClassName={styles.tooltip}
           active={this.state.pickerActive.border}
-          color={this.props.framebuf.borderColor}
+          color={this.props.borderColor}
           onSetActive={this.setPickerActive}
           onSelectColor={this.handleSelectBorderColor}
           paletteRemap={this.props.paletteRemap}
@@ -255,7 +256,7 @@ class ToolbarView extends Component {
           pickerId='background'
           containerClassName={styles.tooltip}
           active={this.state.pickerActive.background}
-          color={this.props.framebuf.backgroundColor}
+          color={this.props.backgroundColor}
           onSetActive={this.setPickerActive}
           onSelectColor={this.handleSelectBgColor}
           paletteRemap={this.props.paletteRemap}
@@ -300,8 +301,8 @@ const mapStateToProps = state => {
   return {
     framebufIndex: selectors.getCurrentScreenFramebufIndex(state),
     screens: selectors.getScreens(state),
-    getFramebufByIndex: fid => selectors.getFramebufByIndex(state, fid),
-    framebuf: framebuf,
+    backgroundColor: fp.maybeDefault(framebuf.backgroundColor, null),
+    borderColor: fp.maybeDefault(framebuf.borderColor, null),
     selectedTool: state.toolbar.selectedTool,
     paletteRemap: selectors.getSettingsPaletteRemap(state),
     colorPalette: selectors.getSettingsCurrentColorPalette(state)
