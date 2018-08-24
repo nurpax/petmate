@@ -2,6 +2,7 @@
 import React, { Component, PureComponent } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
+import { SortableContainer, SortableElement, arrayMove } from 'react-sortable-hoc';
 
 import classnames from 'classnames'
 
@@ -92,6 +93,18 @@ class FramebufTab extends PureComponent {
   }
 }
 
+const SortableFramebufTab = SortableElement((props) =>
+  <FramebufTab {...props} />
+)
+
+const SortableTabList = SortableContainer(({children}) => {
+  return (
+    <div className={styles.tabs}>
+      {children}
+    </div>
+  )
+})
+
 class FramebufferTabs_ extends Component {
   handleActiveClick = (idx) => {
     this.props.Screens.setCurrentScreenIndex(idx)
@@ -115,12 +128,17 @@ class FramebufferTabs_ extends Component {
     this.props.Toolbar.setCtrlKey(false)
   }
 
+  onSortEnd = ({oldIndex, newIndex}) => {
+    this.props.Screens.setScreenOrder(arrayMove(this.props.screens, oldIndex, newIndex))
+  }
+
   render () {
     const lis = this.props.screens.map((framebufId, i) => {
       const framebuf = this.props.getFramebufByIndex(framebufId)
       return (
-        <FramebufTab
+        <SortableFramebufTab
           key={framebufId}
+          index={i}
           id={i}
           onSetActiveTab={this.handleActiveClick}
           onRemoveTab={this.handleRemoveTab}
@@ -133,12 +151,17 @@ class FramebufferTabs_ extends Component {
     })
     return (
       <div className={styles.tabHeadings}>
-        <div className={styles.tabs}>
+        <SortableTabList
+          distance={5}
+          axis='x'
+          helperClass={styles.sortableHelper}
+          onSortEnd={this.onSortEnd}
+        >
           {lis}
           <div className={classnames(styles.tab, styles.newScreen)}>
             <i onClick={this.handleNewTab} className='fa fa-plus'></i>
           </div>
-        </div>
+        </SortableTabList>
       </div>
     )
   }

@@ -31,3 +31,7 @@
 .tab.newScreen:hover {
   color: rgb(255,255,255);
 }
+
+.sortableHelper {
+  z-index: 15;
+}
