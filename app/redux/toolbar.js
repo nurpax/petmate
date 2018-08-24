@@ -317,8 +317,9 @@ export class Toolbar {
           }
         }
       case Toolbar.INVERT_CHAR: {
-        const curScreencode = utils.charScreencodeFromRowCol(state.selectedChar)
-        const inverseRowCol = utils.rowColFromScreencode(brush.findInverseChar(action.data.font, curScreencode))
+        const { font } = action.data
+        const curScreencode = utils.charScreencodeFromRowCol(font, state.selectedChar)
+        const inverseRowCol = utils.rowColFromScreencode(font, brush.findInverseChar(action.data.font, curScreencode))
         return {
           ...state,
           selectedChar: inverseRowCol

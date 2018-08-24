@@ -1,6 +1,11 @@
 
 import memoize  from 'fast-memoize'
-import { colorPalettes, systemFontData, systemFontDataLower } from '../utils'
+import {
+  colorPalettes,
+  systemFontData,
+  systemFontDataLower,
+  charOrderUpper,
+  charOrderLower } from '../utils'
 import { mirrorBrush } from './brush'
 import { CHARSET_UPPER, CHARSET_LOWER } from './editor'
 
@@ -39,12 +44,15 @@ const getFontBits = (charset) => {
     console.error('unknown charset ', charset)
   }
   let bits = systemFontData
+  let charOrder = charOrderUpper
   if (charset === CHARSET_LOWER) {
     bits = systemFontDataLower
+    charOrder = charOrderLower
   }
   return {
     charset,
-    bits
+    bits,
+    charOrder
   }
 }
 

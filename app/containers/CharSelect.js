@@ -25,17 +25,10 @@ import styles from './CharSelect.css'
 
 const SelectButton = ({name, current, setCharset, children}) => {
   return (
-    <div style={{
-      marginLeft: '5px',
-      paddingTop: '2px',
-      paddingBottom: '2px',
-      paddingLeft: '4px',
-      paddingRight: '4px',
-      color: 'rgb(173,173,173)',
+    <div className={styles.charsetSelectButton} style={{
       borderStyle: 'solid',
       borderWidth: '1px',
-      borderColor: name === current ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.0)',
-      cursor: 'default'
+      borderColor: name === current ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.0)'
     }}
     onClick={() => setCharset(name)}
     >
@@ -89,15 +82,17 @@ class CharSelect extends Component {
   }
 
   computeCachedFb(textColor) {
+    const { font } = this.props
     this.fb = fp.mkArray(16, y => {
       return fp.mkArray(16, x => {
         return {
-          code: utils.charScreencodeFromRowCol({row:y, col:x}),
+          code: utils.charScreencodeFromRowCol(font, {row:y, col:x}),
           color: textColor
         }
       })
     })
     this.prevTextColor = textColor
+    this.font = font
   }
 
   handleClick = () => {
@@ -115,7 +110,7 @@ class CharSelect extends Component {
   render () {
     const W = 16
     const H = 16
-    const { colorPalette } = this.props
+    const { colorPalette, font } = this.props
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
@@ -126,12 +121,13 @@ class CharSelect extends Component {
       colorPalette, this.props.backgroundColor
     )
     const s = {width: w, height:h}
-    if (this.prevTextColor !== this.props.textColor) {
+    if (this.prevTextColor !== this.props.textColor ||
+      this.font !== this.props.font) {
       this.computeCachedFb(this.props.textColor)
     }
     let screencode = this.props.curScreencode
     if (this.state.isActive) {
-      screencode = utils.charScreencodeFromRowCol(this.state.charPos)
+      screencode = utils.charScreencodeFromRowCol(font, this.state.charPos)
     }
     return (
       <div style={{
@@ -194,7 +190,7 @@ class CharSelect extends Component {
             curScreencode={screencode}
           />
           <FontSelector
-            currentCharset={this.props.font.charset}
+            currentCharset={font.charset}
             setCharset={this.props.Framebuffer.setCharset}
           />
         </div>
@@ -213,13 +209,14 @@ const mapDispatchToProps = dispatch => {
 const mapStateToProps = state => {
   const selected = state.toolbar.selectedChar
   const framebuf = selectors.getCurrentFramebuf(state)
+  const font = selectors.getCurrentFramebufFont(state)
   return {
     framebufIndex: selectors.getCurrentScreenFramebufIndex(state),
     backgroundColor: framebuf.backgroundColor,
     selected,
-    curScreencode: utils.charScreencodeFromRowCol(selected),
+    curScreencode: utils.charScreencodeFromRowCol(font, selected),
     textColor: state.toolbar.textColor,
-    font: selectors.getCurrentFramebufFont(state),
+    font,
     colorPalette: selectors.getSettingsCurrentColorPalette(state)
   }
 }

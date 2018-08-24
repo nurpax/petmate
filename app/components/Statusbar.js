@@ -12,6 +12,9 @@ const FixedWidthCoord = ({axis, number}) => {
 }
 
 export class CharSelectStatusbar extends PureComponent {
+  static propTypes = {
+    curScreencode: PropTypes.number
+  }
   render () {
     const { curScreencode } = this.props
     const screencodeStr = curScreencode !== null ?

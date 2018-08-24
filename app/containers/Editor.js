@@ -360,7 +360,7 @@ const FramebufferCont = connect(
       backgroundColor: framebuf.backgroundColor,
       selected,
       undoId: state.toolbar.undoId,
-      curScreencode: utils.charScreencodeFromRowCol(selected),
+      curScreencode: utils.charScreencodeFromRowCol(font, selected),
       selectedTool: state.toolbar.selectedTool,
       textColor: state.toolbar.textColor,
       brush: selectors.transformBrush(state.toolbar.brush, state.toolbar.brushTransform, font),
@@ -413,8 +413,9 @@ class Editor extends Component {
 
     let scaleX = 1
     if (this.props.containerSize !== null) {
-      scaleX = this.props.containerSize.width/510.0
+      scaleX = this.props.containerSize.width/515.0
     }
+    console.log('SCALE X XXXXXX', scaleX)
     const scaleY = scaleX
     const { width: charW, height: charH } = this.props.framebuf
     const fbWidth = Math.floor(charW*8 * scaleX)
