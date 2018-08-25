@@ -2,7 +2,7 @@
 import React, { Component, PureComponent } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
-import { SortableContainer, SortableElement, arrayMove } from 'react-sortable-hoc';
+import { SortableContainer, SortableElement, arrayMove } from '../external/react-sortable-hoc'
 
 import classnames from 'classnames'
 

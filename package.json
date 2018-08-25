@@ -214,7 +214,6 @@
     "react-dom": "^16.4.1",
     "react-hot-loader": "^4.3.3",
     "react-redux": "^5.0.7",
-    "react-sortable-hoc": "^0.8.3",
     "redux": "^4.0.0",
     "redux-thunk": "^2.3.0",
     "redux-undo": "^1.0.0-beta9-9-7",

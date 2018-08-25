@@ -4,7 +4,7 @@ import styles from './ColorPicker.css';
 import * as utils from '../utils'
 import * as fp from '../utils/fp'
 
-import { SortableContainer, SortableElement, arrayMove } from 'react-sortable-hoc';
+import { SortableContainer, SortableElement, arrayMove } from '../external/react-sortable-hoc'
 
 const ColorBlock = ({ color, colorPalette, hover }) => {
   const bg = utils.colorIndexToCssRgb(colorPalette, color)
