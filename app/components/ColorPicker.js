@@ -49,6 +49,7 @@ export class SortableColorPalette extends Component {
       <SortableList
         helperClass={styles.sortableHelper}
         axis='x'
+        lockAxis='x'
         items={this.props.palette}
         colorPalette={this.props.colorPalette}
         onSortEnd={this.onSortEnd}
