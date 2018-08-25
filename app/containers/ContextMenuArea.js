@@ -15,7 +15,7 @@ export default class ContextMenuArea extends Component {
   constructor (props) {
     super(props)
     this.menu = new Menu()
-    this.rootElement = null
+    this.rootElement = React.createRef()
   }
 
   handleContextMenu = (e) => {
@@ -26,19 +26,19 @@ export default class ContextMenuArea extends Component {
 
   componentDidMount() {
     this.menu = Menu.buildFromTemplate(this.props.menuItems)
-    this.rootElement.addEventListener(
+    this.rootElement.current.addEventListener(
       "contextmenu",
       this.handleContextMenu
     )
   }
 
   componentWillUnmount() {
-    this.rootElement.removeEventListener("contextmenu", this.handleContextMenu)
+    this.rootElement.current.removeEventListener("contextmenu", this.handleContextMenu)
   }
 
   render() {
     return (
-      <div style={{ ...this.props.style }} ref={ref => (this.rootElement = ref)}>
+      <div style={{ ...this.props.style }} ref={this.rootElement}>
         {this.props.children}
       </div>
     );

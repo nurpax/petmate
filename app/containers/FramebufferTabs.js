@@ -154,7 +154,6 @@ class FramebufferTabs_ extends Component {
         <SortableTabList
           distance={5}
           axis='x'
-          helperClass={styles.sortableHelper}
           onSortEnd={this.onSortEnd}
         >
           {lis}
