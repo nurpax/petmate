@@ -17,17 +17,135 @@ import * as Screens from '../redux/screens'
 import * as selectors from '../redux/selectors'
 
 import * as utils from '../utils'
+import * as fp from '../utils/fp'
+
+// This class is a bit funky with how it disables/enables keyboard shortcuts
+// globally for the app while the input element has focus.  Maybe there'd be a
+// better way to do this, but this seems to work.
+class NameInput_ extends Component {
+  state = {
+    name: this.props.name
+  }
+
+  componentWillUnmount () {
+    this.props.Toolbar.setShortcutsActive(true)
+  }
+
+  handleSubmit = (e) => {
+    e.preventDefault()
+    this.props.onSubmit(this.state.name)
+    this.props.Toolbar.setShortcutsActive(true)
+  }
+
+  handleChange = (e) => {
+    this.setState({ name: e.target.value })
+  }
+
+  handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      this.props.onCancel()
+      this.props.Toolbar.setShortcutsActive(true)
+    }
+  }
+
+  handleBlur = (e) => {
+    this.props.onBlur()
+    this.props.Toolbar.setShortcutsActive(true)
+  }
+
+  handleFocus = (e) => {
+    this.props.Toolbar.setShortcutsActive(false)
+    e.target.select()
+  }
+
+  render () {
+    return (
+      <div className={styles.tabNameEditor}>
+        <form onSubmit={this.handleSubmit}>
+          <input
+            autoFocus
+            onKeyDown={this.handleKeyDown}
+            value={this.state.name}
+            onChange={this.handleChange}
+            onBlur={this.handleBlur}
+            onFocus={this.handleFocus}
+            type='text'
+            size={14} />
+        </form>
+      </div>
+    )
+  }
+}
+
+const NameInput = connect(
+  null,
+  (dispatch, ownProps) => {
+    return {
+      Toolbar: Toolbar.bindDispatch(dispatch)
+    }
+  }
+)(NameInput_)
+
+
+class NameEditor extends Component {
+  state = {
+    editing: false,
+  }
+
+  handleEditingClick = () => {
+    this.setState({ editing: true })
+  }
+
+  handleBlur = () => {
+    this.setState({ editing: false})
+  }
+
+  handleSubmit = (name) => {
+    this.setState({ editing: false})
+    this.props.onNameSave(name)
+  }
+
+  handleCancel = () => {
+    this.setState({ editing: false})
+  }
+
+  render () {
+    if (this.state.editing) {
+      return (
+        <NameInput
+          name={this.props.name}
+          onSubmit={this.handleSubmit}
+          onBlur={this.handleBlur}
+          onCancel={this.handleCancel}
+        />
+      )
+    }
+    return (
+      <div className={styles.tabName} onClick={this.handleEditingClick}>
+        {this.props.name}
+      </div>
+    )
+  }
+}
 
 class FramebufTab extends PureComponent {
   handleSelect = () => {
     this.props.onSetActiveTab(this.props.id)
   }
+
   handleMenuDuplicate = () => {
     this.props.onDuplicateTab(this.props.id)
   }
 
   handleMenuRemove = () => {
     this.props.onRemoveTab(this.props.id)
+  }
+
+  handleNameSave = (name) => {
+    if (name !== '') {
+      this.props.setName(name, this.props.framebufId)
+    }
   }
 
   render () {
@@ -50,8 +168,7 @@ class FramebufTab extends PureComponent {
       backgroundColor: '#000',
       borderStyle: 'solid',
       borderWidth: '5px',
-      borderColor: bord,
-      marginRight: '4px'
+      borderColor: bord
     }
     const scaleStyle = {
       transform: `scale(${scaleX}, ${scaleY})`,
@@ -70,25 +187,36 @@ class FramebufTab extends PureComponent {
     ]
 
     return (
-      <ContextMenuArea menuItems={menuItems}>
-        <div
-          onClick={this.handleSelect}
-          className={classnames(styles.tab, this.props.active ? styles.active : null)}
-          style={s}
-        >
-          <div style={scaleStyle}>
-            <CharGrid
-              width={width}
-              height={height}
-              backgroundColor={backg}
-              grid={false}
-              framebuf={framebuf}
-              font={font}
-              colorPalette={colorPalette}
-            />
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        marginRight: '4px'
+      }}>
+        <ContextMenuArea menuItems={menuItems}>
+          <div
+            onClick={this.handleSelect}
+            className={classnames(styles.tab, this.props.active ? styles.active : null)}
+            style={s}
+          >
+            <div style={scaleStyle}>
+              <CharGrid
+                width={width}
+                height={height}
+                backgroundColor={backg}
+                grid={false}
+                framebuf={framebuf}
+                font={font}
+                colorPalette={colorPalette}
+              />
+            </div>
           </div>
-        </div>
-      </ContextMenuArea>
+        </ContextMenuArea>
+        <NameEditor
+          name={fp.maybeDefault(this.props.framebuf.name, 'Untitled')}
+          onNameSave={this.handleNameSave}
+        />
+      </div>
     )
   }
 }
@@ -140,13 +268,16 @@ class FramebufferTabs_ extends Component {
           key={framebufId}
           index={i}
           id={i}
+          framebufId={framebufId}
           onSetActiveTab={this.handleActiveClick}
           onRemoveTab={this.handleRemoveTab}
           onDuplicateTab={this.handleDuplicateTab}
           framebuf={framebuf}
           active={i === this.props.activeScreen}
           font={this.props.getFont(framebuf)}
-          colorPalette={this.props.colorPalette} />
+          colorPalette={this.props.colorPalette}
+          setName={this.props.Framebuffer.setName}
+        />
       )
     })
     return (

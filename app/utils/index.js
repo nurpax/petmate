@@ -96,7 +96,8 @@ const framebufFields = (framebuf) => {
     backgroundColor: framebuf.backgroundColor,
     borderColor: framebuf.borderColor,
     charset: framebuf.charset,
-    framebuf: framebuf.framebuf
+    name: framebuf.name,
+    framebuf: framebuf.framebuf,
   }
 }
 

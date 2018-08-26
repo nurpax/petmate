@@ -27,7 +27,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
-  padding-top: 20px;
+  padding-top: 10px;
   padding-left: 10px;
   overflow-y: hidden;
 }

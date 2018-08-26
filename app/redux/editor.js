@@ -63,7 +63,8 @@ function emptyFramebuf () {
 const settables = reduxSettables([
   settable('Framebuffer', 'backgroundColor', 6),
   settable('Framebuffer', 'borderColor', 14),
-  settable('Framebuffer', 'charset', CHARSET_UPPER)
+  settable('Framebuffer', 'charset', CHARSET_UPPER),
+  settable('Framebuffer', 'name', null)
 ])
 
 export class Framebuffer {
@@ -112,7 +113,7 @@ export class Framebuffer {
         undoId: null,
         framebufIndex
       }
-    },
+    }
   }
 
   static reducer(state = {
@@ -150,7 +151,8 @@ export class Framebuffer {
           height: c.height,
           backgroundColor: c.backgroundColor,
           borderColor: c.borderColor,
-          charset: c.charset
+          charset: c.charset,
+          name: c.name
         }
       default:
         return settables.reducer(state, action)

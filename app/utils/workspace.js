@@ -14,7 +14,8 @@ export const framebufFromJson = (c) => {
     backgroundColor: c.backgroundColor,
     borderColor: c.borderColor,
     framebuf: c.framebuf,
-    charset: fp.maybeDefault(c.charset, 'upper')
+    charset: fp.maybeDefault(c.charset, 'upper'),
+    name: fp.maybeDefault(c.name, null)
   }
 }
 

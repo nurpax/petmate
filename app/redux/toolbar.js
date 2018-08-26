@@ -28,7 +28,8 @@ const settables = reduxSettables([
   settable('Toolbar', 'showSettings', false),
   settable('Toolbar', 'showExport', {show: false}),
   settable('Toolbar', 'selectedPaletteRemap', 0),
-  settable('Toolbar', 'canvasGrid', false)
+  settable('Toolbar', 'canvasGrid', false),
+  settable('Toolbar', 'shortcutsActive', true)
 ])
 
 const initialBrushValue = {
@@ -66,6 +67,9 @@ export class Toolbar {
     keyDown: (key) => {
       return (dispatch, getState) => {
         const state = getState()
+        if (!state.toolbar.shortcutsActive) {
+          return
+        }
         const { shiftKey, metaKey, ctrlKey } = state.toolbar
         const noMods = !shiftKey && !metaKey && !ctrlKey
         const metaOrCtrl = metaKey || ctrlKey
