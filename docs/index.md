@@ -8,7 +8,7 @@ Petmate is a cross-platform C64 PETSCII image editor, drawing inspiration from t
 
 Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an internet connection.
 
-![Screenshot](img/screenshot1.png)
+![Petmate screenshot w/ PETSCII by Manuel Vio](img/screenshot1.png)
 
 ## Download Petmate
 {:.downloads}
