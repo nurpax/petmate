@@ -13,10 +13,12 @@ export const TOOL_DRAW = 0
 export const TOOL_COLORIZE = 1
 export const TOOL_CHAR_DRAW = 2
 export const TOOL_BRUSH = 3
+export const TOOL_TEXT = 4
 
 const settables = reduxSettables([
   settable('Toolbar', 'textColor', 14),
   settable('Toolbar', 'selectedChar', {row: 8, col: 0}),
+  settable('Toolbar', 'textCursorPos', null),
   settable('Toolbar', 'selectedTool', TOOL_DRAW),
   settable('Toolbar', 'brushRegion', null),
   settable('Toolbar', 'brush', null),
@@ -39,6 +41,62 @@ const initialBrushValue = {
     mirror: 0,
     rotate: 0
   }
+}
+
+function moveTextCursor(curPos, dir, width, height) {
+  const idx = (curPos.row + dir.row)*width + (curPos.col + dir.col) + width*height
+  const wrapped = idx % (width*height)
+  return {
+    row: Math.floor(wrapped / width),
+    col: Math.floor(wrapped % width)
+  }
+}
+
+function asc2int(asc) {
+  return asc.charCodeAt(0)
+}
+
+function convertAsciiToScreencode(asc) {
+  if (asc.length !== 1) {
+    return null
+  }
+  if (asc >= 'a' && asc <= 'z') {
+    return asc2int(asc) - asc2int('a') + 1
+  }
+  if (asc >= 'A' && asc <= 'Z') {
+    return asc2int(asc) - asc2int('A') + 0x41
+  }
+  if (asc >= '0' && asc <= '9') {
+    return asc2int(asc) - asc2int('0') + 0x30
+  }
+  const otherChars = {
+    '@': 0,
+    ' ': 0x20,
+    '!': 0x21,
+    '"': 0x22,
+    '#': 0x23,
+    '$': 0x24,
+    '%': 0x25,
+    '&': 0x26,
+    '(': 0x28,
+    ')': 0x29,
+    '*': 0x2a,
+    '+': 0x2b,
+    ',': 0x2c,
+    '-': 0x2d,
+    '.': 0x2e,
+    '/': 0x2f,
+    ':': 0x3a,
+    ';': 0x3b,
+    '<': 0x3c,
+    '=': 0x3d,
+    '>': 0x3e,
+    '?': 0x3f
+  }
+  if (asc in otherChars) {
+    return otherChars[asc]
+  }
+  return null
 }
 
 export class Toolbar {
@@ -70,21 +128,70 @@ export class Toolbar {
         if (!state.toolbar.shortcutsActive) {
           return
         }
-        const { shiftKey, metaKey, ctrlKey } = state.toolbar
+        const {
+          shiftKey,
+          metaKey,
+          ctrlKey,
+          selectedTool,
+          showSettings,
+          showExport
+        } = state.toolbar
         const noMods = !shiftKey && !metaKey && !ctrlKey
         const metaOrCtrl = metaKey || ctrlKey
 
         // No shift, meta or ctrl
-        if (noMods) {
+        if (noMods || selectedTool === TOOL_TEXT) {
           if (key === 'Escape') {
-            if (state.toolbar.selectedTool === TOOL_BRUSH) {
+            if (selectedTool === TOOL_BRUSH) {
               dispatch(Toolbar.actions.resetBrush())
             }
-            if (state.toolbar.showSettings) {
+            if (selectedTool === TOOL_TEXT) {
+              dispatch(Toolbar.actions.setTextCursorPos(null))
+            }
+            if (showSettings) {
               dispatch(Toolbar.actions.setShowSettings(false))
             }
-            if (state.toolbar.showExport) {
+            if (showExport) {
               dispatch(Toolbar.actions.setShowExport({show:false}))
+            }
+          } else if (state.toolbar.selectedTool === TOOL_TEXT) {
+            // Don't match shortcuts if we're in "text tool" mode.
+            const { textCursorPos, textColor } = state.toolbar
+            const framebufIndex = selectors.getCurrentScreenFramebufIndex(state)
+            const { width, height } = selectors.getFramebufByIndex(state, framebufIndex)
+            if (textCursorPos !== null) {
+              const c = convertAsciiToScreencode(shiftKey ? key.toUpperCase() : key)
+              if (c !== null) {
+                dispatch(Framebuffer.actions.setPixel({
+                  ...textCursorPos,
+                  screencode: c,
+                  color: textColor,
+                  undoId: null
+                }, framebufIndex))
+                const newCursorPos = moveTextCursor(
+                  textCursorPos,
+                  { col: 1, row: 0 },
+                  width, height
+                )
+                dispatch(Toolbar.actions.setTextCursorPos(newCursorPos))
+              }
+              if (key === 'ArrowLeft' || key === 'ArrowRight') {
+                dispatch(Toolbar.actions.setTextCursorPos(
+                  moveTextCursor(
+                    textCursorPos,
+                    { col: key === 'ArrowLeft' ? -1 : 1, row: 0},
+                    width, height
+                  )
+                ))
+              } else if (key === 'ArrowUp' || key === 'ArrowDown') {
+                dispatch(Toolbar.actions.setTextCursorPos(
+                  moveTextCursor(
+                    textCursorPos,
+                    { row: key === 'ArrowUp' ? -1 : 1, col: 0},
+                    width, height
+                  )
+                ))
+              }
             }
           } else if (noMods && key === 'ArrowLeft') {
             dispatch(Screens.actions.nextScreen(-1))
@@ -110,14 +217,16 @@ export class Toolbar {
             dispatch(Toolbar.actions.nextColor(-1))
           } else if (key === 'e') {
             dispatch(Toolbar.actions.nextColor(+1))
-          } else if (key === 'x' || key == '1') {
+          } else if (key === 'x' || key === '1') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
-          } else if (key === 'c' || key == '2') {
+          } else if (key === 'c' || key === '2') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_COLORIZE))
           } else if (key == '3') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_CHAR_DRAW))
-          } else if (key === 'b' || key == '4') {
+          } else if (key === 'b' || key === '4') {
             dispatch(Toolbar.actions.setSelectedTool(TOOL_BRUSH))
+          } else if (key === 't' || key === '5') {
+            dispatch(Toolbar.actions.setSelectedTool(TOOL_TEXT))
           } else if (key === 'g') {
             dispatch((dispatch, getState) => {
               const { canvasGrid } = getState().toolbar

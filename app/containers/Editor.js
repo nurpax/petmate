@@ -6,7 +6,7 @@ import classnames from 'classnames'
 
 import ColorPicker from '../components/ColorPicker'
 import CharGrid from '../components/CharGrid'
-import CharPosOverlay from '../components/CharPosOverlay'
+import CharPosOverlay, { TextCursorOverlay } from '../components/CharPosOverlay'
 import GridOverlay from '../components/GridOverlay'
 import { CanvasStatusbar } from '../components/Statusbar'
 
@@ -26,7 +26,8 @@ import {
   TOOL_DRAW,
   TOOL_COLORIZE,
   TOOL_CHAR_DRAW,
-  TOOL_BRUSH
+  TOOL_BRUSH,
+  TOOL_TEXT
 } from '../redux/toolbar'
 import { selectChar } from '../actions/editor'
 import * as utils from '../utils';
@@ -203,6 +204,8 @@ class FramebufferView_ extends Component {
       } else {
         this.brushDraw(coord)
       }
+    } else if (selectedTool === TOOL_TEXT) {
+      this.props.Toolbar.setTextCursorPos(coord)
     }
     this.prevDragPos = coord
   }
@@ -299,8 +302,9 @@ class FramebufferView_ extends Component {
           <CharPosOverlay
             framebufWidth={this.props.framebufWidth}
             framebufHeight={this.props.framebufHeight}
-            charPos={this.props.charPos} opacity={0.5}
-        />
+            charPos={this.props.charPos}
+            opacity={0.5}
+          />
         if (selectedTool === TOOL_COLORIZE) {
           screencodeHighlight = null
         } else if (selectedTool === TOOL_CHAR_DRAW) {
@@ -312,6 +316,28 @@ class FramebufferView_ extends Component {
         }
       }
     }
+
+    if (selectedTool === TOOL_TEXT) {
+      screencodeHighlight = null
+      colorHighlight = null
+      const { textCursorPos, charPos, textColor } = this.props
+      const cursorPos =
+        textCursorPos !== null ?
+          textCursorPos :
+          (this.props.isActive ? charPos : null)
+      if (cursorPos) {
+        const color = utils.colorIndexToCssRgb(this.props.colorPalette, textColor)
+        overlays =
+          <TextCursorOverlay
+            framebufWidth={this.props.framebufWidth}
+            framebufHeight={this.props.framebufHeight}
+            charPos={cursorPos}
+            fillColor={color}
+            opacity={0.5}
+          />
+      }
+    }
+
     const { scaleX, scaleY } = this.props.canvasScale
     const scale = {
       width: W*8,
@@ -365,6 +391,7 @@ const FramebufferCont = connect(
       textColor: state.toolbar.textColor,
       brush: selectors.transformBrush(state.toolbar.brush, state.toolbar.brushTransform, font),
       brushRegion: state.toolbar.brushRegion,
+      textCursorPos: state.toolbar.textCursorPos,
       shiftKey: state.toolbar.shiftKey,
       altKey: state.toolbar.altKey,
       font,

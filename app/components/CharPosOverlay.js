@@ -1,6 +1,9 @@
 
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import classnames from 'classnames'
+
+import styles from './CharPosOverlay.css'
 
 const charPosOverlayStyleBase = {
   outlineStyle: 'solid',
@@ -11,13 +14,18 @@ const charPosOverlayStyleBase = {
 }
 
 export default class CharPosOverlay extends Component {
+  static defaultProps = {
+    blink: false,
+    fillColor: 'rgb(255,255,255)'
+  }
+
   static propTypes = {
     framebufWidth: PropTypes.number.isRequired,
     framebufHeight: PropTypes.number.isRequired,
   }
 
   render () {
-    const { charPos, grid, framebufWidth, framebufHeight } = this.props
+    const { charPos, grid, framebufWidth, framebufHeight, blink } = this.props
     const scale = grid ? 9 : 8
     let outlineColor = `rgba(255, 255, 255, ${this.props.opacity})`
     if (this.props.color !== undefined) {
@@ -36,10 +44,24 @@ export default class CharPosOverlay extends Component {
       width: `${8}px`,
       height: `${8}px`
     }
+    const { fillColor } = this.props
     return (
       <div style={s}>
+        {blink ?
+          <div style={{
+              width:'100%', height:'100%',
+              backgroundColor: fillColor
+            }}
+            className={styles.blink}>
+          </div> :
+          null}
       </div>
     )
   }
 }
 
+export const TextCursorOverlay = (props) => {
+  return (
+    <CharPosOverlay {...props} blink={true} />
+  )
+}

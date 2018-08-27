@@ -13,7 +13,8 @@ import {
   TOOL_DRAW,
   TOOL_COLORIZE,
   TOOL_CHAR_DRAW,
-  TOOL_BRUSH
+  TOOL_BRUSH,
+  TOOL_TEXT
 } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
 import * as selectors from '../redux/selectors'
@@ -227,6 +228,11 @@ class ToolbarView extends Component {
         tool: TOOL_BRUSH,
         iconName: 'fa-brush',
         tooltip: 'Brush'
+      }),
+      mkTool({
+        tool: TOOL_TEXT,
+        iconName: 'fa-font',
+        tooltip: 'Text'
       })
     ]
     return (
