@@ -16,6 +16,56 @@ const ModalTitle = ({children}) => <h2>{children}</h2>
 const Title3 = ({children}) => <h3>{children}</h3>
 const Title = ({children}) => <h4>{children}</h4>
 
+class GIFExportForm extends Component {
+  render () {
+    const loopControls = () => {
+      return (
+        <Fragment>
+          <label>Gif anim mode:</label>
+          <br/>
+          <br/>
+          <RadioButton
+            name='loopMode'
+            value='once'
+            label='Play once, no looping'
+          />
+          <RadioButton
+            name='loopMode'
+            value='loop'
+            label='Loop'
+          />
+          <RadioButton
+            name='loopMode'
+            value='pingpong'
+            label='Loop (ping pong)'
+          />
+        </Fragment>
+      )
+    }
+    return (
+      <Form state={this.props.state} setField={this.props.setField}>
+        <Title>GIF export options</Title>
+        <br/>
+        <label>Gif anim mode:</label>
+        <br/>
+        <br/>
+        <RadioButton
+          name='animMode'
+          value='single'
+          label='Current screen only'
+        />
+        <RadioButton
+          name='animMode'
+          value='anim'
+          label='Export .gif anim'
+        />
+        <br/>
+        {this.props.state.animMode === 'single' ? null : loopControls()}
+      </Form>
+    )
+  }
+}
+
 class PNGExportForm extends Component {
   render () {
     return (
@@ -111,6 +161,10 @@ class ExportForm extends Component {
         return (
           <BASICExportForm {...connectFormState(this.props, 'bas')} />
         )
+      case 'gif':
+        return (
+          <GIFExportForm {...connectFormState(this.props, 'gif')} />
+        )
       default:
         console.error('unknown export format', this.props.ext)
     }
@@ -131,6 +185,10 @@ class ExportModal_ extends Component {
     bas: {
       currentScreenOnly: true,
       standalone: false
+    },
+    gif: {
+      animMode: 'anim',
+      loopMode: 'loop'
     }
   }
 

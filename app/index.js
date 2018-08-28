@@ -83,6 +83,9 @@ require('electron').ipcRenderer.on('menu', (event, message) => {
     case 'export-prg':
       dispatchExport(formats.prg)
       return
+    case 'export-gif':
+      dispatchExport(formats.gif)
+      return
     case 'import-marq-c':
       store.dispatch(ReduxRoot.actions.fileImportAppend(formats.c))
       return

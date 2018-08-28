@@ -9,7 +9,8 @@ import {
   saveMarqC,
   saveExecutablePRG,
   saveAsm,
-  saveBASIC
+  saveBASIC,
+  saveGIF
 } from './exporters'
 import {
   drawLine
@@ -47,6 +48,11 @@ export const formats = {
     name: 'BASIC listing .bas',
     ext: 'bas',
     exportOptions: false
+  },
+  gif: {
+    name: 'GIF .gif',
+    ext: 'gif',
+    exportOptions: true
   }
 }
 
@@ -107,6 +113,8 @@ export const saveFramebufs = (filename, framebufs, palette, options) => {
   const ext = path.extname(filename)
   if (ext === '.png') {
     return savePNG(filename, selectedFramebuf, palette, options)
+  } else if (ext === '.gif') {
+    return saveGIF(filename, framebufs, palette, options)
   } else if (ext === '.c') {
     return saveMarqC(filename, framebufs, options)
   } else if (ext === '.asm') {
@@ -141,7 +149,6 @@ export const saveWorkspace = (filename, screens, getFramebufById) => {
 }
 
 export const loadWorkspace = (filename, dispatch) => {
-  const ext = path.extname(filename)
   try {
     const content = fs.readFileSync(filename, 'utf-8')
     const c = JSON.parse(content)

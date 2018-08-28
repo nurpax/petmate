@@ -4612,6 +4612,12 @@ getpass@^0.1.1:
   dependencies:
     assert-plus "^1.0.0"
 
+gif-encoder@^0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/gif-encoder/-/gif-encoder-0.6.1.tgz#19a31f91f3218b21d58c236f8039f5f49826697e"
+  dependencies:
+    readable-stream "~1.1.9"
+
 github-url-to-object@^4.0.4:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/github-url-to-object/-/github-url-to-object-4.0.4.tgz#a9797b7026e18d53b50b07f45b7e169b55fd90ee"
