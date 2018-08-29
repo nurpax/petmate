@@ -3,7 +3,13 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
 import Modal from '../components/Modal'
-import { connectFormState, Form, Checkbox, RadioButton } from '../components/formHelpers'
+import {
+  connectFormState,
+  Form,
+  Checkbox,
+  RadioButton,
+  NumberInput
+} from '../components/formHelpers'
 
 import { Toolbar } from '../redux/toolbar'
 import { Settings } from '../redux/settings'
@@ -18,7 +24,16 @@ const Title = ({children}) => <h4>{children}</h4>
 
 class GIFExportForm extends Component {
   render () {
-    const loopControls = () => {
+    let fps = null
+    const delayMS = this.props.state.delayMS
+    if (delayMS !== '') {
+      const delayInt = parseInt(this.props.state.delayMS, 10)
+      if (delayInt !== 0 && !isNaN(delayInt)) {
+        const f = 1000.0 / delayInt
+        fps = `${Math.round(f)} fps`
+      }
+    }
+    const animControls = () => {
       return (
         <Fragment>
           <label>Gif anim mode:</label>
@@ -39,6 +54,16 @@ class GIFExportForm extends Component {
             value='pingpong'
             label='Loop (ping pong)'
           />
+          <div style={{display: 'flex', flexDirection: 'row'}}>
+            <NumberInput
+              name='delayMS'
+              value={delayMS}
+              label='Frame delay (ms)'
+            />
+            <label style={{marginLeft: '10px'}}>
+             {fps}
+            </label>
+          </div>
         </Fragment>
       )
     }
@@ -60,7 +85,7 @@ class GIFExportForm extends Component {
           label='Export .gif anim'
         />
         <br/>
-        {this.props.state.animMode === 'single' ? null : loopControls()}
+        {this.props.state.animMode === 'single' ? null : animControls()}
       </Form>
     )
   }
@@ -188,7 +213,8 @@ class ExportModal_ extends Component {
     },
     gif: {
       animMode: 'anim',
-      loopMode: 'loop'
+      loopMode: 'loop',
+      delayMS: '250'
     }
   }
 

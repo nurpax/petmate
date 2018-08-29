@@ -129,3 +129,21 @@
   border-radius: 50%;
   background: white;
 }
+
+/*------------------------------------------*/
+
+.numberInputContainer {
+
+}
+
+.numberInputContainer input {
+  margin-left: 10px;
+  width: 40px;
+  background-color: #333;
+  color: rgb(170,170,170);
+  font-size: 0.8em;
+}
+
+.numberInputContainer input[type=number]:focus {
+  outline:none;
+}

@@ -26,7 +26,15 @@ export const saveGIF = (filename, fbs, palette, options) => {
     })
 
     encoder.setQuality(20)
-    encoder.setDelay(250)
+    const delayMS = options.delayMS
+    if (delayMS !== '') {
+      const delay = parseInt(delayMS, 10)
+      if (!isNaN(delay) && delay > 0 && delay < 10*1000) {
+        encoder.setDelay(delay)
+      }
+    } else {
+      encoder.setDelay(250)
+    }
 
     if (options.loopMode === 'once') {
       encoder.setRepeat(-1) // TODO options

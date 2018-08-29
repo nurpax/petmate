@@ -24,12 +24,28 @@ const RadioButton_ = ({label, onChange, checked, value}) => {
       {label}
       <input
         type='radio'
-        checked={true}
         value={value}
         onChange={onChange}
         checked={checked}
       />
       <span className={styles.radiocheckmark}></span>
+    </label>
+  )
+}
+
+const NumberInput_ = ({label, onChange, value}) => {
+  console.log(value)
+  return (
+    <label className={styles.numberInputContainer}>
+      {label}
+      <input
+        type='number'
+        value={value}
+        size='4'
+        min='1'
+        max='10000'
+        onChange={onChange}
+      />
     </label>
   )
 }
@@ -79,6 +95,21 @@ export class RadioButton extends Component {
     return (
       <FormContext.Consumer>
         {({ setField, state}) => <RadioButton_ checked={state[this.props.name] === this.props.value} onChange={(e) => setField(this.props.name, e.target.value)} {...this.props} />}
+      </FormContext.Consumer>
+    )
+  }
+}
+
+export class NumberInput extends Component {
+  static propTypes = {
+    name: PropTypes.string.isRequired,
+    value: PropTypes.string.isRequired
+  }
+
+  render () {
+    return (
+      <FormContext.Consumer>
+        {({ setField, state}) => <NumberInput_ onChange={(e) => setField(this.props.name, e.target.value)} {...this.props} />}
       </FormContext.Consumer>
     )
   }

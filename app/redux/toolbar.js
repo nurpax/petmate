@@ -139,6 +139,14 @@ export class Toolbar {
         const noMods = !shiftKey && !metaKey && !ctrlKey
         const metaOrCtrl = metaKey || ctrlKey
 
+        const inModal =
+          state.toolbar.showExport.show ||
+          state.toolbar.showSettings
+
+        if (inModal) {
+          return
+        }
+
         // No shift, meta or ctrl
         if (noMods || selectedTool === TOOL_TEXT) {
           if (key === 'Escape') {
