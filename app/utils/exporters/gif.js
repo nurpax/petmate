@@ -40,15 +40,15 @@ export const saveGIF = (filename, fbs, palette, options) => {
     encoder.pipe(file);
 
     encoder.writeHeader();
-    if (options.animMode !== 'anim') {
+    if (options.animMode !== 'anim' || fbs.length == 1) {
       exportGIF(encoder, selectedFb, palette, options)
     } else {
       for (let fidx = 0; fidx < fbs.length; fidx++) {
         exportGIF(encoder, fbs[fidx], palette, options)
       }
-      // TODO maybe we should skip the last and first frames here?
+      // Skip last and first frames when looping back to beginning.
       if (options.loopMode === 'pingpong') {
-        for (let fidx = fbs.length-1; fidx >= 0; fidx--) {
+        for (let fidx = fbs.length-2; fidx >= 1; fidx--) {
           exportGIF(encoder, fbs[fidx], palette, options)
         }
       }
