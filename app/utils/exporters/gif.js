@@ -2,34 +2,35 @@
 // Create a 10 x 10 gif
 var GifEncoder = require('gif-encoder');
 
-import { framebufToPixels } from './util'
+import { framebufToPixelsIndexed } from './util'
 
 const exportGIF = (encoder, fb, palette, options) => {
-  const pixels = framebufToPixels(fb, palette, options)
-  // Swap R & B
-  for (let pixIdx = 0; pixIdx < pixels.length; pixIdx += 4) {
-    const a = pixels[pixIdx + 0]
-    const b = pixels[pixIdx + 2]
-    pixels[pixIdx + 0] = b
-    pixels[pixIdx + 2] = a
-  }
-  console.log('add gif frame')
+  const pixels = framebufToPixelsIndexed(fb, palette, options)
   encoder.addFrame(pixels)
 }
 
 export const saveGIF = (filename, fbs, palette, options) => {
   try {
     const selectedFb = fbs[options.selectedFramebufIndex]
-    let encoder = new GifEncoder(selectedFb.width*8, selectedFb.height*8, {highWaterMark:1024*256})
+
+    const gifPalette = Array(16*3).fill(0)
+    palette.forEach(({r, g, b}, idx) => {
+      gifPalette[idx*3 + 0] = r
+      gifPalette[idx*3 + 1] = g
+      gifPalette[idx*3 + 2] = b
+    })
+
+    let encoder = new GifEncoder(selectedFb.width*8, selectedFb.height*8, {
+      palette: gifPalette,
+      highWaterMark:1024*256
+    })
 
     encoder.setQuality(20)
     encoder.setDelay(250)
 
     if (options.loopMode === 'once') {
-      console.log('once')
       encoder.setRepeat(-1) // TODO options
     } else if (options.loopMode === 'loop' || options.loopMode === 'pingpong') {
-      console.log(options.loopMode)
       encoder.setRepeat(0) // TODO options
     } else {
       console.error('invalid loop mode', options.loopMode)

@@ -4612,9 +4612,9 @@ getpass@^0.1.1:
   dependencies:
     assert-plus "^1.0.0"
 
-gif-encoder@^0.6.1:
+"gif-encoder@https://github.com/nurpax/gif-encoder#indexed-inputs":
   version "0.6.1"
-  resolved "https://registry.yarnpkg.com/gif-encoder/-/gif-encoder-0.6.1.tgz#19a31f91f3218b21d58c236f8039f5f49826697e"
+  resolved "https://github.com/nurpax/gif-encoder#ecbcc7ffa0012ca488c516ac1ecb99bf1afd70b8"
   dependencies:
     readable-stream "~1.1.9"
 
