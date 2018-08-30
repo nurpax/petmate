@@ -87,9 +87,13 @@ export const actions = {
     return (dispatch, getState) => {
       const state = getState()
       const screens = selectors.getScreens(state)
+      let remappedFbIndex = 0
       const selectedFramebufIndex = selectors.getCurrentScreenFramebufIndex(state)
-      const framebufs = screens.map(idx => {
-        const framebuf = selectors.getFramebufByIndex(state, idx)
+      const framebufs = screens.map((fbIdx, i) => {
+        const framebuf = selectors.getFramebufByIndex(state, fbIdx)
+        if (selectedFramebufIndex === fbIdx) {
+          remappedFbIndex = i
+        }
         return {
           ...framebuf,
           font: selectors.getFramebufFont(state, framebuf)
@@ -98,7 +102,7 @@ export const actions = {
       const palette = selectors.getSettingsCurrentColorPalette(state)
       dialogExportFile(type, framebufs, palette, {
         ...options,
-        selectedFramebufIndex: selectedFramebufIndex
+        selectedFramebufIndex: remappedFbIndex
       })
     }
   },
