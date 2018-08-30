@@ -207,9 +207,14 @@ const mapDispatchToProps = dispatch => {
 }
 
 const mapStateToProps = state => {
-  const selected = state.toolbar.selectedChar
   const framebuf = selectors.getCurrentFramebuf(state)
   const font = selectors.getCurrentFramebufFont(state)
+  const selected =
+    selectors.getCharRowColWithTransform(
+      state.toolbar.selectedChar,
+      font,
+      state.toolbar.charTransform
+    )
   return {
     framebufIndex: selectors.getCurrentScreenFramebufIndex(state),
     backgroundColor: framebuf.backgroundColor,

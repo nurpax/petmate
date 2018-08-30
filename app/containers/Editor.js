@@ -376,6 +376,7 @@ const FramebufferView = withMouseCharPositionShiftLockAxis(FramebufferView_)
 const FramebufferCont = connect(
   state => {
     const selected = state.toolbar.selectedChar
+    const charTransform = state.toolbar.charTransform
     const framebuf = selectors.getCurrentFramebuf(state)
     const font = selectors.getCurrentFramebufFont(state)
     return {
@@ -384,9 +385,8 @@ const FramebufferCont = connect(
       framebufWidth: framebuf.width,
       framebufHeight: framebuf.height,
       backgroundColor: framebuf.backgroundColor,
-      selected,
       undoId: state.toolbar.undoId,
-      curScreencode: utils.charScreencodeFromRowCol(font, selected),
+      curScreencode: selectors.getScreencodeWithTransform(selected, font, charTransform),
       selectedTool: state.toolbar.selectedTool,
       textColor: state.toolbar.textColor,
       brush: selectors.transformBrush(state.toolbar.brush, state.toolbar.brushTransform, font),
@@ -503,7 +503,6 @@ const mapDispatchToProps = dispatch => {
 }
 
 const mapStateToProps = state => {
-  const selected = state.toolbar.selectedChar
   const framebuf = selectors.getCurrentFramebuf(state)
   return {
     framebuf,

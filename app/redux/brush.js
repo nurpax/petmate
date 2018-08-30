@@ -81,6 +81,10 @@ const findTransformed = (charset, code, mirror, angle) => {
   return code
 }
 
+export const findTransformedChar = (font, code, xform) => {
+  return findTransformed(font.bits, code, xform.mirror, xform.rotate)
+}
+
 export const findInverseChar = (font, code) => {
   const fontData = font.bits
   const offs = code*8

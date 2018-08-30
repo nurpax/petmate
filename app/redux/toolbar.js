@@ -15,9 +15,28 @@ export const TOOL_CHAR_DRAW = 2
 export const TOOL_BRUSH = 3
 export const TOOL_TEXT = 4
 
+const emptyTransform = {
+  mirror: 0,
+  rotate: 0
+}
+
+
+function rotate(transform) {
+  return {
+    ...transform,
+    rotate: (transform.rotate + 90) % 360
+  }
+}
+
+function mirror(transform, mirror) {
+  return {
+    ...transform,
+    mirror: transform.mirror ^ mirror
+  }
+}
+
 const settables = reduxSettables([
   settable('Toolbar', 'textColor', 14),
-  settable('Toolbar', 'selectedChar', {row: 8, col: 0}),
   settable('Toolbar', 'textCursorPos', null),
   settable('Toolbar', 'selectedTool', TOOL_DRAW),
   settable('Toolbar', 'brushRegion', null),
@@ -37,10 +56,7 @@ const settables = reduxSettables([
 const initialBrushValue = {
   brush: null,
   brushRegion: null,
-  brushTransform: {
-    mirror: 0,
-    rotate: 0
-  }
+  brushTransform: emptyTransform
 }
 
 function moveTextCursor(curPos, dir, width, height) {
@@ -100,11 +116,14 @@ function convertAsciiToScreencode(asc) {
 }
 
 export class Toolbar {
+  static SET_SELECTED_CHAR = `${Toolbar.name}/SET_SELECTED_CHAR`
   static RESET_BRUSH = `${Toolbar.name}/RESET_BRUSH`
   static RESET_BRUSH_REGION = `${Toolbar.name}/RESET_BRUSH_REGION`
   static CAPTURE_BRUSH = `${Toolbar.name}/CAPTURE_BRUSH`
-  static MIRROR_BRUSH =  `${Toolbar.name}/MIRROR_BRUSH`
-  static ROTATE_BRUSH =  `${Toolbar.name}/ROTATE_BRUSH`
+  static MIRROR_BRUSH = `${Toolbar.name}/MIRROR_BRUSH`
+  static ROTATE_BRUSH = `${Toolbar.name}/ROTATE_BRUSH`
+  static MIRROR_CHAR = `${Toolbar.name}/MIRROR_CHAR`
+  static ROTATE_CHAR = `${Toolbar.name}/ROTATE_CHAR`
   static NEXT_CHARCODE = `${Toolbar.name}/NEXT_CHARCODE`
   static NEXT_COLOR = `${Toolbar.name}/NEXT_COLOR`
   static INVERT_CHAR = `${Toolbar.name}/INVERT_CHAR`
@@ -213,14 +232,24 @@ export class Toolbar {
             dispatch(Toolbar.actions.nextCharcode({ row: +1, col: 0}))
           } else if (key === 'w') {
             dispatch(Toolbar.actions.nextCharcode({ row: -1, col: 0}))
-          } else if (key === 'v') {
-            dispatch(Toolbar.actions.mirrorBrush(Toolbar.MIRROR_Y))
-          } else if (key === 'h') {
-            dispatch(Toolbar.actions.mirrorBrush(Toolbar.MIRROR_X))
+          } else if (key === 'v' || key === 'h') {
+            let mirror = Toolbar.MIRROR_Y
+            if (key === 'h') {
+              mirror = Toolbar.MIRROR_X
+            }
+            if (selectedTool === TOOL_BRUSH) {
+              dispatch(Toolbar.actions.mirrorBrush(mirror))
+            } else if (selectedTool === TOOL_DRAW || selectedTool === TOOL_CHAR_DRAW) {
+              dispatch(Toolbar.actions.mirrorChar(mirror))
+            }
           } else if (key === 'f') {
             dispatch(Toolbar.actions.invertChar())
           } else if (key === 'r') {
-            dispatch(Toolbar.actions.rotateBrush())
+            if (selectedTool === TOOL_BRUSH) {
+              dispatch(Toolbar.actions.rotateBrush())
+            } else if (selectedTool === TOOL_DRAW || selectedTool === TOOL_CHAR_DRAW) {
+              dispatch(Toolbar.actions.rotateChar())
+            }
           } else if (key === 'q') {
             dispatch(Toolbar.actions.nextColor(-1))
           } else if (key === 'e') {
@@ -299,6 +328,13 @@ export class Toolbar {
     resetBrush: () => {
       return {
         type: Toolbar.RESET_BRUSH
+      }
+    },
+
+    setSelectedChar: (rc) => {
+      return {
+        type: Toolbar.SET_SELECTED_CHAR,
+        data: rc
       }
     },
 
@@ -412,12 +448,29 @@ export class Toolbar {
       return {
         type: Toolbar.ROTATE_BRUSH,
       }
+    },
+
+    mirrorChar: (axis) => {
+      return {
+        type: Toolbar.MIRROR_CHAR,
+        data: {
+          mirror: axis
+        }
+      }
+    },
+
+    rotateChar: () => {
+      return {
+        type: Toolbar.ROTATE_CHAR,
+      }
     }
   }
 
   static reducer(state = {
       ...settables.initialValues,
       ...initialBrushValue,
+      selectedChar: {row: 8, col: 0},
+      charTransform: emptyTransform,
       undoId: 0
     }, action) {
     switch (action.type) {
@@ -432,6 +485,13 @@ export class Toolbar {
           ...initialBrushValue,
           brush: action.data
         }
+      case Toolbar.SET_SELECTED_CHAR:
+        const rc = action.data
+        return {
+          ...state,
+          selectedChar: rc,
+          charTransform: emptyTransform
+        }
       case Toolbar.NEXT_CHARCODE:
         const dir = action.data
         return {
@@ -439,7 +499,8 @@ export class Toolbar {
           selectedChar: {
             row: Math.max(0, Math.min(15, state.selectedChar.row + dir.row)),
             col: Math.max(0, Math.min(15, state.selectedChar.col + dir.col)),
-          }
+          },
+          charTransform: emptyTransform
         }
       case Toolbar.INVERT_CHAR: {
         const { font } = action.data
@@ -447,7 +508,8 @@ export class Toolbar {
         const inverseRowCol = utils.rowColFromScreencode(font, brush.findInverseChar(action.data.font, curScreencode))
         return {
           ...state,
-          selectedChar: inverseRowCol
+          selectedChar: inverseRowCol,
+          charTransform: emptyTransform
         }
       }
       case Toolbar.NEXT_COLOR: {
@@ -468,18 +530,22 @@ export class Toolbar {
       case Toolbar.MIRROR_BRUSH:
         return {
           ...state,
-          brushTransform: {
-            ...state.brushTransform,
-            mirror: state.brushTransform.mirror ^ action.data.mirror
-          }
+          brushTransform: mirror(state.brushTransform, action.data.mirror)
         }
       case Toolbar.ROTATE_BRUSH:
         return {
           ...state,
-          brushTransform: {
-            ...state.brushTransform,
-            rotate: (state.brushTransform.rotate + 90) % 360
-          }
+          brushTransform: rotate(state.brushTransform)
+        }
+      case Toolbar.MIRROR_CHAR:
+        return {
+          ...state,
+          charTransform: mirror(state.charTransform, action.data.mirror)
+        }
+      case Toolbar.ROTATE_CHAR:
+        return {
+          ...state,
+          charTransform: rotate(state.charTransform)
         }
       case Toolbar.CLEAR_MOD_KEY_STATE:
         return {
