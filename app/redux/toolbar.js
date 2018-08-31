@@ -181,7 +181,8 @@ export class Toolbar {
             if (showExport) {
               dispatch(Toolbar.actions.setShowExport({show:false}))
             }
-          } else if (state.toolbar.selectedTool === TOOL_TEXT) {
+          } else if (state.toolbar.selectedTool === TOOL_TEXT &&
+            state.toolbar.textCursorPos !== null) {
             // Don't match shortcuts if we're in "text tool" mode.
             const { textCursorPos, textColor } = state.toolbar
             const framebufIndex = selectors.getCurrentScreenFramebufIndex(state)
