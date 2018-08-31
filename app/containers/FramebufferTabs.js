@@ -60,6 +60,10 @@ class NameInput_ extends Component {
   }
 
   render () {
+    // Not the pattern field for the input.  Only accept screen names that
+    // most assemblers can compile.  Otherwise the names may leak into .asm
+    // export, the export succeeds, only for the user to find out much later
+    // that his exported .asm file does not even compile.
     return (
       <div className={styles.tabNameEditor}>
         <form onSubmit={this.handleSubmit}>
@@ -71,6 +75,7 @@ class NameInput_ extends Component {
             onBlur={this.handleBlur}
             onFocus={this.handleFocus}
             type='text'
+            pattern='[_a-zA-Z]+[a-zA-Z0-9_]*'
             size={14} />
         </form>
       </div>

@@ -60,5 +60,19 @@
 }
 
 .tabNameEditor input[type=text]:focus {
-  outline:none;
+  outline: solid;
+  outline-width: 1px;
+  outline-color: rgba(0,0,0,0);
+}
+
+.tabNameEditor input[type=text]:valid {
+  outline: solid;
+  outline-width: 1px;
+  outline-color: rgba(0,0,0,0);
+}
+
+.tabNameEditor input[type=text]:invalid {
+  outline: solid;
+  outline-width: 1px;
+  outline-color: rgba(255,32,32,0.6);
 }
