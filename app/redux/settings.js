@@ -8,12 +8,14 @@ export const SET_PALETTE = 'SET_PALETTE'
 export const SAVE_EDITS = 'SAVE_EDITS'
 export const CANCEL_EDITS = 'CANCEL_EDITS'
 export const SET_SELECTED_COLOR_PALETTE = 'SET_SELECTED_COLOR_PALETTE'
+export const SET_INTEGER_SCALE = 'SET_INTEGER_SCALE'
 
 const CONFIG_FILE_VERSION = 1
 
 const initialState = {
   palettes: fp.mkArray(4, () => fp.mkArray(16, i => i)),
-  selectedColorPalette: 'petmate'
+  selectedColorPalette: 'petmate',
+  integerScale: false
 }
 
 function saveSettings(settings) {
@@ -38,7 +40,8 @@ function fromJson(json) {
   return {
     ...initialState,
     palettes: json.palettes === undefined ? init.palettes : json.palettes,
-    selectedColorPalette: json.selectedColorPalette === undefined ? init.selectedColorPalette : json.selectedColorPalette
+    selectedColorPalette: json.selectedColorPalette === undefined ? init.selectedColorPalette : json.selectedColorPalette,
+    integerScale: fp.maybeDefault(json.integerScale, false)
   }
 }
 
@@ -83,6 +86,13 @@ export class Settings {
         branch,
         data: name
       }
+    },
+    setIntegerScale: (branch, scale) => {
+      return {
+        type: SET_INTEGER_SCALE,
+        branch,
+        data: scale
+      }
     }
   }
 
@@ -114,6 +124,16 @@ export class Settings {
           [branch]: {
             ...state[branch],
             palettes: fp.arraySet(state[branch].palettes, action.idx, action.palette)
+          }
+        }
+      case SET_INTEGER_SCALE: {
+          const branch = action.branch
+          return {
+            ...state,
+            [branch]: {
+              ...state[branch],
+              integerScale: action.data
+            }
           }
         }
       case SET_SELECTED_COLOR_PALETTE: {

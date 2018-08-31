@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux'
 
 import Modal from '../components/Modal'
+import { CheckboxInput } from '../components/formHelpers'
 import { Toolbar } from '../redux/toolbar'
 import { Settings } from '../redux/settings'
 
@@ -39,15 +40,16 @@ const PaletteOption = ({ onClick, selected, value, label, colorPalette }) => {
       style={{
         cursor: 'default',
         backgroundColor: 'rgb(40,40,40)',
+        width:'95%',
         marginTop: '10px',
         padding: '7px 7px 7px 7px',
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        outlineStyle: 'solid',
-        outlineColor: selected ? 'rgba(255,255,255, 0.6)' : 'rgba(0,0,0,0)',
-        outlineWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: selected ? 'rgba(255,255,255, 0.6)' : 'rgba(0,0,0,0)',
+        borderWidth: '1px',
       }}>
       <div style={{width: '90px'}}>{label}</div>
       <ColorPalette colorPalette={colorPalette} />
@@ -101,6 +103,10 @@ class Settings_ extends Component {
     this.props.Settings.cancelEdits()
   }
 
+  handleIntegerScale = (e) => {
+    this.props.Settings.setIntegerScale('editing', e.target.checked)
+  }
+
   render () {
     const { colorPalette, selectedColorPaletteName } = this.props
     const setPalette = (idx, v) => {
@@ -113,7 +119,8 @@ class Settings_ extends Component {
             display: 'flex',
             height: '100%',
             flexDirection: 'column',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
+            overflowY: 'auto'
           }}>
 
             <div>
@@ -147,6 +154,16 @@ class Settings_ extends Component {
                 setPalette={setPalette}
                 colorPalette={colorPalette}
               />
+
+              <Title3>View</Title3>
+              <div style={{marginTop: '9px'}}>
+                <CheckboxInput
+                  label='Snap window scale to integers to keep 1x1 pixels.'
+                  checked={this.props.integerScale}
+                  onChange={this.handleIntegerScale}
+                />
+              </div>
+              <br/>
             </div>
 
             <div style={{alignSelf: 'flex-end'}}>
@@ -169,7 +186,8 @@ export default connect(
       palette1: selectors.getSettingsEditing(state).palettes[2],
       palette2: selectors.getSettingsEditing(state).palettes[3],
       colorPalette: selectors.getSettingsEditingCurrentColorPalette(state),
-      selectedColorPaletteName: selectors.getSettingsEditing(state).selectedColorPalette
+      selectedColorPaletteName: selectors.getSettingsEditing(state).selectedColorPalette,
+      integerScale: selectors.getSettingsEditing(state).integerScale
     }
   },
   (dispatch) => {

@@ -442,6 +442,14 @@ class Editor extends Component {
     if (this.props.containerSize !== null) {
       scaleX = this.props.containerSize.width/515.0
     }
+    if (this.props.integerScale) {
+      // TOOD this depends on the desktop resolution.  On macOS this produces
+      // reasonable resoluts in the 1.5x scale case.  If we don't
+      // floor(x*2)/2, there will be fewer scale steps when resizing the
+      // window.  This feels a bit confusing.
+      scaleX = Math.floor(scaleX*2)
+      scaleX /= 2
+    }
     const scaleY = scaleX
     const { width: charW, height: charH } = this.props.framebuf
     const fbWidth = Math.floor(charW*8 * scaleX)
@@ -508,7 +516,8 @@ const mapStateToProps = state => {
     framebuf,
     textColor: state.toolbar.textColor,
     paletteRemap: selectors.getSettingsPaletteRemap(state),
-    colorPalette: selectors.getSettingsCurrentColorPalette(state)
+    colorPalette: selectors.getSettingsCurrentColorPalette(state),
+    integerScale: selectors.getSettingsIntegerScale(state)
   }
 }
 

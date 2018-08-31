@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 
 import styles from './formHelpers.css'
 
-const Checkbox_ = ({label, onChange, checked}) => {
+export const CheckboxInput = ({label, onChange, checked}) => {
   return (
     <label className={styles.checkboxContainer}>
       {label}
@@ -79,7 +79,7 @@ export class Checkbox extends Component {
   render () {
     return (
       <FormContext.Consumer>
-        {({ setField, state}) => <Checkbox_ checked={state[this.props.name]} onChange={(e) => setField(this.props.name, e.target.checked)} {...this.props} />}
+        {({ setField, state}) => <CheckboxInput checked={state[this.props.name]} onChange={(e) => setField(this.props.name, e.target.checked)} {...this.props} />}
       </FormContext.Consumer>
     )
   }

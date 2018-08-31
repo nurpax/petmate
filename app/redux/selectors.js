@@ -118,6 +118,11 @@ export const getSettingsCurrentColorPalette = (state) => {
   return getSettingsColorPaletteByName(state, settings.selectedColorPalette)
 }
 
+export const getSettingsIntegerScale = (state) => {
+  const settings = getSettings(state)
+  return settings.integerScale
+}
+
 export const getSettingsEditingCurrentColorPalette = (state) => {
   const settings = getSettingsEditing(state)
   return getSettingsColorPaletteByName(state, settings.selectedColorPalette)
