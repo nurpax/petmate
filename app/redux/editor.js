@@ -3,6 +3,8 @@ import { bindActionCreators } from 'redux'
 
 import { settable, reduxSettables } from './settable'
 import { Toolbar } from './toolbar'
+import { makeScreenName } from './utils'
+import * as fp from '../utils/fp'
 
 export const CHARSET_UPPER = 'upper'
 export const CHARSET_LOWER = 'lower'
@@ -60,9 +62,12 @@ function emptyFramebuf () {
   return Array(FB_HEIGHT).fill(Array(FB_WIDTH).fill({code: 32, color:14}))
 }
 
+export const DEFAULT_BACKGROUND_COLOR = 6
+export const DEFAULT_BORDER_COLOR = 14
+
 const settables = reduxSettables([
-  settable('Framebuffer', 'backgroundColor', 6),
-  settable('Framebuffer', 'borderColor', 14),
+  settable('Framebuffer', 'backgroundColor', DEFAULT_BACKGROUND_COLOR),
+  settable('Framebuffer', 'borderColor', DEFAULT_BORDER_COLOR),
   settable('Framebuffer', 'charset', CHARSET_UPPER),
   settable('Framebuffer', 'name', null)
 ])
@@ -70,6 +75,7 @@ const settables = reduxSettables([
 export class Framebuffer {
   static SET_PIXEL = `${Framebuffer.name}/SET_PIXEL`
   static SET_BRUSH = `${Framebuffer.name}/SET_BRUSH`
+  static SET_FIELDS = `${Framebuffer.name}/SET_FIELDS`
   static IMPORT_FILE = `${Framebuffer.name}/IMPORT_FILE`
   static CLEAR_CANVAS = `${Framebuffer.name}/CLEAR_CANVAS`
   static COPY_FRAMEBUF = `${Framebuffer.name}/COPY_FRAMEBUF`
@@ -106,6 +112,14 @@ export class Framebuffer {
         framebufIndex
       }
     },
+    setFields: (fields, framebufIndex, undoId) => {
+      return {
+        type: Framebuffer.SET_FIELDS,
+        data: fields,
+        undoId,
+        framebufIndex
+      }
+    },
     copyFramebuf: (framebuf, framebufIndex) => {
       return {
         type: Framebuffer.COPY_FRAMEBUF,
@@ -138,6 +152,11 @@ export class Framebuffer {
           ...state,
           framebuf: emptyFramebuf()
         }
+      case Framebuffer.SET_FIELDS:
+        return {
+          ...state,
+          ...action.data
+        }
       case Framebuffer.COPY_FRAMEBUF:
         return {
           ...state,
@@ -145,6 +164,7 @@ export class Framebuffer {
         }
       case Framebuffer.IMPORT_FILE:
         const c = action.data
+        const name = fp.maybeDefault(c.name, makeScreenName(action.framebufIndex))
         return {
           framebuf: c.framebuf,
           width: c.width,
@@ -152,7 +172,7 @@ export class Framebuffer {
           backgroundColor: c.backgroundColor,
           borderColor: c.borderColor,
           charset: c.charset,
-          name: c.name
+          name
         }
       default:
         return settables.reducer(state, action)

@@ -28,3 +28,8 @@ export const framebufIndexMergeProps = (stateProps, dispatchProps, ownProps) => 
     ...injectFramebufIndex(stateProps, dispatchProps)
   }
 }
+
+export const makeScreenName = (idx) => {
+  const str = `${idx + 1}`
+  return `screen_${str.padStart(3, '0')}`
+}

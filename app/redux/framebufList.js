@@ -15,11 +15,11 @@ function framebufListReducer(reducer, actionTypes) {
     case actionTypes.remove:
       return fp.arrayRemoveAt(state, action.index)
     default:
-      const { framebufIndex, ...rest } = action;
+      const { framebufIndex } = action
       if (typeof framebufIndex !== 'undefined') {
         return state.map((item, i) => {
           if (framebufIndex == i) {
-            return reducer(item, rest)
+            return reducer(item, action)
           } else {
             return item
           }
