@@ -5,7 +5,8 @@ let fs = require('fs')
 
 const initCodeKickAss = ({
   borderColor,
-  backgroundColor
+  backgroundColor,
+  label
 }) => `
 .const PLAY_MUSIC = false
 
@@ -19,23 +20,23 @@ const initCodeKickAss = ({
 }
 
 start: {
-    lda #${borderColor}
+    lda ${label}
     sta $d020
-    lda #${backgroundColor}
+    lda ${label}+1
     sta $d021
 
     // copy PETSCII
     ldx #$00
 loop:
     .for(var i=0; i<3; i++) {
-        lda frame0000+2+i*$100,x
+        lda ${label}+2+i*$100,x
         sta $0400+i*$100,x
-        lda frame0000+2+25*40+i*$100,x
+        lda ${label}+2+25*40+i*$100,x
         sta $d800+i*$100,x
     }
-    lda frame0000+2+$2e8,x
+    lda ${label}+2+$2e8,x
     sta $0400+$2e8,x
-    lda frame0000+2+25*40+$2e8,x
+    lda ${label}+2+25*40+$2e8,x
     sta $d800+$2e8,x
     inx
     bne loop
@@ -74,6 +75,7 @@ const c64tassStartSequence = `
 `
 
 const ACMEStartSequence = `
+; acme --cpu 6510 --format cbm --outfile foo.prg foo.asm
 * = $0801                             ; BASIC start address (#2049)
 !byte $0d,$08,$dc,$07,$9e,$20,$34,$39 ; BASIC loader to start at $c000...
 !byte $31,$35,$32,$00,$00,$00         ; puts BASIC line 2012 SYS 49152
@@ -82,7 +84,8 @@ const ACMEStartSequence = `
 
 const initCode64tassOrACME = startSequence => ({
   borderColor,
-  backgroundColor
+  backgroundColor,
+  label
 }) => `
 ${startSequence}
 start
@@ -93,24 +96,24 @@ start
 
     ldx #$00
 loop
-    lda frame0000+2+0*$100,x
+    lda ${label}+2+0*$100,x
     sta $0400+0*$100,x
-    lda frame0000+2+25*40+0*$100,x
+    lda ${label}+2+25*40+0*$100,x
     sta $d800+0*$100,x
 
-    lda frame0000+2+1*$100,x
+    lda ${label}+2+1*$100,x
     sta $0400+1*$100,x
-    lda frame0000+2+25*40+1*$100,x
+    lda ${label}+2+25*40+1*$100,x
     sta $d800+1*$100,x
 
-    lda frame0000+2+2*$100,x
+    lda ${label}+2+2*$100,x
     sta $0400+2*$100,x
-    lda frame0000+2+25*40+2*$100,x
+    lda ${label}+2+25*40+2*$100,x
     sta $d800+2*$100,x
 
-    lda frame0000+2+$2e8,x
+    lda ${label}+2+$2e8,x
     sta $0400+$2e8,x
-    lda frame0000+2+25*40+$2e8,x
+    lda ${label}+2+25*40+$2e8,x
     sta $d800+$2e8,x
     inx
     bne loop
@@ -134,11 +137,10 @@ function bytesToCommaDelimited(dstLines, bytes, bytesPerLine, byte) {
   }
 }
 
-function convertToAsm(lines, fb, idx, {mkLabel, byte}) {
-  const { width, height, framebuf, backgroundColor, borderColor } = fb
+function convertToAsm(lines, fb, {mkLabel, byte}) {
+  const { width, height, framebuf, backgroundColor, borderColor, name } = fb
 
-  const num = String(idx).padStart(4, '0')
-  lines.push(mkLabel(`frame${num}`))
+  lines.push(mkLabel(`${name}`))
 
   let bytes = []
   for (let y = 0; y < height; y++) {
@@ -187,15 +189,16 @@ const saveAsm = (filename, fbs, options) => {
     // Single screen export?
     const selectedFb = fbs[options.selectedFramebufIndex]
     if (options.currentScreenOnly) {
-      convertToAsm(lines, selectedFb, 0, syntaxParams)
+      convertToAsm(lines, selectedFb, syntaxParams)
     } else {
-      fbs.forEach((fb,idx) => convertToAsm(lines, fb, idx, syntaxParams))
+      fbs.forEach((fb) => convertToAsm(lines, fb, syntaxParams))
     }
     let backgroundColor = selectedFb.backgroundColor
     let borderColor = selectedFb.borderColor
     const initCodeOptions = {
       backgroundColor,
-      borderColor
+      borderColor,
+      label: selectedFb.name
     }
     const init = options.standalone ? mkInitCode(initCodeOptions) : ''
     fs.writeFileSync(
