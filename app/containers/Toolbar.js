@@ -75,7 +75,7 @@ class FbColorPicker_ extends PureComponent {
     const bg = utils.colorIndexToCssRgb(colorPalette, this.props.color)
     const s = {
       height: '40px',
-      marginTop: '12px',
+      marginTop: '10px',
       backgroundColor: bg,
       flex: 1
     }
@@ -86,7 +86,8 @@ class FbColorPicker_ extends PureComponent {
         <div
           className={classnames(styles.colorpicker, this.props.fadeOut ? styles.fadeOut : null)}
           style={{
-            filter: 'drop-shadow(3px 3px 3px #000)'
+            top: '9px',
+            filter: 'drop-shadow(2.5px 2.5px 1.5px rgba(0,0,0,0.5))',
           }}
         >
           <ColorPicker
@@ -94,6 +95,7 @@ class FbColorPicker_ extends PureComponent {
             onSelectColor={this.handleSelectColor}
             paletteRemap={this.props.paletteRemap}
             colorPalette={colorPalette}
+            scale={{scaleX:1.5, scaleY:1.5}}
             twoRows={true}
           />
         </div>
