@@ -399,7 +399,8 @@ export class Toolbar {
         const state = getState()
         dispatch(Toolbar.actions.setSelectedChar(charPos))
         if (state.toolbar.selectedTool === TOOL_BRUSH ||
-          state.toolbar.selectedTool === TOOL_COLORIZE) {
+          state.toolbar.selectedTool === TOOL_COLORIZE ||
+          state.toolbar.selectedTool === TOOL_TEXT) {
           dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
         }
       }
@@ -410,7 +411,8 @@ export class Toolbar {
         const state = getState()
         dispatch(Toolbar.actions.setTextColor(pix.color))
         dispatch(Toolbar.actions.setScreencode(pix.code))
-        if (state.toolbar.selectedTool === TOOL_BRUSH) {
+        if (state.toolbar.selectedTool === TOOL_BRUSH ||
+          state.toolbar.selectedTool === TOOL_TEXT) {
           dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
         }
       }
