@@ -321,21 +321,31 @@ class FramebufferView_ extends Component {
       screencodeHighlight = null
       colorHighlight = null
       const { textCursorPos, charPos, textColor } = this.props
-      const cursorPos =
-        textCursorPos !== null ?
-          textCursorPos :
-          (this.props.isActive ? charPos : null)
-      if (cursorPos) {
+      let textCursorOverlay = null
+      if (textCursorPos !== null) {
         const color = utils.colorIndexToCssRgb(this.props.colorPalette, textColor)
-        overlays =
+        textCursorOverlay =
           <TextCursorOverlay
             framebufWidth={this.props.framebufWidth}
             framebufHeight={this.props.framebufHeight}
-            charPos={cursorPos}
+            charPos={textCursorPos}
             fillColor={color}
             opacity={0.5}
           />
       }
+      overlays =
+        <Fragment>
+          {textCursorOverlay}
+          {this.props.isActive ?
+            <CharPosOverlay
+              framebufWidth={this.props.framebufWidth}
+              framebufHeight={this.props.framebufHeight}
+              charPos={charPos}
+              opacity={0.5}
+            />
+            :
+            null}
+        </Fragment>
     }
 
     const { scaleX, scaleY } = this.props.canvasScale
