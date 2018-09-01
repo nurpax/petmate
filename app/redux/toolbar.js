@@ -340,9 +340,15 @@ export class Toolbar {
     },
 
     nextCharcode: (dir) => {
-      return {
-        type: Toolbar.NEXT_CHARCODE,
-        data: dir
+      return (dispatch, getState) => {
+        const font = selectors.getCurrentFramebufFont(getState())
+        dispatch({
+          type: Toolbar.NEXT_CHARCODE,
+          data: {
+            dir,
+            font
+          }
+        })
       }
     },
 
@@ -495,19 +501,21 @@ export class Toolbar {
           selectedChar: rc,
           charTransform: emptyTransform
         }
-      case Toolbar.NEXT_CHARCODE:
-        const dir = action.data
+      case Toolbar.NEXT_CHARCODE: {
+        const { dir, font } = action.data
+        const rc = selectors.getCharRowColWithTransform(state.selectedChar, font, state.charTransform)
         return {
           ...state,
           selectedChar: {
-            row: Math.max(0, Math.min(15, state.selectedChar.row + dir.row)),
-            col: Math.max(0, Math.min(15, state.selectedChar.col + dir.col)),
+            row: Math.max(0, Math.min(15, rc.row + dir.row)),
+            col: Math.max(0, Math.min(15, rc.col + dir.col)),
           },
           charTransform: emptyTransform
         }
+      }
       case Toolbar.INVERT_CHAR: {
         const { font } = action.data
-        const curScreencode = utils.charScreencodeFromRowCol(font, state.selectedChar)
+        const curScreencode = selectors.getScreencodeWithTransform(state.selectedChar, font, state.charTransform)
         const inverseRowCol = utils.rowColFromScreencode(font, brush.findInverseChar(action.data.font, curScreencode))
         return {
           ...state,

@@ -74,7 +74,7 @@ export const getCurrentFramebufFont = (state) => {
 const rowColFromScreencodeMemoized_ = (f, sc) => rowColFromScreencode(f, sc)
 const rowColFromScreencodeMemoized = memoize(rowColFromScreencodeMemoized_)
 
-export const computeScreencodeWithTransform = (rowcol, font, transform) => {
+const computeScreencodeWithTransform = (rowcol, font, transform) => {
   const sc = charScreencodeFromRowCol(font, rowcol)
   return findTransformedChar(font, sc, transform)
 }

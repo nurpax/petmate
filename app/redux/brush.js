@@ -64,6 +64,13 @@ const rotateChar = (charset, code, angle) => {
 
 
 const findTransformed = (charset, code, mirror, angle) => {
+  // This identity check is a must-have here due to duplicate 8x8 blocks in
+  // the character set.  If there's no transformation applied to the current
+  // character, just return the original screencode rather than another one
+  // that may be bit-wise equivalent.
+  if (mirror === 0 && angle === 0) {
+    return code
+  }
   const rotchar = rotateChar(charset, code, angle)
   const flippedChar = mirrorChar(charset, rotchar, mirror)
   for (let ci = 0; ci < 256; ci++) {
