@@ -221,7 +221,7 @@ export class Toolbar {
             dispatch(Toolbar.actions.setTextCursorPos(null))
           }
 
-          if (state.toolbar.textCursorPos !== null) {
+          if (state.toolbar.textCursorPos !== null && !metaOrCtrl) {
             // Don't match shortcuts if we're in "text tool" mode.
             const { textCursorPos, textColor } = state.toolbar
             const framebufIndex = selectors.getCurrentScreenFramebufIndex(state)
