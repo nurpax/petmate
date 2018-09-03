@@ -166,23 +166,62 @@ export class Toolbar {
           return
         }
 
-        // No shift, meta or ctrl
-        if (noMods || selectedTool === TOOL_TEXT) {
+        let inTextInput = selectedTool === TOOL_TEXT && state.toolbar.textCursorPos !== null
+        // These shortcuts should work regardless of what drawing tool is selected.
+        if (noMods) {
+          if (!inTextInput) {
+            if (key === 'ArrowLeft') {
+              dispatch(Screens.actions.nextScreen(-1))
+              return
+            } else if (key === 'ArrowRight') {
+              dispatch(Screens.actions.nextScreen(+1))
+              return
+            } else if (key === 'q') {
+              dispatch(Toolbar.actions.nextColor(-1))
+              return
+            } else if (key === 'e') {
+              dispatch(Toolbar.actions.nextColor(+1))
+              return
+            } else if (key === 'x' || key === '1') {
+              dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
+              return
+            } else if (key === 'c' || key === '2') {
+              dispatch(Toolbar.actions.setSelectedTool(TOOL_COLORIZE))
+              return
+            } else if (key == '3') {
+              dispatch(Toolbar.actions.setSelectedTool(TOOL_CHAR_DRAW))
+              return
+            } else if (key === 'b' || key === '4') {
+              dispatch(Toolbar.actions.setSelectedTool(TOOL_BRUSH))
+              return
+            } else if (key === 't' || key === '5') {
+              dispatch(Toolbar.actions.setSelectedTool(TOOL_TEXT))
+              return
+            } else if (key === 'g') {
+              return dispatch((dispatch, getState) => {
+                const { canvasGrid } = getState().toolbar
+                dispatch(Toolbar.actions.setCanvasGrid(!canvasGrid))
+              })
+            }
+          }
+          // These shouldn't early exit this function since we check for other
+          // conditions for Esc later.
           if (key === 'Escape') {
-            if (selectedTool === TOOL_BRUSH) {
-              dispatch(Toolbar.actions.resetBrush())
-            }
-            if (selectedTool === TOOL_TEXT) {
-              dispatch(Toolbar.actions.setTextCursorPos(null))
-            }
             if (showSettings) {
               dispatch(Toolbar.actions.setShowSettings(false))
             }
             if (showExport) {
               dispatch(Toolbar.actions.setShowExport({show:false}))
             }
-          } else if (state.toolbar.selectedTool === TOOL_TEXT &&
-            state.toolbar.textCursorPos !== null) {
+          }
+        }
+
+        if (selectedTool === TOOL_TEXT) {
+          if (key === 'Escape') {
+            dispatch(Toolbar.actions.setTextCursorPos(null))
+          }
+
+          if (state.toolbar.textCursorPos !== null) {
             // Don't match shortcuts if we're in "text tool" mode.
             const { textCursorPos, textColor } = state.toolbar
             const framebufIndex = selectors.getCurrentScreenFramebufIndex(state)
@@ -221,10 +260,12 @@ export class Toolbar {
                 ))
               }
             }
-          } else if (noMods && key === 'ArrowLeft') {
-            dispatch(Screens.actions.nextScreen(-1))
-          } else if (noMods && key === 'ArrowRight') {
-            dispatch(Screens.actions.nextScreen(+1))
+          }
+        } else if (noMods) {
+          if (key === 'Escape') {
+            if (selectedTool === TOOL_BRUSH) {
+              dispatch(Toolbar.actions.resetBrush())
+            }
           } else if (key === 'a') {
             dispatch(Toolbar.actions.nextCharcode({ row: 0, col: -1}))
           } else if (key === 'd') {
@@ -251,25 +292,6 @@ export class Toolbar {
             } else if (selectedTool === TOOL_DRAW || selectedTool === TOOL_CHAR_DRAW) {
               dispatch(Toolbar.actions.rotateChar())
             }
-          } else if (key === 'q') {
-            dispatch(Toolbar.actions.nextColor(-1))
-          } else if (key === 'e') {
-            dispatch(Toolbar.actions.nextColor(+1))
-          } else if (key === 'x' || key === '1') {
-            dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
-          } else if (key === 'c' || key === '2') {
-            dispatch(Toolbar.actions.setSelectedTool(TOOL_COLORIZE))
-          } else if (key == '3') {
-            dispatch(Toolbar.actions.setSelectedTool(TOOL_CHAR_DRAW))
-          } else if (key === 'b' || key === '4') {
-            dispatch(Toolbar.actions.setSelectedTool(TOOL_BRUSH))
-          } else if (key === 't' || key === '5') {
-            dispatch(Toolbar.actions.setSelectedTool(TOOL_TEXT))
-          } else if (key === 'g') {
-            dispatch((dispatch, getState) => {
-              const { canvasGrid } = getState().toolbar
-              dispatch(Toolbar.actions.setCanvasGrid(!canvasGrid))
-            })
           }
         }
 
@@ -304,7 +326,6 @@ export class Toolbar {
 
     keyUp: (key) => {
       return (dispatch, getState) => {
-        const state = getState()
         if (key === 'Shift') {
           dispatch(Toolbar.actions.setShiftKey(false))
         } else if (key === 'Meta') {

@@ -47,6 +47,16 @@ function dispatchExport(type) {
 }
 
 require('electron').ipcRenderer.on('window-blur', (event, message) => {
+  store.dispatch(Toolbar.actions.setShortcutsActive(false))
+  store.dispatch(Toolbar.actions.clearModKeyState())
+})
+
+window.addEventListener('focus', () => {
+  store.dispatch(Toolbar.actions.setShortcutsActive(true))
+  store.dispatch(Toolbar.actions.clearModKeyState())
+})
+window.addEventListener('blur', () => {
+  store.dispatch(Toolbar.actions.setShortcutsActive(false))
   store.dispatch(Toolbar.actions.clearModKeyState())
 })
 
