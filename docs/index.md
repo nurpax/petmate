@@ -61,6 +61,10 @@ The settings are saved in the following location:
 
 ## Release history
 
+Petmate 0.4.1 (2018-09-04)
+- Add 32-bit build for Windows.
+- Fix several keyboard shortcut related bugs: [#112](https://github.com/nurpax/petmate/issues/112), [#111](https://github.com/nurpax/petmate/issues/111), [#105](https://github.com/nurpax/petmate/issues/105), [#97](https://github.com/nurpax/petmate/issues/97)
+
 Petmate 0.4.0 (2018-09-02)
 - Re-order screens by dragging.  Assign names to screens that get output to exported .asm file symbol names.
 - Text input tool.
