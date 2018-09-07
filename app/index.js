@@ -69,6 +69,19 @@ require('electron').ipcRenderer.on('menu', (event, message) => {
     case 'redo':
       store.dispatch(ReduxRoot.actions.redo())
       return
+    case 'new':
+      const { dialog } = require('electron').remote
+      if (dialog.showMessageBox({
+        type: 'question',
+        buttons: ['Reset', 'Cancel'],
+        cancelId: 1,
+        message: 'Reset workspace?',
+        detail: 'This will empty your workspace.  This cannot be undone.'
+      }) === 0) {
+        store.dispatch(ReduxRoot.actions.resetState())
+        store.dispatch(Screens.actions.newScreen())
+      }
+      return
     case 'open':
       store.dispatch(ReduxRoot.actions.fileOpenWorkspace())
       return

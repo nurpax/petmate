@@ -117,6 +117,12 @@ export default class MenuBuilder {
     const subMenuFile = {
       label: 'File',
       submenu: [
+        { label: 'New', accelerator: 'Command+N',
+          click: () => {
+            this.sendMenuCommand('new');
+          }
+        },
+        { type: 'separator' },
         { label: 'Open File...', accelerator: 'Command+O',
           click: () => {
             this.sendMenuCommand('open');
@@ -239,6 +245,11 @@ export default class MenuBuilder {
       {
         label: '&File',
         submenu: [
+          { label: 'New',
+            click: () => {
+              this.sendMenuCommand('new');
+            }
+          },
           { label: '&Open', accelerator: 'Ctrl+O',
             click: () => {
               this.sendMenuCommand('open');
