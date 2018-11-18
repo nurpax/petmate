@@ -23,6 +23,11 @@ import { framebufIndexMergeProps } from '../redux/utils'
 
 import { withHoverFade } from './hoc'
 
+import {
+  faBrush, faPencilAlt, faFont, faUndo, faRedo, faBroom, faCog
+} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import styles from './Toolbar.module.css';
 
 class Icon extends PureComponent {
@@ -40,9 +45,7 @@ class Icon extends PureComponent {
         className={classnames(styles.tooltip, selectedClass, this.props.bottom ? styles.end : null)}
         onClick={() => this.props.onIconClick()}
       >
-        <i
-          className={classnames(styles.icon, `fas ${this.props.iconName}`)}
-        />
+        <FontAwesomeIcon className={styles.icon} icon={this.props.iconName} />
         {this.props.subIcon !== null ? this.props.subIcon() : null}
         {tooltip}
       </div>
@@ -212,29 +215,29 @@ class ToolbarView extends Component {
     const tools = [
       mkTool({
         tool: TOOL_DRAW,
-        iconName: 'fa-pencil-alt',
+        iconName: faPencilAlt,
         tooltip: 'Char & Color'
       }),
       mkTool({
         tool: TOOL_COLORIZE,
-        iconName: 'fa-pencil-alt',
+        iconName: faPencilAlt,
         tooltip: 'Color only',
         subIcon: renderColorizeSubIcon
       }),
       mkTool({
         tool: TOOL_CHAR_DRAW,
-        iconName: 'fa-pencil-alt',
+        iconName: faPencilAlt,
         tooltip: 'Char only',
         subIcon: renderCharSubIcon
       }),
       mkTool({
         tool: TOOL_BRUSH,
-        iconName: 'fa-brush',
+        iconName: faBrush,
         tooltip: 'Brush'
       }),
       mkTool({
         tool: TOOL_TEXT,
-        iconName: 'fa-font',
+        iconName: faFont,
         tooltip: 'Text'
       })
     ]
@@ -242,13 +245,13 @@ class ToolbarView extends Component {
       <div className={styles.toolbar}>
         <Icon
           onIconClick={this.props.undo}
-          iconName='fa-undo' tooltip='Undo'/>
+          iconName={faUndo} tooltip='Undo'/>
         <Icon
           onIconClick={this.props.redo}
-          iconName='fa-redo' tooltip='Redo'/>
+          iconName={faRedo} tooltip='Redo'/>
         <Icon
           onIconClick={this.props.Toolbar.clearCanvas}
-          iconName='fa-broom' tooltip='Clear canvas'/>
+          iconName={faBroom} tooltip='Clear canvas'/>
         {tools}
         <FbColorPicker
           pickerId='border'
@@ -275,7 +278,7 @@ class ToolbarView extends Component {
         <Icon
           bottom={true}
           onIconClick={() => this.props.Toolbar.setShowSettings(true)}
-          iconName='fa-cog' tooltip='Preferences'/>
+          iconName={faCog} tooltip='Preferences'/>
       </div>
     )
   }

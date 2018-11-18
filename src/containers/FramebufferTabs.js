@@ -18,6 +18,9 @@ import * as selectors from '../redux/selectors'
 import * as utils from '../utils'
 import * as fp from '../utils/fp'
 
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import styles from './FramebufferTabs.module.css'
 
 // This class is a bit funky with how it disables/enables keyboard shortcuts
@@ -296,7 +299,7 @@ class FramebufferTabs_ extends Component {
         >
           {lis}
           <div className={classnames(styles.tab, styles.newScreen)}>
-            <i onClick={this.handleNewTab} className='fa fa-plus'></i>
+            <FontAwesomeIcon onClick={this.handleNewTab} icon={faPlus} />
           </div>
         </SortableTabList>
       </div>
