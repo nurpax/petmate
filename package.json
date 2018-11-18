@@ -35,6 +35,7 @@
     "react-redux": "^5.1.1",
     "react-scripts": "2.1.1",
     "redux": "^4.0.1",
+    "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
     "redux-undo": "1.0.0-beta9-9-7",
     "resize-observer-polyfill": "^1.5.0",
