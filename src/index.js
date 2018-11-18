@@ -1,6 +1,5 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { AppContainer } from 'react-hot-loader';
 import Root from './containers/Root';
 import { configureStore, history } from './store/configureStore';
 import './app.global.css';
@@ -15,26 +14,11 @@ const store = configureStore();
 // Create one screen/framebuffer so that we have a canvas to draw on
 store.dispatch(Screens.actions.newScreen())
 
-render(
-  <AppContainer>
-    <Root store={store} history={history} />
-  </AppContainer>,
+render(<Root store={store} history={history} />,
   document.getElementById('root')
 );
 
 loadSettings((j) => store.dispatch(Settings.actions.load(j)))
-
-if (module.hot) {
-  module.hot.accept('./containers/Root', () => {
-    const NextRoot = require('./containers/Root'); // eslint-disable-line global-require
-    render(
-      <AppContainer>
-        <NextRoot store={store} history={history} />
-      </AppContainer>,
-      document.getElementById('root')
-    );
-  });
-}
 
 function dispatchExport(type) {
   // Either open an export options modal or go to export directly if the
