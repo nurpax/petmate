@@ -1,7 +1,8 @@
-const fs = require('fs')
 
 import { framebufFromJson } from '../workspace'
 import { chunkArray } from '../../utils'
+
+const fs = require('fs')
 
 function screencodeColorMap(charcodes, colors) {
   return charcodes.map((c,i) => {

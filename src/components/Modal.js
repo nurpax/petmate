@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import ReactDOM from 'react-dom'
 import classnames from 'classnames'
 
-import styles from './Modal.css'
+import styles from './Modal.module.css'
 
 const modalRoot = document.getElementById('modal-root')
 

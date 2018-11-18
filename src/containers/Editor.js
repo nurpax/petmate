@@ -32,7 +32,7 @@ import {
 import { selectChar } from '../actions/editor'
 import * as utils from '../utils';
 
-import styles from './Editor.css';
+import styles from './Editor.module.css';
 
 const brushOverlayStyleBase = {
   outlineColor: 'rgba(128, 255, 128, 0.5)',

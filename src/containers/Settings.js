@@ -14,7 +14,7 @@ import {
   SortableColorPalette
 } from '../components/ColorPicker'
 
-import styles from './Settings.css'
+import styles from './Settings.module.css'
 
 const ModalTitle = ({children}) => <h2>{children}</h2>
 const Title3 = ({children}) => <h3>{children}</h3>

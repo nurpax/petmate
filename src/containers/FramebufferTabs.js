@@ -9,7 +9,6 @@ import classnames from 'classnames'
 import ContextMenuArea from './ContextMenuArea'
 
 import CharGrid from '../components/CharGrid'
-import styles from './FramebufferTabs.css'
 import { framebufIndexMergeProps }  from '../redux/utils'
 import { Framebuffer } from '../redux/editor'
 import { Toolbar } from '../redux/toolbar'
@@ -18,6 +17,8 @@ import * as selectors from '../redux/selectors'
 
 import * as utils from '../utils'
 import * as fp from '../utils/fp'
+
+import styles from './FramebufferTabs.module.css'
 
 // This class is a bit funky with how it disables/enables keyboard shortcuts
 // globally for the app while the input element has focus.  Maybe there'd be a

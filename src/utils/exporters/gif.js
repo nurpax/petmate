@@ -1,8 +1,7 @@
 
-// Create a 10 x 10 gif
-var GifEncoder = require('gif-encoder');
-
 import { framebufToPixelsIndexed } from './util'
+
+var GifEncoder = require('gif-encoder');
 
 const exportGIF = (encoder, fb, palette, options) => {
   const pixels = framebufToPixelsIndexed(fb, palette, options)

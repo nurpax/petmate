@@ -1,10 +1,11 @@
 // @flow
 import React, { Component } from 'react';
-import styles from './ColorPicker.css';
 import * as utils from '../utils'
 import * as fp from '../utils/fp'
 
 import { SortableContainer, SortableElement, arrayMove } from '../external/react-sortable-hoc'
+
+import styles from './ColorPicker.module.css';
 
 const ColorBlock = ({ color, colorPalette, hover }) => {
   const bg = utils.colorIndexToCssRgb(colorPalette, color)

@@ -12,7 +12,7 @@ import Editor from './Editor';
 import { Framebuffer } from '../redux/editor'
 import * as reduxToolbar from '../redux/toolbar'
 
-import s from './App.css'
+import s from './App.module.css'
 
 class ExtLink extends Component {
   handleIconClick = (e) => {

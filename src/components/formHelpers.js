@@ -2,7 +2,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
-import styles from './formHelpers.css'
+import styles from './formHelpers.module.css'
 
 export const CheckboxInput = ({label, onChange, checked}) => {
   return (

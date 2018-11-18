@@ -1,9 +1,11 @@
-export SortableContainer from './SortableContainer';
-export SortableElement from './SortableElement';
-export SortableHandle from './SortableHandle';
+import SortableContainer from './SortableContainer';
+import SortableElement from './SortableElement';
+import SortableHandle from './SortableHandle';
 
-export sortableContainer from './SortableContainer';
-export sortableElement from './SortableElement';
-export sortableHandle from './SortableHandle';
+import sortableContainer from './SortableContainer';
+import sortableElement from './SortableElement';
+import sortableHandle from './SortableHandle';
 
 export {arrayMove} from './utils';
+
+export { SortableContainer, SortableElement, SortableHandle }

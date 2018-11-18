@@ -21,7 +21,7 @@ import * as fp from '../utils/fp'
 import * as selectors from '../redux/selectors'
 import { CharPosition } from './hoc'
 
-import styles from './CharSelect.css'
+import styles from './CharSelect.module.css'
 
 const SelectButton = ({name, current, setCharset, children}) => {
   return (

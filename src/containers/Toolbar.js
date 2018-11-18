@@ -20,9 +20,10 @@ import { Framebuffer } from '../redux/editor'
 import * as selectors from '../redux/selectors'
 import * as Root from '../redux/root'
 import { framebufIndexMergeProps } from '../redux/utils'
-import styles from './Toolbar.css';
 
 import { withHoverFade } from './hoc'
+
+import styles from './Toolbar.module.css';
 
 class Icon extends PureComponent {
   static defaultProps = {

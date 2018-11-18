@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import classnames from 'classnames'
 
-import styles from './CharPosOverlay.css'
+import styles from './CharPosOverlay.module.css'
 
 const charPosOverlayStyleBase = {
   outlineStyle: 'solid',
