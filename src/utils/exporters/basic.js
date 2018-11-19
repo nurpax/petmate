@@ -1,7 +1,7 @@
 
 import { chunkArray } from '../../utils'
 
-let fs = require('fs')
+import { fs } from '../electronImports' 
 
 const initCode = ({
   borderColor,

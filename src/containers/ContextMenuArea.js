@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { remote } from 'electron'
+
+import { electron } from '../utils/electronImports'
+const remote = electron.remote;
 
 const { Menu } = remote;
 

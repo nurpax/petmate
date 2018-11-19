@@ -18,8 +18,9 @@ import {
 
 import { colorPalettes } from './palette'
 
-const fs = require('fs')
-const path = require('path')
+import { electron, fs, path } from './electronImports' 
+const { ipcRenderer } = electron
+
 
 // TODO import VICE VPL files
 
@@ -218,21 +219,14 @@ export function chunkArray(myArray, chunk_size){
 }
 
 
-const electron = require('electron')
-const { ipcRenderer } = electron
-const isDev = require('electron-is-dev');
-
 export const loadAppFile = (filename) => {
   const appPath = electron.remote.app.getAppPath()
-  let abspath = isDev ?
-    path.resolve(__dirname, filename) :
-    path.resolve(appPath, filename)
-  return fs.readFileSync(abspath)
+  return fs.readFileSync(path.resolve(appPath, filename));
 }
 
-export const systemFontData = loadAppFile('./assets/system-charset.bin')
-export const systemFontDataLower = loadAppFile('./assets/system-charset-lower.bin')
-export const executablePrgTemplate = loadAppFile('./assets/template.prg')
+export const systemFontData = loadAppFile('assets/system-charset.bin')
+export const systemFontDataLower = loadAppFile('assets/system-charset-lower.bin')
+export const executablePrgTemplate = loadAppFile('assets/template.prg')
 
 function setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename) {
   setWorkspaceFilename(filename)
@@ -240,7 +234,7 @@ function setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename) {
 }
 
 export function dialogLoadWorkspace(dispatch, setWorkspaceFilename) {
-  const {dialog} = require('electron').remote
+  const {dialog} = electron.remote
   const filters = [
     {name: 'Petmate workspace', extensions: ['petmate']},
   ]
@@ -257,7 +251,7 @@ export function dialogLoadWorkspace(dispatch, setWorkspaceFilename) {
 }
 
 export function dialogSaveAsWorkspace(dispatch, screens, getFramebufByIndex, setWorkspaceFilename) {
-  const {dialog} = require('electron').remote
+  const {dialog} = electron.remote
   const filters = [
     {name: 'Petmate workspace file', extensions: ['petmate']},
   ]
@@ -270,7 +264,7 @@ export function dialogSaveAsWorkspace(dispatch, screens, getFramebufByIndex, set
 }
 
 export function dialogExportFile(type, framebufs, palette, options) {
-  const {dialog} = require('electron').remote
+  const {dialog} = electron.remote
   const filters = [
     {name: type.name, extensions: [type.ext]}
   ]
@@ -282,7 +276,7 @@ export function dialogExportFile(type, framebufs, palette, options) {
 }
 
 export function dialogImportFile(type, importFile) {
-  const {dialog} = require('electron').remote
+  const {dialog} = electron.remote
   const filters = [
     { name: type.name, extensions: [type.ext] }
   ]
@@ -298,10 +292,7 @@ export function dialogImportFile(type, importFile) {
 }
 
 export function loadSettings(dispatchSettingsLoad) {
-  const electron = require('electron')
-  const path = require('path')
   let settingsFile = path.join(electron.remote.app.getPath('userData'), 'Settings')
-  var fs = require('fs');
   if (fs.existsSync(settingsFile)) {
     const c = fs.readFileSync(settingsFile, 'utf-8')
     const j = JSON.parse(c)

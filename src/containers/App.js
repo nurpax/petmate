@@ -12,12 +12,14 @@ import Editor from './Editor';
 import { Framebuffer } from '../redux/editor'
 import * as reduxToolbar from '../redux/toolbar'
 
+import { electron } from '../utils/electronImports'
+
 import s from './App.module.css'
 
 class ExtLink extends Component {
   handleIconClick = (e) => {
     e.preventDefault()
-    require('electron').shell.openExternal(this.props.href)
+    electron.shell.openExternal(this.props.href)
   }
   render () {
     return (

@@ -1,7 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
 import Root from './containers/Root';
-import { configureStore, history } from './store/configureStore';
 import './app.global.css';
 
 import { formats, loadSettings } from './utils'
@@ -10,11 +9,16 @@ import { Settings } from './redux/settings'
 import { Toolbar } from './redux/toolbar'
 import * as ReduxRoot from './redux/root'
 
+import configureStore from './store/configureStore'
+
+// TODO prod builds
+import { electron } from './utils/electronImports'
+
 const store = configureStore();
 // Create one screen/framebuffer so that we have a canvas to draw on
 store.dispatch(Screens.actions.newScreen())
 
-render(<Root store={store} history={history} />,
+render(<Root store={store} history={undefined} />,
   document.getElementById('root')
 );
 
@@ -30,7 +34,7 @@ function dispatchExport(type) {
   }
 }
 
-require('electron').ipcRenderer.on('window-blur', (event, message) => {
+electron.ipcRenderer.on('window-blur', (event, message) => {
   store.dispatch(Toolbar.actions.setShortcutsActive(false))
   store.dispatch(Toolbar.actions.clearModKeyState())
 })
@@ -45,7 +49,7 @@ window.addEventListener('blur', () => {
 })
 
 // Listen to commands from the main process
-require('electron').ipcRenderer.on('menu', (event, message) => {
+electron.ipcRenderer.on('menu', (event, message) => {
   switch (message) {
     case 'undo':
       store.dispatch(ReduxRoot.actions.undo())
@@ -54,7 +58,7 @@ require('electron').ipcRenderer.on('menu', (event, message) => {
       store.dispatch(ReduxRoot.actions.redo())
       return
     case 'new':
-      const { dialog } = require('electron').remote
+      const { dialog } = electron.remote
       if (dialog.showMessageBox({
         type: 'question',
         buttons: ['Reset', 'Cancel'],

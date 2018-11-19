@@ -2,7 +2,6 @@ const { app, BrowserWindow, shell, ipcMain, Menu, TouchBar } = require('electron
 const { TouchBarButton, TouchBarLabel, TouchBarSpacer } = TouchBar;
 
 const path = require('path');
-const isDev = require('electron-is-dev');
 
 let mainWindow;
 
@@ -21,12 +20,12 @@ createWindow = () => {
 	});
 
 	mainWindow.loadURL(
-		isDev
+		!app.isPackaged
 			? 'http://localhost:3000'
 			: `file://${path.join(__dirname, '../build/index.html')}`,
 	);
 
-	if (isDev) {
+	if (!app.isPackaged) {
 		const {
 			default: installExtension,
 			REACT_DEVELOPER_TOOLS,

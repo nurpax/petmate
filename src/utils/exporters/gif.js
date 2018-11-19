@@ -1,6 +1,8 @@
 
 import { framebufToPixelsIndexed } from './util'
 
+import { fs } from '../electronImports'
+
 var GifEncoder = require('gif-encoder');
 
 const exportGIF = (encoder, fb, palette, options) => {
@@ -43,7 +45,7 @@ export const saveGIF = (filename, fbs, palette, options) => {
       console.error('invalid loop mode', options.loopMode)
     }
 
-    let file = require('fs').createWriteStream(filename);
+    let file = fs.createWriteStream(filename);
     encoder.pipe(file);
 
     encoder.writeHeader();

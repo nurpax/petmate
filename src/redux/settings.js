@@ -1,6 +1,8 @@
 
 import { bindActionCreators } from 'redux'
 
+import { electron, path, fs } from '../utils/electronImports'
+
 import * as fp from '../utils/fp'
 
 export const LOAD = 'LOAD'
@@ -19,9 +21,6 @@ const initialState = {
 }
 
 function saveSettings(settings) {
-  const electron = require('electron')
-  const path = require('path')
-  var fs = require('fs');
   let settingsFile = path.join(electron.remote.app.getPath('userData'), 'Settings')
   const j = JSON.stringify(settings)
   fs.writeFileSync(settingsFile, j, 'utf-8')

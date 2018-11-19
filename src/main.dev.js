@@ -13,6 +13,8 @@
 import { app, BrowserWindow } from 'electron';
 import MenuBuilder from './menu';
 
+import { electron } from './utils/electronImports'
+
 let mainWindow = null;
 
 if (process.env.NODE_ENV === 'production') {
@@ -93,7 +95,7 @@ app.on('ready', async () => {
   menuBuilder.buildMenu();
 
   // Handle browser window set window title requests
-  const {ipcMain} = require('electron')
+  const ipcMain = electron;
   ipcMain.on('set-title', (event, arg) => {
     mainWindow.setTitle(arg)
   })

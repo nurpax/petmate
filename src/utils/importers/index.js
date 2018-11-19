@@ -2,7 +2,7 @@
 import { framebufFromJson } from '../workspace'
 import { chunkArray } from '../../utils'
 
-const fs = require('fs')
+import { fs } from '../electronImports' 
 
 function screencodeColorMap(charcodes, colors) {
   return charcodes.map((c,i) => {

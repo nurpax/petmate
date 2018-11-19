@@ -6,9 +6,9 @@ import { saveAsm } from './asm'
 import { saveBASIC } from './basic'
 import { saveGIF } from './gif'
 
-const nativeImage = require('electron').nativeImage
+import { electron, fs } from '../electronImports' 
 
-let fs = require('fs')
+const nativeImage = electron.nativeImage
 
 function doublePixels(buf, w, h) {
   const dstPitch = 2*w*4
