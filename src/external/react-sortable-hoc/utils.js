@@ -104,8 +104,8 @@ export function getPosition(event) {
 
 export function isTouchEvent(event) {
   return (
-    event.touches && event.touches.length ||
-    event.changedTouches && event.changedTouches.length
+    (event.touches && event.touches.length) ||
+    (event.changedTouches && event.changedTouches.length)
   );
 }
 

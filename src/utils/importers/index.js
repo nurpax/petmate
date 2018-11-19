@@ -80,7 +80,7 @@ export const loadMarqCFramebuf = (filename, importFile) => {
       }
 
       let str = line.trim()
-      if (str[str.length-1] == ',') {
+      if (str[str.length-1] === ',') {
         str = str.substring(0, str.length - 1);
       }
       let arr = JSON.parse(`[${str}]`)

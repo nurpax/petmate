@@ -1,6 +1,5 @@
 // @flow
 import { combineReducers } from 'redux'
-import undoable from 'redux-undo'
 import { Toolbar } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
 import { Settings } from '../redux/settings'

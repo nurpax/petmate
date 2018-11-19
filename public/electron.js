@@ -1,142 +1,117 @@
-const { app, BrowserWindow, shell, ipcMain, Menu, TouchBar } = require('electron');
-const { TouchBarButton, TouchBarLabel, TouchBarSpacer } = TouchBar;
+
+const {
+    app,
+    systemPreferences,
+    BrowserWindow,
+    shell,
+    ipcMain,
+    Menu
+} = require('electron');
+const MenuBuilder = require('./menu');
+
+systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
+systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
 
 const path = require('path');
 
 let mainWindow;
 
 createWindow = () => {
-	mainWindow = new BrowserWindow({
-		backgroundColor: '#F7F7F7',
-		minWidth: 880,
-		show: false,
+    mainWindow = new BrowserWindow({
+        backgroundColor: '#F7F7F7',
+        minWidth: 880,
+        show: false,
 //		titleBarStyle: 'hidden',
-		webPreferences: {
-			webSecurity: false,
-			nodeIntegration: true
-		},
-		width: 800,
-		height: 600
-	});
+        webPreferences: {
+            webSecurity: false,
+            nodeIntegration: true
+        },
+        width: 1100,
+        height: 680,
+        minWidth: 768,
+        minHeight: 500
+    });
 
-	mainWindow.loadURL(
-		!app.isPackaged
-			? 'http://localhost:3000'
-			: `file://${path.join(__dirname, '../build/index.html')}`,
-	);
+    mainWindow.on('page-title-updated', (event, message) => {
+        event.preventDefault()
+    })
+    mainWindow.setTitle('Petmate')
 
-	if (!app.isPackaged) {
-		const {
-			default: installExtension,
-			REACT_DEVELOPER_TOOLS,
-			REDUX_DEVTOOLS,
-		} = require('electron-devtools-installer');
+    mainWindow.loadURL(
+        !app.isPackaged
+            ? 'http://localhost:3000'
+            : `file://${path.join(__dirname, '../build/index.html')}`,
+    );
 
-		installExtension(REACT_DEVELOPER_TOOLS)
-			.then(name => {
-				console.log(`Added Extension: ${name}`);
-			})
-			.catch(err => {
-				console.log('An error occurred: ', err);
-			});
+    // @TODO: Use 'ready-to-show' event
+    //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
+    mainWindow.webContents.on('did-finish-load', () => {
+        if (!mainWindow) {
+            throw new Error('"mainWindow" is not defined');
+        }
+        mainWindow.show();
+        mainWindow.focus();
+    });
 
-		installExtension(REDUX_DEVTOOLS)
-			.then(name => {
-				console.log(`Added Extension: ${name}`);
-			})
-			.catch(err => {
-				console.log('An error occurred: ', err);
-			});
-	}
+    if (!app.isPackaged) {
+        const {
+            default: installExtension,
+            REACT_DEVELOPER_TOOLS,
+            REDUX_DEVTOOLS,
+        } = require('electron-devtools-installer');
 
-	mainWindow.once('ready-to-show', () => {
-		mainWindow.show();
+        installExtension(REACT_DEVELOPER_TOOLS)
+            .then(name => {
+                console.log(`Added Extension: ${name}`);
+            })
+            .catch(err => {
+                console.log('An error occurred: ', err);
+            });
 
-		ipcMain.on('open-external-window', (event, arg) => {
-			shell.openExternal(arg);
-		});
-	});
-};
+        installExtension(REDUX_DEVTOOLS)
+            .then(name => {
+                console.log(`Added Extension: ${name}`);
+            })
+            .catch(err => {
+                console.log('An error occurred: ', err);
+            });
+    }
 
-generateMenu = () => {
-	const template = [
-		{
-			label: 'File',
-			submenu: [{ role: 'about' }, { role: 'quit' }],
-		},
-		{
-			label: 'Edit',
-			submenu: [
-				{ role: 'undo' },
-				{ role: 'redo' },
-				{ type: 'separator' },
-				{ role: 'cut' },
-				{ role: 'copy' },
-				{ role: 'paste' },
-				{ role: 'pasteandmatchstyle' },
-				{ role: 'delete' },
-				{ role: 'selectall' },
-			],
-		},
-		{
-			label: 'View',
-			submenu: [
-				{ role: 'reload' },
-				{ role: 'forcereload' },
-				{ role: 'toggledevtools' },
-				{ type: 'separator' },
-				{ role: 'resetzoom' },
-				{ role: 'zoomin' },
-				{ role: 'zoomout' },
-				{ type: 'separator' },
-				{ role: 'togglefullscreen' },
-			],
-		},
-		{
-			role: 'window',
-			submenu: [{ role: 'minimize' }, { role: 'close' }],
-		},
-		{
-			role: 'help',
-			submenu: [
-				{
-					click() {
-						require('electron').shell.openExternal(
-							'https://getstream.io/winds',
-						);
-					},
-					label: 'Learn More',
-				},
-				{
-					click() {
-						require('electron').shell.openExternal(
-							'https://github.com/GetStream/Winds/issues',
-						);
-					},
-					label: 'File Issue on GitHub',
-				},
-			],
-		},
-	];
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.show();
 
-	Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+        ipcMain.on('open-external-window', (event, arg) => {
+            shell.openExternal(arg);
+        });
+    });
 };
 
 app.on('ready', () => {
-	createWindow();
-	generateMenu();
+    createWindow();
+
+    const menuBuilder = new MenuBuilder(mainWindow);
+    menuBuilder.buildMenu();
 });
 
 app.on('window-all-closed', () => {
-	app.quit();
+    app.quit();
 });
 
 app.on('activate', () => {
-	if (mainWindow === null) {
-		createWindow();
-	}
+    if (mainWindow === null) {
+        createWindow();
+    }
 });
 
+// Handle browser window set window title requests
+ipcMain.on('set-title', (event, arg) => {
+    mainWindow.setTitle(arg)
+})
+
+app.on('browser-window-blur', () => {
+    mainWindow.webContents.send('window-blur')
+})
+
 ipcMain.on('load-page', (event, arg) => {
-	mainWindow.loadURL(arg);
+    mainWindow.loadURL(arg);
 });

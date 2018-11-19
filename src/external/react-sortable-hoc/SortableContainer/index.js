@@ -215,7 +215,7 @@ export default function sortableContainer(WrappedComponent, config = {withRef: f
         };
         const combinedDelta = Math.abs(delta.x) + Math.abs(delta.y);
 
-        if (!distance && (!pressThreshold || pressThreshold && combinedDelta >= pressThreshold)) {
+        if (!distance && (!pressThreshold || (pressThreshold && combinedDelta >= pressThreshold))) {
           clearTimeout(this.cancelTimer);
           this.cancelTimer = setTimeout(this.cancel, 0);
         } else if (distance && combinedDelta >= distance && this.manager.isActive()) {

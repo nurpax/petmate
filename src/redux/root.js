@@ -12,8 +12,7 @@ import {
   dialogImportFile,
   importFramebufs,
   saveWorkspace,
-  loadSettings,
-  appendFramebufs
+  loadSettings
 } from '../utils'
 
 export const RESET_STATE = 'RESET_STATE'

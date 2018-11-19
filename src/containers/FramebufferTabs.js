@@ -9,7 +9,6 @@ import classnames from 'classnames'
 import ContextMenuArea from './ContextMenuArea'
 
 import CharGrid from '../components/CharGrid'
-import { framebufIndexMergeProps }  from '../redux/utils'
 import { Framebuffer } from '../redux/editor'
 import { Toolbar } from '../redux/toolbar'
 import * as Screens from '../redux/screens'

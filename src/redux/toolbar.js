@@ -188,7 +188,7 @@ export class Toolbar {
             } else if (key === 'c' || key === '2') {
               dispatch(Toolbar.actions.setSelectedTool(TOOL_COLORIZE))
               return
-            } else if (key == '3') {
+            } else if (key === '3') {
               dispatch(Toolbar.actions.setSelectedTool(TOOL_CHAR_DRAW))
               return
             } else if (key === 'b' || key === '4') {
@@ -319,6 +319,8 @@ export class Toolbar {
             case '4':
               dispatch(Toolbar.actions.setSelectedPaletteRemap(3))
               break
+            default:
+              break;
           }
         }
       }

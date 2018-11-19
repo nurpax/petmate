@@ -9,28 +9,9 @@ import Settings from './Settings'
 import ExportModal from './ExportModal'
 import Editor from './Editor';
 
-import { Framebuffer } from '../redux/editor'
 import * as reduxToolbar from '../redux/toolbar'
 
-import { electron } from '../utils/electronImports'
-
 import s from './App.module.css'
-
-class ExtLink extends Component {
-  handleIconClick = (e) => {
-    e.preventDefault()
-    electron.shell.openExternal(this.props.href)
-  }
-  render () {
-    return (
-      <a
-        onClick={this.handleIconClick}
-        href={this.props.href}>
-        {this.props.children}
-      </a>
-    )
-  }
-}
 
 class DivSize extends Component {
   constructor (props) {
@@ -120,11 +101,6 @@ class AppView extends Component {
 const mapDispatchToProps = dispatch => {
   return {
     Toolbar: reduxToolbar.Toolbar.bindDispatch(dispatch)
-  }
-}
-
-const mapStateToProps = state => {
-  return {
   }
 }
 

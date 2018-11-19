@@ -18,7 +18,7 @@ function framebufListReducer(reducer, actionTypes) {
       const { framebufIndex } = action
       if (typeof framebufIndex !== 'undefined') {
         return state.map((item, i) => {
-          if (framebufIndex == i) {
+          if (framebufIndex === i) {
             return reducer(item, action)
           } else {
             return item

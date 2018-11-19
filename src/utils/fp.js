@@ -10,7 +10,7 @@ export const mkArray = (n, f) => {
 
 export const arraySet = (arr, idx, newVal) => {
   return arr.map((v,i) => {
-    if (i == idx) {
+    if (i === idx) {
       return newVal
     }
     return v

@@ -1,5 +1,5 @@
-// @flow
-import { app, Menu, shell, BrowserWindow } from 'electron';
+
+const { app, Menu, shell, BrowserWindow } = require('electron');
 
 const importers = [
   { label: 'PETSCII (.c)', cmd: 'import-marq-c' }
@@ -14,10 +14,8 @@ const exporters = [
   { label: 'PNG (.png)', cmd: 'export-png' }
 ]
 
-export default class MenuBuilder {
-  mainWindow: BrowserWindow;
-
-  constructor(mainWindow: BrowserWindow) {
+module.exports = class MenuBuilder {
+  constructor(mainWindow) {
     this.mainWindow = mainWindow;
   }
 
@@ -26,11 +24,8 @@ export default class MenuBuilder {
   }
 
   buildMenu() {
-    if (
-      process.env.NODE_ENV === 'development' ||
-      process.env.DEBUG_PROD === 'true'
-    ) {
-      this.setupDevelopmentEnvironment();
+    if (!app.isPackaged) {
+        this.setupDevelopmentEnvironment();
     }
 
     const template = process.platform === 'darwin'
@@ -39,7 +34,6 @@ export default class MenuBuilder {
 
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
-
     return menu;
   }
 
@@ -62,7 +56,6 @@ export default class MenuBuilder {
   }
 
   setupDevelopmentEnvironment() {
-    this.mainWindow.openDevTools();
     this.mainWindow.webContents.on('context-menu', (e, props) => {
       const { x, y } = props;
 
@@ -235,7 +228,7 @@ export default class MenuBuilder {
     };
 
     const subMenuView =
-      process.env.NODE_ENV === 'development' ? subMenuViewDev : subMenuViewProd;
+      !app.isPackaged ? subMenuViewDev : subMenuViewProd;
 
     return [subMenuAbout, subMenuFile, subMenuEdit, subMenuView, subMenuWindow, subMenuHelp];
   }
