@@ -233,6 +233,11 @@ function setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename) {
   ipcRenderer.send('set-title', `Petmate - ${filename}`)
 }
 
+export function loadWorkspaceNoDialog(dispatch, filename, setWorkspaceFilename) {
+  loadWorkspace(filename, dispatch)
+  setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename)
+}
+
 export function dialogLoadWorkspace(dispatch, setWorkspaceFilename) {
   const {dialog} = electron.remote
   const filters = [
@@ -243,8 +248,7 @@ export function dialogLoadWorkspace(dispatch, setWorkspaceFilename) {
     return
   }
   if (filename.length === 1) {
-    loadWorkspace(filename[0], dispatch)
-    setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename[0])
+    loadWorkspaceNoDialog(dispatch, filename[0], setWorkspaceFilename);
   } else {
     console.error('wtf?!')
   }

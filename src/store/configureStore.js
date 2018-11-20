@@ -1,6 +1,8 @@
-// @flow
-if (process.env.NODE_ENV === 'production') {
-  module.exports = require('./configureStore.prod');
-} else {
-  module.exports = require('./configureStore.dev');
-}
+
+import configureStoreDev from './configureStore.dev'
+import configureStoreProd from './configureStore.prod'
+
+const configureStore = process.env.NODE_ENV === 'production' ?
+  configureStoreProd : configureStoreDev;
+
+export default configureStore;

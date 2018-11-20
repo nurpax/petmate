@@ -8,8 +8,10 @@ import FramebufferTabs from './FramebufferTabs'
 import Settings from './Settings'
 import ExportModal from './ExportModal'
 import Editor from './Editor';
+import FileDrop from './FileDrop'
 
 import * as reduxToolbar from '../redux/toolbar'
+import { loadWorkspaceNoDialog } from '../utils'
 
 import s from './App.module.css'
 
@@ -77,10 +79,19 @@ class AppView extends Component {
     this.props.Toolbar.keyUp(event.key)
   }
 
+  handleLoadPetmate = (filename) => {
+    const { dispatch } = this.props;
+    const setWorkspaceFilename = (filename) => this.props.Toolbar.setWorkspaceFilename(filename);
+    loadWorkspaceNoDialog(dispatch, filename, setWorkspaceFilename);
+  }
+
   render() {
     return (
       <Fragment>
-        <div className={s.appGrid}>
+        <FileDrop
+          className={s.appGrid}
+          loadDroppedFile={this.handleLoadPetmate}
+        >
           <div className={s.topmenu}>
             <FramebufferTabs />
           </div>
@@ -90,7 +101,7 @@ class AppView extends Component {
           <DivSize className={s.editor}>
             <Editor />
           </DivSize>
-        </div>
+        </FileDrop>
         <Settings />
         <ExportModal />
       </Fragment>
@@ -100,7 +111,8 @@ class AppView extends Component {
 
 const mapDispatchToProps = dispatch => {
   return {
-    Toolbar: reduxToolbar.Toolbar.bindDispatch(dispatch)
+    Toolbar: reduxToolbar.Toolbar.bindDispatch(dispatch),
+    dispatch
   }
 }
 
