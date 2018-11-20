@@ -1,6 +1,6 @@
 {
   "name": "petmate",
-  "version": "1.0.0",
+  "version": "0.5.0",
   "description": "Petmate - a C64 PETSCII graphics editor",
   "private": false,
   "author": "Janne Hellsten <jjhellst@gmail.com>",
@@ -72,7 +72,7 @@
     "linux": {
       "icon": "resources/icon.png",
       "target": [
-        "snap"
+        "deb"
       ],
       "description": "Petmate",
       "category": "Graphics"
