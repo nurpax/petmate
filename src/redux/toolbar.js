@@ -141,7 +141,11 @@ export class Toolbar {
       }
     },
 
-    keyDown: (key) => {
+    keyDown: (k) => {
+      // Lower-case single keys in case the caps-lock is on.
+      // Doing this for single char keys only to keep the other
+      // keys (like 'ArrowLeft') in their original values.
+      const key = k.length == 1 ? k.toLowerCase() : k;
       return (dispatch, getState) => {
         const state = getState()
         if (!state.toolbar.shortcutsActive) {
