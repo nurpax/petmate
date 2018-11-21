@@ -2,11 +2,13 @@
 import { chunkArray, executablePrgTemplate } from '../../utils'
 import { framebufToPixels } from './util'
 
+import { CHARSET_LOWER } from '../../redux/editor'
+
 import { saveAsm } from './asm'
 import { saveBASIC } from './basic'
 import { saveGIF } from './gif'
 
-import { electron, fs } from '../electronImports' 
+import { electron, fs } from '../electronImports'
 
 const nativeImage = electron.nativeImage
 
@@ -119,11 +121,33 @@ const saveMarqC = (filename, fbs, options) => {
 
 const saveExecutablePRG = (filename, fb, options) => {
   try {
-    const { width, height, framebuf, backgroundColor, borderColor } = fb
+    const {
+      width,
+      height,
+      framebuf,
+      backgroundColor,
+      borderColor,
+      charset
+    } = fb
 
     if (width !== 40 || height !== 25) {
       throw 'Only 40x25 framebuffer widths are supported!'
     }
+
+    // Patch a .prg template that has a known code structure.
+    // We search for STA instructions that write to registers and
+    // modify the values we store.  For example, to set the
+    // lowercase charset, search for the below and modify it:
+    //
+    // Look for this:
+    //
+    // LDA #$14   (default on C64 is actually $15 but bit 0 is unused)
+    // STA $d018
+    //
+    // Change it to:
+    //
+    // LDA #$17
+    // STA $d018
 
     let buf = executablePrgTemplate.slice(0)
     // Search for STA $d020
@@ -132,6 +156,12 @@ const saveExecutablePRG = (filename, fb, options) => {
     // Search for STA $d021
     const d021idx = buf.indexOf(Buffer.from([0x8d, 0x21, 0xd0]))
     buf[d021idx - 1] = backgroundColor
+
+    if (charset == CHARSET_LOWER) {
+      // LDA #$14 -> LDA #$17
+      const offs = buf.indexOf(Buffer.from([0x8d, 0x18, 0xd0]))
+      buf[offs - 1] = 0x17;
+    }
 
     let screencodeOffs = 0x62
     let colorOffs = screencodeOffs + 1000

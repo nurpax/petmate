@@ -2,13 +2,16 @@
 import { chunkArray } from '../../utils'
 
 import { fs } from '../electronImports' 
+import { CHARSET_UPPER } from '../../redux/editor';
 
 const initCode = ({
   borderColor,
-  backgroundColor
+  backgroundColor,
+  charsetBits
 }) => `10 rem created with petmate
 20 poke 53280,${borderColor}
 30 poke 53281,${backgroundColor}
+40 poke 53272,${charsetBits}
 100 for i = 1024 to 1024 + 999
 110 read a: poke i,a: next i
 120 for i = 55296 to 55296 + 999
@@ -49,9 +52,11 @@ const saveBASIC = (filename, fbs, options) => {
 
     let backgroundColor = selectedFb.backgroundColor
     let borderColor = selectedFb.borderColor
+    const charsetBits = selectedFb.charset == CHARSET_UPPER ? 0x15 : 0x17;
     const initCodeOptions = {
       backgroundColor,
-      borderColor
+      borderColor,
+      charsetBits
     }
     const init = initCode(initCodeOptions)
     let dataLines = lines.map((line,idx) => {

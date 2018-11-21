@@ -2,10 +2,12 @@
 import { chunkArray } from '../../utils'
 
 import { fs } from '../electronImports' 
+import { CHARSET_UPPER } from '../../redux/editor';
 
 const initCodeKickAss = ({
   borderColor,
   backgroundColor,
+  charsetBits,
   label
 }) => `
 .const PLAY_MUSIC = false
@@ -24,6 +26,8 @@ start: {
     sta $d020
     lda ${label}+1
     sta $d021
+    lda #${charsetBits}
+    sta $d018
 
     // copy PETSCII
     ldx #$00
@@ -85,6 +89,7 @@ const ACMEStartSequence = `
 const initCode64tassOrACME = startSequence => ({
   borderColor,
   backgroundColor,
+  charsetBits,
   label
 }) => `
 ${startSequence}
@@ -93,6 +98,8 @@ start
     sta $d020
     lda #${backgroundColor}
     sta $d021
+    lda #${charsetBits}
+    sta $d018
 
     ldx #$00
 loop
@@ -198,6 +205,7 @@ const saveAsm = (filename, fbs, options) => {
     const initCodeOptions = {
       backgroundColor,
       borderColor,
+      charsetBits: selectedFb.charset === CHARSET_UPPER ? "$15" : "$17",
       label: selectedFb.name
     }
     const init = options.standalone ? mkInitCode(initCodeOptions) : ''
