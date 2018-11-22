@@ -20,7 +20,6 @@ const emptyTransform = {
   rotate: 0
 }
 
-
 function rotate(transform) {
   return {
     ...transform,
@@ -32,6 +31,15 @@ function mirror(transform, mirror) {
   return {
     ...transform,
     mirror: transform.mirror ^ mirror
+  }
+}
+
+function dispatchForCurrentFramebuf (f) {
+  return (dispatch, getState) => {
+    const state = getState();
+    const framebufIndex = selectors.getCurrentScreenFramebufIndex(state);
+    const undoId = state.undoId;
+    return f(dispatch, framebufIndex, undoId);
   }
 }
 
@@ -153,6 +161,7 @@ export class Toolbar {
         }
         const {
           shiftKey,
+          altKey,
           metaKey,
           ctrlKey,
           selectedTool,
@@ -174,10 +183,10 @@ export class Toolbar {
         // These shortcuts should work regardless of what drawing tool is selected.
         if (noMods) {
           if (!inTextInput) {
-            if (key === 'ArrowLeft') {
+            if (!altKey && key === 'ArrowLeft') {
               dispatch(Screens.actions.nextScreen(-1))
               return
-            } else if (key === 'ArrowRight') {
+            } else if (!altKey && key === 'ArrowRight') {
               dispatch(Screens.actions.nextScreen(+1))
               return
             } else if (key === 'q') {
@@ -345,12 +354,9 @@ export class Toolbar {
     },
 
     clearCanvas: () => {
-      return (dispatch, getState) => {
-        const state = getState()
-        const framebufIndex = selectors.getCurrentScreenFramebufIndex(state)
-        const undoId = state.undoId
+      return dispatchForCurrentFramebuf((dispatch, framebufIndex, undoId) => {
         dispatch(Framebuffer.actions.clearCanvas(framebufIndex, undoId))
-      }
+      });
     },
 
     resetBrush: () => {
@@ -499,7 +505,20 @@ export class Toolbar {
       return {
         type: Toolbar.ROTATE_CHAR,
       }
-    }
+    },
+
+    shiftHorizontal: (dir) => {
+      return dispatchForCurrentFramebuf((dispatch, framebufIndex) => {
+        dispatch(Framebuffer.actions.shiftHorizontal(dir, framebufIndex))
+      });
+    },
+
+    shiftVertical: (dir) => {
+      return dispatchForCurrentFramebuf((dispatch, framebufIndex) => {
+        dispatch(Framebuffer.actions.shiftVertical(dir, framebufIndex))
+      });
+    },
+
   }
 
   static reducer(state = {

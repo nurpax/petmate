@@ -21,6 +21,14 @@ export function reducer(state = {current: 0, list: []}, action) {
   switch (action.type) {
   case ADD_SCREEN:
     const insertAfter = action.data.insertAfterIndex
+    // Insert at the beginning
+    if (insertAfter === -1) {
+      return {
+        ...state,
+        list: [action.data.framebufId].concat(state.list)
+      }
+    }
+    // Otherwise in the middle of the list or at the end
     return {
       ...state,
       list: fp.arrayInsertAt(state.list, insertAfter+1, action.data.framebufId)
@@ -69,7 +77,7 @@ export const actions = {
         // Don't allow deletion of the last framebuffer
         return
       }
-      dispatch(actions.setCurrentScreenIndex(index == numScreens - 1 ? numScreens - 2 : index))
+      dispatch(actions.setCurrentScreenIndex(index === numScreens - 1 ? numScreens - 2 : index))
       dispatch({
         type: REMOVE_SCREEN,
         index
@@ -96,7 +104,7 @@ export const actions = {
       })
     }
   },
-  newScreen: () => {
+  newScreen: (insertAtBeginning = undefined) => {
     return (dispatch, getState) => {
       const state = getState()
       const index = state.screens.current
@@ -114,6 +122,7 @@ export const actions = {
       }
       dispatch({
         type: ADD_SCREEN_AND_FRAMEBUF,
+        insertAfterIndex: insertAtBeginning ? -1 : undefined,
         data: null
       })
       dispatch((dispatch, getState) => {

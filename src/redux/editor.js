@@ -58,6 +58,22 @@ function setBrush(framebuf, {row, col, brush}) {
   })
 }
 
+function rotateArr(arr, dir) {
+  if (dir == -1) {
+    return [...arr.slice(1, arr.length), arr[0]];
+  }
+  return [arr[arr.length-1], ...arr.slice(0, arr.length-1)];
+
+}
+
+function shiftHorizontal(framebuf, dir) {
+  return framebuf.map((row) => rotateArr(row, dir))
+}
+
+function shiftVertical(framebuf, dir) {
+  return rotateArr(framebuf, dir);
+}
+
 function emptyFramebuf () {
   return Array(FB_HEIGHT).fill(Array(FB_WIDTH).fill({code: 32, color:14}))
 }
@@ -79,6 +95,8 @@ export class Framebuffer {
   static IMPORT_FILE = `${Framebuffer.name}/IMPORT_FILE`
   static CLEAR_CANVAS = `${Framebuffer.name}/CLEAR_CANVAS`
   static COPY_FRAMEBUF = `${Framebuffer.name}/COPY_FRAMEBUF`
+  static SHIFT_HORIZONTAL = `${Framebuffer.name}/SHIFT_HORIZONTAL`
+  static SHIFT_VERTICAL = `${Framebuffer.name}/SHIFT_VERTICAL`
 
   static actions = {
     ...settables.actions,
@@ -127,6 +145,22 @@ export class Framebuffer {
         undoId: null,
         framebufIndex
       }
+    },
+    shiftHorizontal: (dir, framebufIndex) => {
+      return {
+        type: Framebuffer.SHIFT_HORIZONTAL,
+        data: dir,
+        undoId: null,
+        framebufIndex
+      }
+    },
+    shiftVertical: (dir, framebufIndex) => {
+      return {
+        type: Framebuffer.SHIFT_VERTICAL,
+        data: dir,
+        undoId: null,
+        framebufIndex
+      }
     }
   }
 
@@ -151,6 +185,16 @@ export class Framebuffer {
         return {
           ...state,
           framebuf: emptyFramebuf()
+        }
+      case Framebuffer.SHIFT_HORIZONTAL:
+        return {
+          ...state,
+          framebuf: shiftHorizontal(state.framebuf, action.data)
+        }
+      case Framebuffer.SHIFT_VERTICAL:
+        return {
+          ...state,
+          framebuf: shiftVertical(state.framebuf, action.data)
         }
       case Framebuffer.SET_FIELDS:
         return {

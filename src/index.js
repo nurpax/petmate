@@ -103,6 +103,21 @@ electron.ipcRenderer.on('menu', (event, message) => {
     case 'preferences':
       store.dispatch(Toolbar.actions.setShowSettings(true))
       return
+    case 'new-screen-left':
+      store.dispatch(Screens.actions.newScreen(-1))
+      return;
+    case 'shift-screen-left':
+      store.dispatch(Toolbar.actions.shiftHorizontal(-1))
+      return;
+    case 'shift-screen-right':
+      store.dispatch(Toolbar.actions.shiftHorizontal(+1))
+      return;
+    case 'shift-screen-up':
+      store.dispatch(Toolbar.actions.shiftVertical(-1))
+      return;
+    case 'shift-screen-down':
+      store.dispatch(Toolbar.actions.shiftVertical(+1))
+      return;
     default:
       console.warn('unknown message from main process', message)
   }
