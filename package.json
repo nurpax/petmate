@@ -74,7 +74,7 @@
       "icon": "resources/icon.ico"
     },
     "linux": {
-      "icon": "resources/icon.png",
+      "icon": "resources/icons",
       "target": [
         "deb"
       ],
