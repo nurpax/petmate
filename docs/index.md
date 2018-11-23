@@ -12,9 +12,9 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.4.1.dmg'>Petmate-0.4.1.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.4.1.exe'>Petmate Setup 0.4.1.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.4.1_amd64.deb'>petmate_0.4.1_amd64.deb</a>
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.5.0.dmg'>Petmate-0.5.0.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.5.0.exe'>Petmate Setup 0.5.0.exe</a>
+* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.5.0_amd64.deb'>petmate_0.5.0_amd64.deb</a>
 
 ## Features
 
@@ -46,6 +46,8 @@ This project is work-in-progress.  You can view [github issues](https://github.c
 - `Start drawing while holding SHIFT`: Lock vertical or horizontal movement for drawing straight lines
 - `⌘1-4 / Ctrl+1-4`: Switch between palettes.  Use the Preferences pane to configure palettes
 - `Left/right arrows`: Move to previous/next screen
+- `Alt-left/right/up/down`: Shift the whole screen left/right/up/down
+- `⌘T/Ctrl-T`: Add a new screen.
 
 Open/Save/Save As: use platform shortcuts (e.g., Save is `Ctrl+S` on Windows, `⌘S` on Mac).
 
@@ -60,6 +62,15 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.5.0 (2018-11-23)
+- Upgrade to Electron 2.0.2 to Electron 3.0.9.  This should make Petmate work on the latest Ubuntu released.
+- Add shift tool that can be used to move the whole PETSCII canvas around with `Alt-left/right/up/down`.  ([#81](https://github.com/nurpax/petmate/issues/81))
+- Add a "new screen" menu item in the application.  This also adds a keyboard shortcut `⌘T/Ctrl-T` for the same.
+- Fix keyboard shortcuts when the capslock is on ([#119](https://github.com/nurpax/petmate/issues/119))
+- Dragging a .petmate file on top of the application window will open it in Petmate. ([#48](https://github.com/nurpax/petmate/issues/48))
+- Supper lowercase/uppercase charsets in .prg/.asm/.bas export ([#110](https://github.com/nurpax/petmate/issues/110))
+- Completely new Electron build.  Removed some MAJOR cruft from the project structure by switching to a simple Create React App based build using just CRA and electron-builder.
 
 Petmate 0.4.1 (2018-09-04)
 - Add 32-bit build for Windows.
