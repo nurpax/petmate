@@ -9,8 +9,10 @@ const {
 } = require('electron');
 const MenuBuilder = require('./menu');
 
-systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
-systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
+if (process.platform == 'darwin') {
+    systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true)
+    systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true)
+}
 
 const path = require('path');
 
