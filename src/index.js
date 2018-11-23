@@ -103,8 +103,8 @@ electron.ipcRenderer.on('menu', (event, message) => {
     case 'preferences':
       store.dispatch(Toolbar.actions.setShowSettings(true))
       return
-    case 'new-screen-left':
-      store.dispatch(Screens.actions.newScreen(-1))
+    case 'new-screen':
+      store.dispatch(Screens.actions.newScreen())
       return;
     case 'shift-screen-left':
       store.dispatch(Toolbar.actions.shiftHorizontal(-1))

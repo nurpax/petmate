@@ -115,6 +115,11 @@ module.exports = class MenuBuilder {
             this.sendMenuCommand('new');
           }
         },
+        { label: 'New Screen', accelerator: 'Command+T',
+          click: () => {
+            this.sendMenuCommand('new-screen');
+          }
+        },
         { type: 'separator' },
         { label: 'Open File...', accelerator: 'Command+O',
           click: () => {
@@ -155,37 +160,26 @@ module.exports = class MenuBuilder {
           }
         },
         { type: 'separator' },
-
-        { label: "Screen",
-          submenu: [
-            { label: 'New Screen', accelerator: 'Shift+Command+M',
-              click: () => {
-                this.sendMenuCommand('new-screen-left');
-              }
-            },
-            { type: 'separator' },
-            { label: 'Shift Left', accelerator: 'Alt+Left',
-              click: () => {
-                this.sendMenuCommand('shift-screen-left');
-              }
-            },
-            { label: 'Shift Right', accelerator: 'Alt+Right',
-              click: () => {
-                this.sendMenuCommand('shift-screen-right');
-              }
-            },
-            { label: 'Shift Up', accelerator: 'Alt+Up',
-              click: () => {
-                this.sendMenuCommand('shift-screen-up');
-              }
-            },
-            { label: 'Shift Down', accelerator: 'Alt+Down',
-              click: () => {
-                this.sendMenuCommand('shift-screen-down');
-              }
-            },
-          ]
-        }
+        { label: 'Shift Left', accelerator: 'Alt+Left',
+          click: () => {
+            this.sendMenuCommand('shift-screen-left');
+          }
+        },
+        { label: 'Shift Right', accelerator: 'Alt+Right',
+          click: () => {
+            this.sendMenuCommand('shift-screen-right');
+          }
+        },
+        { label: 'Shift Up', accelerator: 'Alt+Up',
+          click: () => {
+            this.sendMenuCommand('shift-screen-up');
+          }
+        },
+        { label: 'Shift Down', accelerator: 'Alt+Down',
+          click: () => {
+            this.sendMenuCommand('shift-screen-down');
+          }
+        },
       ]
     };
     const subMenuViewDev = {
@@ -275,6 +269,12 @@ module.exports = class MenuBuilder {
               this.sendMenuCommand('new');
             }
           },
+          { label: 'New Screen', accelerator: 'Ctrl+T',
+            click: () => {
+              this.sendMenuCommand('new-screen');
+            }
+          },
+          { type: 'separator' },
           { label: '&Open', accelerator: 'Ctrl+O',
             click: () => {
               this.sendMenuCommand('open');
@@ -318,6 +318,27 @@ module.exports = class MenuBuilder {
           { label: '&Redo', accelerator: 'Ctrl+Y', selector: 'redo:',
             click: () => {
               this.sendMenuCommand('redo');
+            }
+          },
+          { type: 'separator' },
+          { label: 'Shift Left', accelerator: 'Alt+Left',
+            click: () => {
+              this.sendMenuCommand('shift-screen-left');
+            }
+          },
+          { label: 'Shift Right', accelerator: 'Alt+Right',
+            click: () => {
+              this.sendMenuCommand('shift-screen-right');
+            }
+          },
+          { label: 'Shift Up', accelerator: 'Alt+Up',
+            click: () => {
+              this.sendMenuCommand('shift-screen-up');
+            }
+          },
+          { label: 'Shift Down', accelerator: 'Alt+Down',
+            click: () => {
+              this.sendMenuCommand('shift-screen-down');
             }
           },
           { type: 'separator' },
