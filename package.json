@@ -33,7 +33,6 @@
     "react-dev-utils": "^6.1.1",
     "react-dom": "^16.6.3",
     "react-redux": "^5.1.1",
-    "react-scripts": "2.1.1",
     "redux": "^4.0.1",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
@@ -51,7 +50,7 @@
     "wait-on": "^3.2.0"
   },
   "build": {
-    "appId": "com.nurpax",
+    "appId": "com.nurpax.petmate",
     "compression": "normal",
     "productName": "Petmate",
     "directories": {
