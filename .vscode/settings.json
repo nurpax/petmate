@@ -1,6 +1,4 @@
 {
-  "javascript.validate.enable": false,
-  "flow.useNPMPackagedFlow": true,
   "search.exclude": {
     ".git": true,
     ".eslintcache": true,
@@ -15,6 +13,7 @@
     "npm-debug.log.*": true,
     "test/**/__snapshots__": true,
     "yarn.lock": true
-},
-"editor.tabSize": 2
+  },
+  "editor.tabSize": 2,
+  "files.trimTrailingWhitespace": true
 }
