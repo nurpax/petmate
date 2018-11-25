@@ -1,14 +1,22 @@
 
 import { chunkArray } from '../../utils'
 
-import { fs } from '../electronImports' 
+import { fs } from '../electronImports'
 import { CHARSET_UPPER } from '../../redux/editor';
+import { Framebuf } from  '../../redux/types';
+import { ExportOptions } from  './types';
+
+interface InitCodeParams {
+  borderColor: number;
+  backgroundColor: number;
+  charsetBits: number;
+}
 
 const initCode = ({
   borderColor,
   backgroundColor,
   charsetBits
-}) => `10 rem created with petmate
+}: InitCodeParams) => `10 rem created with petmate
 20 poke 53280,${borderColor}
 30 poke 53281,${backgroundColor}
 40 poke 53272,${charsetBits}
@@ -18,7 +26,7 @@ const initCode = ({
 130 read a: poke i,a: next i
 140 goto 140`
 
-function bytesToCommaDelimited(dstLines, bytes, bytesPerLine) {
+function bytesToCommaDelimited(dstLines: string[], bytes: number[]) {
   let lines = chunkArray(bytes, 16)
   for (let i = 0; i < lines.length; i++) {
     const s = `${lines[i].join(',')}`
@@ -26,7 +34,7 @@ function bytesToCommaDelimited(dstLines, bytes, bytesPerLine) {
   }
 }
 
-function convertToBASIC(lines, fb, idx) {
+function convertToBASIC(lines: string[], fb: Framebuf) {
   const { width, height, framebuf } = fb
 
   let bytes = []
@@ -40,15 +48,15 @@ function convertToBASIC(lines, fb, idx) {
       bytes.push(framebuf[y][x].color)
     }
   }
-  bytesToCommaDelimited(lines, bytes, width)
+  bytesToCommaDelimited(lines, bytes)
 }
 
-const saveBASIC = (filename, fbs, options) => {
+const saveBASIC = (filename: string, fbs: Framebuf[], options: ExportOptions) => {
   try {
-    let lines = []
+    let lines: string[] = []
     // Single screen export
     const selectedFb = fbs[options.selectedFramebufIndex]
-    convertToBASIC(lines, selectedFb, 0)
+    convertToBASIC(lines, selectedFb)
 
     let backgroundColor = selectedFb.backgroundColor
     let borderColor = selectedFb.borderColor

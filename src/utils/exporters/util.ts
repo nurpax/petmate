@@ -1,5 +1,8 @@
 
-export const framebufToPixelsIndexed = (fb, options) => {
+import { FramebufWithFont } from './types'
+import { RgbPalette } from '../../redux/types'
+
+export function framebufToPixelsIndexed(fb: FramebufWithFont): Buffer  {
   const { width, height, framebuf, backgroundColor, font } = fb
   const fontData = font.bits
   const dwidth = width*8
@@ -28,12 +31,12 @@ export const framebufToPixelsIndexed = (fb, options) => {
   return buf
 }
 
-export const framebufToPixels = (fb, palette, options) => {
+export function framebufToPixels(fb: FramebufWithFont, palette: RgbPalette): Buffer {
   const { width, height } = fb
   const dwidth = width*8
   const dheight = height*8
 
-  const indexedBuf = framebufToPixelsIndexed(fb, palette, options)
+  const indexedBuf = framebufToPixelsIndexed(fb)
   const buf = Buffer.alloc(dwidth * dheight * 4)
 
   for (let y = 0; y < height*8; y++) {

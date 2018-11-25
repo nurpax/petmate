@@ -1,15 +1,28 @@
 
 import { chunkArray } from '../../utils'
 
-import { fs } from '../electronImports' 
+import { fs } from '../electronImports'
 import { CHARSET_UPPER } from '../../redux/editor';
+import { Framebuf } from  '../../redux/types';
+import { AsmExportOptions } from './types'
+import * as fp from '../fp'
+
+interface InitCodeParams {
+  borderColor: number;
+  backgroundColor: number;
+  charsetBits: string;
+  label: string;
+}
+
+interface SyntaxParams {
+  byte: string;
+  mkLabel: (lbl: string) => string;
+}
 
 const initCodeKickAss = ({
-  borderColor,
-  backgroundColor,
   charsetBits,
   label
-}) => `
+}: InitCodeParams) => `
 .const PLAY_MUSIC = false
 
 :BasicUpstart2(start)
@@ -86,12 +99,12 @@ const ACMEStartSequence = `
 * = $c000                             ; start address for 6502 code
 `
 
-const initCode64tassOrACME = startSequence => ({
+const initCode64tassOrACME = (startSequence: string) => ({
   borderColor,
   backgroundColor,
   charsetBits,
   label
-}) => `
+}: InitCodeParams) => `
 ${startSequence}
 start
     lda #${borderColor}
@@ -136,7 +149,7 @@ wait_first_line
     jmp infloop
 `
 
-function bytesToCommaDelimited(dstLines, bytes, bytesPerLine, byte) {
+function bytesToCommaDelimited(dstLines: string[], bytes: number[], bytesPerLine: number, byte: string) {
   let lines = chunkArray(bytes, bytesPerLine)
   for (let i = 0; i < lines.length; i++) {
     const s = `${byte} ${lines[i].join(',')}`
@@ -144,10 +157,14 @@ function bytesToCommaDelimited(dstLines, bytes, bytesPerLine, byte) {
   }
 }
 
-function convertToAsm(lines, fb, {mkLabel, byte}) {
+function maybeLabelName(name: string | undefined) {
+  return fp.maybeDefault(name, 'untitled' as string);
+}
+
+function convertToAsm(lines: string[], fb: Framebuf, {mkLabel, byte}: SyntaxParams) {
   const { width, height, framebuf, backgroundColor, borderColor, name } = fb
 
-  lines.push(mkLabel(`${name}`))
+  lines.push(mkLabel(maybeLabelName(name)));
 
   let bytes = []
   for (let y = 0; y < height; y++) {
@@ -164,9 +181,9 @@ function convertToAsm(lines, fb, {mkLabel, byte}) {
   bytesToCommaDelimited(lines, bytes, width, byte)
 }
 
-const saveAsm = (filename, fbs, options) => {
+const saveAsm = (filename: string, fbs: Framebuf[], options: AsmExportOptions) => {
   let mkInitCode = null
-  let syntaxParams = null
+  let syntaxParams: SyntaxParams;
   if (options.assembler === 'kickass') {
     mkInitCode = initCodeKickAss
     syntaxParams = {
@@ -185,14 +202,13 @@ const saveAsm = (filename, fbs, options) => {
       mkLabel: lbl => lbl,
       byte: '!byte'
     }
-  }
-
-  if (mkInitCode === null) {
+  } else {
     alert(`asm output format ${options.assembler} is currently unsupported`)
+    return;
   }
 
   try {
-    let lines = []
+    let lines: string[] = [];
     // Single screen export?
     const selectedFb = fbs[options.selectedFramebufIndex]
     if (options.currentScreenOnly) {
@@ -206,7 +222,7 @@ const saveAsm = (filename, fbs, options) => {
       backgroundColor,
       borderColor,
       charsetBits: selectedFb.charset === CHARSET_UPPER ? "$15" : "$17",
-      label: selectedFb.name
+      label: maybeLabelName(selectedFb.name)
     }
     const init = options.standalone ? mkInitCode(initCodeOptions) : ''
     fs.writeFileSync(

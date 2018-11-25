@@ -1,7 +1,9 @@
 
 import { chunkArray, executablePrgTemplate } from '../../utils'
 import { framebufToPixels } from './util'
+import { FramebufWithFont, ExportOptions, PngExportOptions } from './types'
 
+import { Framebuf, RgbPalette } from '../../redux/types'
 import { CHARSET_LOWER } from '../../redux/editor'
 
 import { saveAsm } from './asm'
@@ -12,7 +14,7 @@ import { electron, fs } from '../electronImports'
 
 const nativeImage = electron.nativeImage
 
-function doublePixels(buf, w, h) {
+function doublePixels(buf: Buffer, w: number, h: number): Buffer {
   const dstPitch = 2*w*4
   const dst = Buffer.alloc(2*w * 2*h * 4)
   for (let y = 0; y < h; y++) {
@@ -40,13 +42,13 @@ function doublePixels(buf, w, h) {
   return dst
 }
 
-const savePNG = (filename, fb, palette, options) => {
+const savePNG = (filename: string, fb: FramebufWithFont, palette: RgbPalette, options: PngExportOptions) => {
   try {
     const { width, height } = fb
     const dwidth = width*8
     const dheight = height*8
 
-    const buf = framebufToPixels(fb, palette, options)
+    const buf = framebufToPixels(fb, palette);
     const scale = options.doublePixels ? 2 : 1
     const pixBuf = options.doublePixels ?
       doublePixels(buf, dwidth, dheight) : buf
@@ -65,7 +67,7 @@ const savePNG = (filename, fb, palette, options) => {
   }
 }
 
-function bytesToCommaDelimited(dstLines, bytes, bytesPerLine) {
+function bytesToCommaDelimited(dstLines: string[], bytes: number[], bytesPerLine: number) {
   let lines = chunkArray(bytes, bytesPerLine)
   for (let i = 0; i < lines.length; i++) {
     const s = lines[i].join(',')
@@ -77,7 +79,7 @@ function bytesToCommaDelimited(dstLines, bytes, bytesPerLine) {
   }
 }
 
-function convertToMarqC(lines, fb, idx) {
+function convertToMarqC(lines: string[], fb: Framebuf, idx: number) {
   const { width, height, framebuf, backgroundColor, borderColor } = fb
 
   // TODO support multiple screens
@@ -100,9 +102,9 @@ function convertToMarqC(lines, fb, idx) {
   lines.push('};')
 }
 
-const saveMarqC = (filename, fbs, options) => {
+function saveMarqC(filename: string, fbs: Framebuf[], _options: ExportOptions) {
   try {
-    let lines = []
+    let lines: string[] = []
     fbs.forEach((fb,idx) => convertToMarqC(lines, fb, idx))
     let width = 0
     let height = 0
@@ -119,7 +121,7 @@ const saveMarqC = (filename, fbs, options) => {
   }
 }
 
-const saveExecutablePRG = (filename, fb, options) => {
+function saveExecutablePRG(filename: string, fb: Framebuf, _options: ExportOptions) {
   try {
     const {
       width,

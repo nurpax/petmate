@@ -27,9 +27,9 @@ export const arrayRemoveAt = <T>(arr: T[], idx: number): T[] => {
 
 export const maybeDefault = <T>(val: (T | undefined | null), defaultVal: T): T => {
   if (val === undefined || val === null) {
-    return defaultVal
+    return defaultVal;
   }
-  return val
+  return val;
 }
 
 export const maybe = <T, S>(val: (T | undefined | null), defaultVal: S, f: (v: T) => S): S => {

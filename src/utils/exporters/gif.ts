@@ -2,15 +2,19 @@
 import { framebufToPixelsIndexed } from './util'
 
 import { fs } from '../electronImports'
+import { FramebufWithFont } from  './types';
+import { RgbPalette } from  '../../redux/types';
+import { GifExportOptions } from  './types';
 
-var GifEncoder = require('gif-encoder');
+type GifEncoder = any;
+const GifEncoder: GifEncoder = require('gif-encoder');
 
-const exportGIF = (encoder, fb, palette, options) => {
-  const pixels = framebufToPixelsIndexed(fb, palette, options)
+const exportGIF = (encoder: GifEncoder, fb: FramebufWithFont) => {
+  const pixels = framebufToPixelsIndexed(fb)
   encoder.addFrame(pixels)
 }
 
-export const saveGIF = (filename, fbs, palette, options) => {
+export const saveGIF = (filename: string, fbs: FramebufWithFont[], palette: RgbPalette, options: GifExportOptions) => {
   try {
     const selectedFb = fbs[options.selectedFramebufIndex]
 
@@ -38,9 +42,9 @@ export const saveGIF = (filename, fbs, palette, options) => {
     }
 
     if (options.loopMode === 'once') {
-      encoder.setRepeat(-1) // TODO options
+      encoder.setRepeat(-1);
     } else if (options.loopMode === 'loop' || options.loopMode === 'pingpong') {
-      encoder.setRepeat(0) // TODO options
+      encoder.setRepeat(0);
     } else {
       console.error('invalid loop mode', options.loopMode)
     }
@@ -50,15 +54,15 @@ export const saveGIF = (filename, fbs, palette, options) => {
 
     encoder.writeHeader();
     if (options.animMode !== 'anim' || fbs.length == 1) {
-      exportGIF(encoder, selectedFb, palette, options)
+      exportGIF(encoder, selectedFb)
     } else {
       for (let fidx = 0; fidx < fbs.length; fidx++) {
-        exportGIF(encoder, fbs[fidx], palette, options)
+        exportGIF(encoder, fbs[fidx])
       }
       // Skip last and first frames when looping back to beginning.
       if (options.loopMode === 'pingpong') {
         for (let fidx = fbs.length-2; fidx >= 1; fidx--) {
-          exportGIF(encoder, fbs[fidx], palette, options)
+          exportGIF(encoder, fbs[fidx])
         }
       }
     }
