@@ -1,5 +1,7 @@
 
-export function drawLine(setPixel, x0, y0, x1, y1) {
+type SetPixelFunc = (x:number, y:number) => void;
+
+export function drawLine(setPixel: SetPixelFunc, x0: number, y0: number, x1: number, y1: number) {
    var dx = Math.abs(x1-x0)
    var dy = Math.abs(y1-y0)
    var sx = (x0 < x1) ? 1 : -1
