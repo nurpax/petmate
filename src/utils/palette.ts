@@ -1,6 +1,7 @@
 
-// TODO remove export
-const palette = [
+import { Rgb } from '../redux/types'
+
+const palette: Rgb[] = [
   {r:0x00, g:0x00, b:0x00},
   {r:0xff, g:0xff, b:0xff},
   {r:146, g:74, b:64},
@@ -17,15 +18,18 @@ const palette = [
   {r:178, g:236, b:145},
   {r:134, g:122, b:222},
   {r:174, g:174, b:174},
-]
+];
 
-function hexToRgb(hex) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  return result ? {
+function hexToRgb(hex: string): Rgb {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) {
+    throw new Error('hexToRgb: impossible -- must mean a syntax error in color defs in palette.ts');
+  }
+  return {
       r: parseInt(result[1], 16),
       g: parseInt(result[2], 16),
       b: parseInt(result[3], 16)
-  } : null
+  };
 }
 
 const colodore = [
@@ -33,17 +37,17 @@ const colodore = [
   "#8e3c97","#56ac4d","#2e2c9b","#edf171",
   "#8e5029","#553800","#c46c71","#4a4a4a",
   "#7b7b7b","#a9ff9f","#706deb","#b2b2b2"
-]
+];
 
 const pepto = [
   "#000000","#ffffff","#67372d","#73a3b1",
   "#6e3e83","#5b8d48","#362976","#b7c576",
   "#6c4f2a","#423908","#98675b","#444444",
   "#6c6c6c","#9dd28a","#6d5fb0","#959595"
-]
+];
 
 export const colorPalettes = {
   'petmate': palette,
   'colodore': colodore.map(hexToRgb),
   'pepto': pepto.map(hexToRgb)
-}
+};
