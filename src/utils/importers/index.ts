@@ -2,9 +2,12 @@
 import { framebufFromJson } from '../workspace'
 import { chunkArray } from '../../utils'
 
-import { fs } from '../electronImports' 
+import { fs } from '../electronImports'
 
-function screencodeColorMap(charcodes, colors) {
+// TODO get rid of this
+type ImportDispatch = any
+
+function screencodeColorMap(charcodes: number[], colors: number[]) {
   return charcodes.map((c,i) => {
     return {
       code: c,
@@ -13,6 +16,7 @@ function screencodeColorMap(charcodes, colors) {
   })
 }
 
+/*
 export const loadCalTxtFramebuf = (filename, importFile) => {
   try {
     const content = fs.readFileSync(filename, 'utf-8')
@@ -57,14 +61,15 @@ export const loadCalTxtFramebuf = (filename, importFile) => {
     alert(`Failed to load file '${filename}'!`)
   }
 }
+*/
 
-export const loadMarqCFramebuf = (filename, importFile) => {
+export function loadMarqCFramebuf(filename: string, importFile: ImportDispatch) {
   try {
     const content = fs.readFileSync(filename, 'utf-8')
     const lines = content.split('\n')
 
     let frames = []
-    let bytes = []
+    let bytes: number[] = []
     for (let li = 0; li < lines.length; li++) {
       let line = lines[li]
       if (/unsigned char (.*)\[\].*/.exec(line)) {
@@ -84,7 +89,7 @@ export const loadMarqCFramebuf = (filename, importFile) => {
         str = str.substring(0, str.length - 1);
       }
       let arr = JSON.parse(`[${str}]`)
-      arr.forEach((byte) => {
+      arr.forEach((byte: number) => {
         bytes.push(byte)
       })
     }
@@ -104,6 +109,7 @@ export const loadMarqCFramebuf = (filename, importFile) => {
         framebuf: chunkArray(codes, 40)
       })
     })
+    // TODO don't call importFile here, just return the framebuf array
     importFile(framebufs)
   } catch(e) {
     alert(`Failed to load file '${filename}'!`)

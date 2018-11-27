@@ -18,7 +18,7 @@ import {
 
 import { colorPalettes } from './palette'
 
-import { electron, fs, path } from './electronImports' 
+import { electron, fs, path } from './electronImports'
 const { ipcRenderer } = electron
 
 
@@ -178,12 +178,10 @@ const loadJsonFramebuf = (filename, importFile) => {
 
 export const loadFramebuf = (filename, importFile) => {
   const ext = path.extname(filename)
-  if (ext === '.petski') {
-    return loadJsonFramebuf(filename, importFile)
-  }  else if (ext === '.txt') {
-    return loadCalTxtFramebuf(filename, importFile)
-  }  else if (ext === '.c') {
+  if (ext === '.c') {
     return loadMarqCFramebuf(filename, importFile)
+  } else {
+    console.error('this shouldn not happen');
   }
 }
 
