@@ -10,10 +10,11 @@ import {
   dialogSaveAsWorkspace,
   dialogExportFile,
   dialogImportFile,
-  importFramebufs,
   saveWorkspace,
   loadSettings
 } from '../utils'
+
+import { importFramebufs } from './workspace'
 
 export const RESET_STATE = 'RESET_STATE'
 export const LOAD_WORKSPACE = 'LOAD_WORKSPACE'
@@ -77,7 +78,7 @@ export const actions = {
       const state = getState()
       const framebufIndex = selectors.getCurrentScreenFramebufIndex(state)
       dialogImportFile(type, framebufs => {
-        importFramebufs(dispatch, framebufs, true)
+        dispatch(importFramebufs(framebufs, true));
       })
     }
   },

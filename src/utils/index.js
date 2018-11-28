@@ -1,5 +1,6 @@
 
-import * as workspace from './workspace'
+import * as workspace from '../redux/workspace'
+
 import {
   loadCalTxtFramebuf,
   loadMarqCFramebuf
@@ -153,7 +154,7 @@ export const loadWorkspace = (filename, dispatch) => {
   try {
     const content = fs.readFileSync(filename, 'utf-8')
     const c = JSON.parse(content)
-    workspace.load(dispatch, c)
+    dispatch(workspace.load(c));
   }
   catch(e) {
     console.error(e)
@@ -302,6 +303,4 @@ export function loadSettings(dispatchSettingsLoad) {
   }
 }
 
-const importFramebufs = workspace.importFramebufs
-
-export { drawLine, colorPalettes, importFramebufs }
+export { drawLine, colorPalettes }

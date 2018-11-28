@@ -1,5 +1,5 @@
 
-import { framebufFromJson } from '../workspace'
+import { framebufFromJson } from '../../redux/workspace'
 import { chunkArray } from '../../utils'
 
 import { fs } from '../electronImports'
