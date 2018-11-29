@@ -3,6 +3,12 @@ import { bindActionCreators } from 'redux'
 
 import { electron, path, fs } from '../utils/electronImports'
 
+import {
+  Settings as RSettings,
+  EditSaved,
+  EditBranch,
+  PaletteName
+} from './types'
 import * as fp from '../utils/fp'
 
 export const LOAD = 'LOAD'
@@ -12,22 +18,22 @@ export const CANCEL_EDITS = 'CANCEL_EDITS'
 export const SET_SELECTED_COLOR_PALETTE = 'SET_SELECTED_COLOR_PALETTE'
 export const SET_INTEGER_SCALE = 'SET_INTEGER_SCALE'
 
-const CONFIG_FILE_VERSION = 1
+//const CONFIG_FILE_VERSION = 1
 
-const initialState = {
+const initialState: RSettings = {
   palettes: fp.mkArray(4, () => fp.mkArray(16, i => i)),
   selectedColorPalette: 'petmate',
   integerScale: false
 }
 
-function saveSettings(settings) {
+function saveSettings(settings: RSettings) {
   let settingsFile = path.join(electron.remote.app.getPath('userData'), 'Settings')
   const j = JSON.stringify(settings)
   fs.writeFileSync(settingsFile, j, 'utf-8')
 }
 
 // Load settings from a JSON doc.  Handle version upgrades.
-function fromJson(json) {
+function fromJson(json: any): RSettings {
   let version = undefined
   if (json.version === undefined || json.version === 1) {
     version = 1
@@ -37,7 +43,6 @@ function fromJson(json) {
   }
   const init = initialState
   return {
-    ...initialState,
     palettes: json.palettes === undefined ? init.palettes : json.palettes,
     selectedColorPalette: json.selectedColorPalette === undefined ? init.selectedColorPalette : json.selectedColorPalette,
     integerScale: fp.maybeDefault(json.integerScale, false)
@@ -46,18 +51,18 @@ function fromJson(json) {
 
 export class Settings {
   static actions = {
-    load: (json) => {
+    load: (json: any) => {
       return {
         type: LOAD,
         data: fromJson(json)
       }
     },
     saveEdits: () => {
-      return (dispatch, getState) => {
+      return (dispatch: any, _getState: any) => {
         dispatch({
           type: SAVE_EDITS
         })
-        dispatch((dispatch, getState) => {
+        dispatch((_dispatch: any, getState: any) => {
           const state = getState().settings
           saveSettings(state.saved)
         })
@@ -68,10 +73,7 @@ export class Settings {
         type: CANCEL_EDITS
       }
     },
-    setPalette: (branch, idx, palette) => {
-      if (!(branch === 'editing' || branch === 'saved')) {
-        console.error('editing or saved', branch)
-      }
+    setPalette: (branch: EditBranch, idx: number, palette: number[] ) => {
       return {
         type: SET_PALETTE,
         branch,
@@ -79,14 +81,14 @@ export class Settings {
         palette
       }
     },
-    setSelectedColorPaletteName: (branch, name) => {
+    setSelectedColorPaletteName: (branch: EditBranch, name: PaletteName) => {
       return {
         type: SET_SELECTED_COLOR_PALETTE,
         branch,
         data: name
       }
     },
-    setIntegerScale: (branch, scale) => {
+    setIntegerScale: (branch: EditBranch, scale: boolean) => {
       return {
         type: SET_INTEGER_SCALE,
         branch,
@@ -95,10 +97,10 @@ export class Settings {
     }
   }
 
-  static reducer(state = {
+  static reducer(state: EditSaved<RSettings> = {
     editing: initialState, // form state while editing
     saved: initialState    // final state for rest of UI and persistence
-    }, action) {
+    }, action: any) {
     switch (action.type) {
       case LOAD:
         let newSaved = action.data
@@ -117,7 +119,7 @@ export class Settings {
           editing: state.saved
         }
       case SET_PALETTE:
-        const branch = action.branch
+        const branch: EditBranch = action.branch
         return {
           ...state,
           [branch]: {
@@ -126,7 +128,7 @@ export class Settings {
           }
         }
       case SET_INTEGER_SCALE: {
-          const branch = action.branch
+          const branch: EditBranch = action.branch
           return {
             ...state,
             [branch]: {
@@ -136,7 +138,7 @@ export class Settings {
           }
         }
       case SET_SELECTED_COLOR_PALETTE: {
-          const branch = action.branch
+          const branch: EditBranch = action.branch
           return {
             ...state,
             [branch]: {
@@ -150,7 +152,7 @@ export class Settings {
     }
   }
 
-  static bindDispatch (dispatch) {
+  static bindDispatch (dispatch: any) {
     return bindActionCreators(Settings.actions, dispatch)
   }
 }

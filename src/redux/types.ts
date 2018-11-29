@@ -37,3 +37,17 @@ export type RgbPalette = Rgb[];
 
 // TODO
 export type Brush = any;
+
+export type PaletteName = 'petmate' | 'colodore' | 'pepto';
+
+export type EditBranch = 'saved' | 'editing';
+
+export type EditSaved<T> = {
+  [k in EditBranch]: T;
+};
+
+export interface Settings {
+  palettes: number[][];
+  selectedColorPalette: string;
+  integerScale: boolean;
+};
