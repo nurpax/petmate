@@ -19,6 +19,10 @@ import { CharSelectStatusbar } from '../components/Statusbar'
 import * as utils from '../utils'
 import * as fp from '../utils/fp'
 import * as selectors from '../redux/selectors'
+import {
+  getSettingsCurrentColorPalette
+} from '../redux/settingsSelectors'
+
 import { CharPosition } from './hoc'
 
 import styles from './CharSelect.module.css'
@@ -222,7 +226,7 @@ const mapStateToProps = state => {
     curScreencode: utils.charScreencodeFromRowCol(font, selected),
     textColor: state.toolbar.textColor,
     font,
-    colorPalette: selectors.getSettingsCurrentColorPalette(state)
+    colorPalette: getSettingsCurrentColorPalette(state)
   }
 }
 

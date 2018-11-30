@@ -6,6 +6,9 @@ import { Framebuffer } from './editor'
 import * as Screens from './screens'
 
 import * as selectors from './selectors'
+import {
+  getSettingsPaletteRemap
+} from '../redux/settingsSelectors'
 import * as utils from '../utils'
 import * as brush from './brush'
 
@@ -409,7 +412,7 @@ export class Toolbar {
         dispatch({
           type: Toolbar.NEXT_COLOR,
           data: dir,
-          paletteRemap: selectors.getSettingsPaletteRemap(state)
+          paletteRemap: getSettingsPaletteRemap(state)
         })
       }
     },

@@ -1,5 +1,9 @@
 
 import * as selectors from './selectors'
+import {
+  getSettingsCurrentColorPalette
+} from '../redux/settingsSelectors'
+
 import { ActionCreators } from 'redux-undo';
 
 import { Framebuffer } from './editor'
@@ -99,7 +103,7 @@ export const actions = {
           font: selectors.getFramebufFont(state, framebuf)
         }
       })
-      const palette = selectors.getSettingsCurrentColorPalette(state)
+      const palette = getSettingsCurrentColorPalette(state)
       dialogExportFile(type, framebufs, palette, {
         ...options,
         selectedFramebufIndex: remappedFbIndex

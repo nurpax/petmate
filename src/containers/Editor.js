@@ -19,6 +19,13 @@ import {
 
 import { Framebuffer } from '../redux/editor'
 import * as selectors from '../redux/selectors'
+import {
+  getSettingsPaletteRemap,
+  getSettingsCurrentColorPalette,
+  getSettingsIntegerScale
+} from '../redux/settingsSelectors'
+
+
 import { framebufIndexMergeProps }  from '../redux/utils'
 
 import {
@@ -405,7 +412,7 @@ const FramebufferCont = connect(
       shiftKey: state.toolbar.shiftKey,
       altKey: state.toolbar.altKey,
       font,
-      colorPalette: selectors.getSettingsCurrentColorPalette(state),
+      colorPalette: getSettingsCurrentColorPalette(state),
       canvasGrid: state.toolbar.canvasGrid
     }
   },
@@ -525,9 +532,9 @@ const mapStateToProps = state => {
   return {
     framebuf,
     textColor: state.toolbar.textColor,
-    paletteRemap: selectors.getSettingsPaletteRemap(state),
-    colorPalette: selectors.getSettingsCurrentColorPalette(state),
-    integerScale: selectors.getSettingsIntegerScale(state)
+    paletteRemap: getSettingsPaletteRemap(state),
+    colorPalette: getSettingsCurrentColorPalette(state),
+    integerScale: getSettingsIntegerScale(state)
   }
 }
 

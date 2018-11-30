@@ -50,8 +50,16 @@ export type EditSaved<T> = {
 
 export interface Settings {
   palettes: number[][];
-  selectedColorPalette: string;
+  selectedColorPalette: PaletteName;
   integerScale: boolean;
+};
+
+export interface RootState {
+  settings: {
+    saved: Settings;
+    editing: Settings;
+  };
+  toolbar: any; // TODO
 };
 
 /////////////////////////////////////////////////////

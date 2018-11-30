@@ -18,6 +18,7 @@ import {
 } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
 import * as selectors from '../redux/selectors'
+import { getSettingsPaletteRemap, getSettingsCurrentColorPalette } from '../redux/settingsSelectors'
 import * as Root from '../redux/root'
 import { framebufIndexMergeProps } from '../redux/utils'
 
@@ -316,8 +317,8 @@ const mapStateToProps = state => {
     backgroundColor: fp.maybe(framebuf, null, fb => fb.backgroundColor),
     borderColor: fp.maybe(framebuf, null, fb => fb.borderColor),
     selectedTool: state.toolbar.selectedTool,
-    paletteRemap: selectors.getSettingsPaletteRemap(state),
-    colorPalette: selectors.getSettingsCurrentColorPalette(state)
+    paletteRemap: getSettingsPaletteRemap(state),
+    colorPalette: getSettingsCurrentColorPalette(state)
   }
 }
 export default connect(

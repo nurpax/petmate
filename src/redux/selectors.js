@@ -3,7 +3,6 @@ import memoize  from 'fast-memoize'
 import {
   charScreencodeFromRowCol,
   rowColFromScreencode,
-  colorPalettes,
   systemFontData,
   systemFontDataLower,
   charOrderUpper,
@@ -86,46 +85,6 @@ export const getScreencodeWithTransform = (rowcol, font, transform) => {
 export const getCharRowColWithTransform = (rowcol, font, transform) => {
   const char = getScreencodeWithTransform(rowcol, font, transform)
   return rowColFromScreencodeMemoized(font, char)
-}
-
-export const getSettings = (state) => {
-  return state.settings['saved']
-}
-
-export const getSettingsEditing = (state) => {
-  return state.settings['editing']
-}
-
-export const getSettingsPaletteRemap = (state) => {
-  const idx = state.toolbar.selectedPaletteRemap
-  if (idx === undefined) {
-    return undefined
-  }
-  const palettes = getSettings(state).palettes
-  if (idx >= palettes.length) {
-    console.error('trying to use an undefined palette idx', idx)
-    return undefined
-  }
-  return palettes[idx]
-}
-
-export const getSettingsColorPaletteByName = (state, name) => {
-  return colorPalettes[name]
-}
-
-export const getSettingsCurrentColorPalette = (state) => {
-  const settings = getSettings(state)
-  return getSettingsColorPaletteByName(state, settings.selectedColorPalette)
-}
-
-export const getSettingsIntegerScale = (state) => {
-  const settings = getSettings(state)
-  return settings.integerScale
-}
-
-export const getSettingsEditingCurrentColorPalette = (state) => {
-  const settings = getSettingsEditing(state)
-  return getSettingsColorPaletteByName(state, settings.selectedColorPalette)
 }
 
 const transformBrushMemoized = memoize(mirrorBrush)

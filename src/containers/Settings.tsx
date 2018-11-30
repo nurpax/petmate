@@ -1,40 +1,63 @@
-import React, { Component, Fragment } from 'react';
+import React, {
+  Component,
+  Fragment,
+  StatelessComponent as SFC,
+  MouseEvent
+} from 'react';
 import { connect } from 'react-redux'
 
 import Modal from '../components/Modal'
 import { CheckboxInput } from '../components/formHelpers'
+import { RootState, Rgb, PaletteName, EditBranch } from '../redux/types'
 import { Toolbar } from '../redux/toolbar'
 import { Settings } from '../redux/settings'
 
-import * as selectors from '../redux/selectors'
-import * as utils from '../utils'
+import * as selectors from '../redux/settingsSelectors'
+// TODO ts need utils/index to be .ts
+import * as utils from '../utils/palette'
 
 import {
   ColorPalette,
   SortableColorPalette
 } from '../components/ColorPicker'
 
-const ModalTitle = ({children}) => <h2>{children}</h2>
-const Title3 = ({children}) => <h3>{children}</h3>
-const Title = ({children}) => <h4>{children}</h4>
+const ModalTitle: SFC<{}> = ({children}) => <h2>{children}</h2>
+const Title3: SFC<{}> = ({children}) => <h3>{children}</h3>
+const Title: SFC<{}> = ({children}) => <h4>{children}</h4>
 
-const CustomPalette = ({idx, palette, setPalette, colorPalette}) => {
+interface CustomPaletteProps {
+  idx: number;
+  palette: number[];
+  setPalette: (paletteIdx: number, order: number[]) => void;
+  colorPalette: Rgb[];
+}
+
+const CustomPalette: SFC<CustomPaletteProps> = ({
+  idx, palette, setPalette, colorPalette
+}) => {
   return (
     <Fragment>
       <Title>Custom Palette {idx}:</Title>
       <SortableColorPalette
         palette={palette}
-        setPalette={p => setPalette(idx, p)}
+        setPalette={(p: number[]) => setPalette(idx, p)}
         colorPalette={colorPalette}
       />
     </Fragment>
   )
 }
 
-const PaletteOption = ({ onClick, selected, value, label, colorPalette }) => {
+interface PaletteOptionProps {
+  onClick: (e: MouseEvent<HTMLElement>) => void;
+  selected: boolean;
+  label: string;
+  colorPalette: Rgb[];
+}
+
+const PaletteOption: SFC<PaletteOptionProps> = (props: PaletteOptionProps) => {
   return (
     <div
-      onClick={onClick}
+      onClick={props.onClick}
       style={{
         cursor: 'default',
         backgroundColor: 'rgb(40,40,40)',
@@ -46,29 +69,32 @@ const PaletteOption = ({ onClick, selected, value, label, colorPalette }) => {
         alignItems: 'center',
         justifyContent: 'space-between',
         borderStyle: 'solid',
-        borderColor: selected ? 'rgba(255,255,255, 0.6)' : 'rgba(0,0,0,0)',
+        borderColor: props.selected ? 'rgba(255,255,255, 0.6)' : 'rgba(0,0,0,0)',
         borderWidth: '1px',
       }}>
-      <div style={{width: '90px'}}>{label}</div>
-      <ColorPalette colorPalette={colorPalette} />
+      <div style={{width: '90px'}}>{props.label}</div>
+      <ColorPalette colorPalette={props.colorPalette} />
     </div>
   )
 }
 
-class ColorPaletteSelector extends Component {
-  handleClick = (e, name) => {
-    this.props.setSelectedColorPaletteName('editing', name)
+interface ColorPaletteSelectorProps {
+  colorPalette: Rgb[];
+  selectedColorPaletteName: PaletteName;
+  setSelectedColorPaletteName: (branch: EditBranch, name: PaletteName) => void;
+};
+
+class ColorPaletteSelector extends Component<ColorPaletteSelectorProps> {
+  handleClick = (_e: MouseEvent<Element>, name: PaletteName) => {
+    this.props.setSelectedColorPaletteName('editing', name);
   }
 
   render () {
-    const opts = [
-      { value: 'petmate' },
-      { value: 'colodore' },
-      { value: 'pepto' }
+    const opts: PaletteName[] = [
+      'petmate',
+      'colodore',
+      'pepto'
     ]
-    const options = opts.map(({value}) => {
-      return { value, label: value, colorPalette: utils.colorPalettes[value]}
-    })
     const { selectedColorPaletteName } = this.props
     return (
       <Fragment>
@@ -76,12 +102,11 @@ class ColorPaletteSelector extends Component {
         {opts.map(desc => {
           return (
             <PaletteOption
-              key={desc.value}
-              name={desc.value}
-              label={desc.value}
-              selected={selectedColorPaletteName === desc.value}
-              colorPalette={utils.colorPalettes[desc.value]}
-              onClick={(e) => this.handleClick(e, desc.value)}
+              key={desc}
+              label={desc}
+              selected={selectedColorPaletteName === desc}
+              colorPalette={utils.colorPalettes[desc]}
+              onClick={(e: MouseEvent<Element>) => this.handleClick(e, desc)}
             />
           )
         })}
@@ -90,7 +115,19 @@ class ColorPaletteSelector extends Component {
   }
 }
 
-class Settings_ extends Component {
+interface SettingsProps {
+  showSettings: boolean;
+  palette0: number[];
+  palette1: number[];
+  palette2: number[];
+  colorPalette: Rgb[];
+  selectedColorPaletteName: PaletteName;
+  integerScale: boolean;
+  Settings: any; // TODO ts
+  Toolbar: any;  // TODO ts
+}
+
+class Settings_ extends Component<SettingsProps> {
   handleOK = () => {
     this.props.Toolbar.setShowSettings(false)
     this.props.Settings.saveEdits()
@@ -101,14 +138,14 @@ class Settings_ extends Component {
     this.props.Settings.cancelEdits()
   }
 
-  handleIntegerScale = (e) => {
+  handleIntegerScale = (e: any) => {
     this.props.Settings.setIntegerScale('editing', e.target.checked)
   }
 
   render () {
     const { colorPalette, selectedColorPaletteName } = this.props
-    const setPalette = (idx, v) => {
-      this.props.Settings.setPalette('editing', idx, v)
+    const setPalette = (idx: number, v: number[]) => {
+      this.props.Settings.setPalette('editing', idx, v);
     }
     return (
       <div>
@@ -177,7 +214,7 @@ class Settings_ extends Component {
 }
 
 export default connect(
-  (state) => {
+  (state: RootState) => {
     return {
       showSettings: state.toolbar.showSettings,
       palette0: selectors.getSettingsEditing(state).palettes[1],
