@@ -1,4 +1,6 @@
 
+import { Action } from 'redux'
+
 export type Charset = 'upper' | 'lower';
 
 export interface Coord2 {
@@ -51,3 +53,10 @@ export interface Settings {
   selectedColorPalette: string;
   integerScale: boolean;
 };
+
+/////////////////////////////////////////////////////
+export interface FbAction<T> extends Action {
+  framebufIndex: number;
+  undoId: number | undefined;
+  data: T;
+}

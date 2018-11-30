@@ -6,6 +6,7 @@ import {
   Coord2,
   Framebuf,
   Pixel,
+  FbAction
 } from './types'
 
 import { settable, reduxSettables } from './settable'
@@ -78,13 +79,6 @@ export class Framebuffer {
 
 const FB_WIDTH = 40;
 const FB_HEIGHT = 25;
-
-interface Action {
-  type: string;
-  data: any;
-  framebufIndex: number;
-  undoId?: number;
-};
 
 type SetCharParams = Coord2 & { screencode: number, color: number };
 
@@ -189,7 +183,7 @@ export function fbReducer(state: Framebuf = {
   borderColor: DEFAULT_BORDER_COLOR,
   charset: 'upper',
   name: undefined
-}, action: Action): Framebuf {
+}, action: FbAction<any>): Framebuf {
   switch (action.type) {
     case Framebuffer.SET_PIXEL:
       return mapPixels(state, fb => setChar(fb, action.data));

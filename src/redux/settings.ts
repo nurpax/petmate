@@ -100,7 +100,7 @@ export class Settings {
   static reducer(state: EditSaved<RSettings> = {
     editing: initialState, // form state while editing
     saved: initialState    // final state for rest of UI and persistence
-    }, action: any) {
+    }, action: any): EditSaved<RSettings> {
     switch (action.type) {
       case LOAD:
         let newSaved = action.data
