@@ -215,14 +215,15 @@ class Settings_ extends Component<SettingsProps> {
 
 export default connect(
   (state: RootState) => {
+    const { getSettingsEditing, getSettingsEditingCurrentColorPalette } = selectors;
     return {
       showSettings: state.toolbar.showSettings,
-      palette0: selectors.getSettingsEditing(state).palettes[1],
-      palette1: selectors.getSettingsEditing(state).palettes[2],
-      palette2: selectors.getSettingsEditing(state).palettes[3],
-      colorPalette: selectors.getSettingsEditingCurrentColorPalette(state),
-      selectedColorPaletteName: selectors.getSettingsEditing(state).selectedColorPalette,
-      integerScale: selectors.getSettingsEditing(state).integerScale
+      palette0: getSettingsEditing(state).palettes[1],
+      palette1: getSettingsEditing(state).palettes[2],
+      palette2: getSettingsEditing(state).palettes[3],
+      colorPalette: getSettingsEditingCurrentColorPalette(state),
+      selectedColorPaletteName: getSettingsEditing(state).selectedColorPalette,
+      integerScale: getSettingsEditing(state).integerScale
     }
   },
   (dispatch) => {
