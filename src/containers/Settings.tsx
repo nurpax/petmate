@@ -10,7 +10,7 @@ import Modal from '../components/Modal'
 import { CheckboxInput } from '../components/formHelpers'
 import { RootState, Rgb, PaletteName, EditBranch } from '../redux/types'
 import { Toolbar } from '../redux/toolbar'
-import { Settings } from '../redux/settings'
+import * as settings from '../redux/settings'
 
 import * as selectors from '../redux/settingsSelectors'
 // TODO ts need utils/index to be .ts
@@ -20,6 +20,7 @@ import {
   ColorPalette,
   SortableColorPalette
 } from '../components/ColorPicker'
+import { bindActionCreators } from 'redux';
 
 const ModalTitle: SFC<{}> = ({children}) => <h2>{children}</h2>
 const Title3: SFC<{}> = ({children}) => <h3>{children}</h3>
@@ -81,12 +82,15 @@ const PaletteOption: SFC<PaletteOptionProps> = (props: PaletteOptionProps) => {
 interface ColorPaletteSelectorProps {
   colorPalette: Rgb[];
   selectedColorPaletteName: PaletteName;
-  setSelectedColorPaletteName: (branch: EditBranch, name: PaletteName) => void;
+  setSelectedColorPaletteName: (args: { branch: EditBranch, name: PaletteName}) => void;
 };
 
 class ColorPaletteSelector extends Component<ColorPaletteSelectorProps> {
   handleClick = (_e: MouseEvent<Element>, name: PaletteName) => {
-    this.props.setSelectedColorPaletteName('editing', name);
+    this.props.setSelectedColorPaletteName({
+      branch: 'editing',
+      name
+    })
   }
 
   render () {
@@ -115,7 +119,7 @@ class ColorPaletteSelector extends Component<ColorPaletteSelectorProps> {
   }
 }
 
-interface SettingsProps {
+interface SettingsStateProps {
   showSettings: boolean;
   palette0: number[];
   palette1: number[];
@@ -123,11 +127,14 @@ interface SettingsProps {
   colorPalette: Rgb[];
   selectedColorPaletteName: PaletteName;
   integerScale: boolean;
-  Settings: any; // TODO ts
+};
+
+interface SettingsDispatchProps  {
+  Settings: settings.PropsFromDispatch;
   Toolbar: any;  // TODO ts
 }
 
-class Settings_ extends Component<SettingsProps> {
+class Settings_ extends Component<SettingsStateProps & SettingsDispatchProps> {
   handleOK = () => {
     this.props.Toolbar.setShowSettings(false)
     this.props.Settings.saveEdits()
@@ -139,13 +146,20 @@ class Settings_ extends Component<SettingsProps> {
   }
 
   handleIntegerScale = (e: any) => {
-    this.props.Settings.setIntegerScale('editing', e.target.checked)
+    this.props.Settings.setIntegerScale({
+      branch: 'editing',
+      scale: e.target.checked
+    });
   }
 
   render () {
     const { colorPalette, selectedColorPaletteName } = this.props
     const setPalette = (idx: number, v: number[]) => {
-      this.props.Settings.setPalette('editing', idx, v);
+      this.props.Settings.setPalette({
+        branch: 'editing',
+        idx,
+        palette: v
+      })
     }
     return (
       <div>
@@ -229,7 +243,7 @@ export default connect(
   (dispatch) => {
     return {
       Toolbar: Toolbar.bindDispatch(dispatch),
-      Settings: Settings.bindDispatch(dispatch)
+      Settings: bindActionCreators(settings.actions, dispatch)
     }
   }
 )(Settings_)

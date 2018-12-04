@@ -1,22 +1,29 @@
 
-import { bindActionCreators } from 'redux'
+import { Action } from 'redux'
+import { ThunkAction } from 'redux-thunk';
 
 import { electron, path, fs } from '../utils/electronImports'
 
 import {
+  ActionsUnion,
+  createAction,
+  MapReturnToVoid,
   Settings as RSettings,
   EditSaved,
   EditBranch,
-  PaletteName
+  PaletteName,
+  RootState
 } from './types'
 import * as fp from '../utils/fp'
 
-export const LOAD = 'LOAD'
-export const SET_PALETTE = 'SET_PALETTE'
-export const SAVE_EDITS = 'SAVE_EDITS'
-export const CANCEL_EDITS = 'CANCEL_EDITS'
-export const SET_SELECTED_COLOR_PALETTE = 'SET_SELECTED_COLOR_PALETTE'
-export const SET_INTEGER_SCALE = 'SET_INTEGER_SCALE'
+type SettingsJson = any;
+
+const LOAD = 'LOAD'
+const SET_PALETTE = 'SET_PALETTE'
+const SAVE_EDITS = 'SAVE_EDITS'
+const CANCEL_EDITS = 'CANCEL_EDITS'
+const SET_SELECTED_COLOR_PALETTE = 'SET_SELECTED_COLOR_PALETTE'
+const SET_INTEGER_SCALE = 'SET_INTEGER_SCALE'
 
 //const CONFIG_FILE_VERSION = 1
 
@@ -33,7 +40,7 @@ function saveSettings(settings: RSettings) {
 }
 
 // Load settings from a JSON doc.  Handle version upgrades.
-function fromJson(json: any): RSettings {
+function fromJson(json: SettingsJson): RSettings {
   let version = undefined
   if (json.version === undefined || json.version === 1) {
     version = 1
@@ -49,110 +56,118 @@ function fromJson(json: any): RSettings {
   }
 }
 
-export class Settings {
-  static actions = {
-    load: (json: any) => {
-      return {
-        type: LOAD,
-        data: fromJson(json)
-      }
-    },
-    saveEdits: () => {
-      return (dispatch: any, _getState: any) => {
-        dispatch({
-          type: SAVE_EDITS
-        })
-        dispatch((_dispatch: any, getState: any) => {
-          const state = getState().settings
-          saveSettings(state.saved)
-        })
-      }
-    },
-    cancelEdits: () => {
-      return {
-        type: CANCEL_EDITS
-      }
-    },
-    setPalette: (branch: EditBranch, idx: number, palette: number[] ) => {
-      return {
-        type: SET_PALETTE,
-        branch,
-        idx,
-        palette
-      }
-    },
-    setSelectedColorPaletteName: (branch: EditBranch, name: PaletteName) => {
-      return {
-        type: SET_SELECTED_COLOR_PALETTE,
-        branch,
-        data: name
-      }
-    },
-    setIntegerScale: (branch: EditBranch, scale: boolean) => {
-      return {
-        type: SET_INTEGER_SCALE,
-        branch,
-        data: scale
-      }
+export function saveEdits (): ThunkAction<void, RootState, undefined, Action> {
+  return (dispatch, _getState) => {
+    dispatch(actions.saveEditsAction());
+    dispatch((_dispatch, getState) => {
+      const state = getState().settings
+      saveSettings(state.saved)
+    })
+  }
+}
+
+interface BranchArgs {
+  branch: EditBranch;
+}
+
+interface SetPaletteArgs extends BranchArgs {
+  idx: number;
+  palette: number[];
+}
+
+interface SetSelectedColorPaletteNameArgs extends BranchArgs {
+  name: PaletteName;
+}
+
+interface SetIntegerScaleArgs extends BranchArgs {
+  scale: boolean;
+}
+
+const actionCreators = {
+  load: (data: SettingsJson) => createAction(LOAD, fromJson(data)),
+  saveEditsAction: () => createAction(SAVE_EDITS),
+  cancelEdits: () => createAction(CANCEL_EDITS),
+  setPalette: (data: SetPaletteArgs) => createAction(SET_PALETTE, data),
+  setSelectedColorPaletteName: (data: SetSelectedColorPaletteNameArgs) => createAction(SET_SELECTED_COLOR_PALETTE, data),
+  setIntegerScale: (data: SetIntegerScaleArgs) => createAction(SET_INTEGER_SCALE, data)
+};
+
+export type Actions = ActionsUnion<typeof actionCreators>
+
+export const actions = {
+  ...actionCreators,
+  saveEdits
+};
+
+export interface PropsFromDispatch {
+  load: MapReturnToVoid<typeof actions.load>;
+  cancelEdits: MapReturnToVoid<typeof actions.cancelEdits>;
+  setPalette: MapReturnToVoid<typeof actions.setPalette>;
+  setSelectedColorPaletteName: MapReturnToVoid<typeof actions.setSelectedColorPaletteName>;
+  setIntegerScale: MapReturnToVoid<typeof actions.setIntegerScale>;
+  saveEdits: MapReturnToVoid<typeof saveEdits>;
+};
+
+//      return updateBranch(state, action.data.branch, s => {
+//        ...s,
+///       integerScale: action.data.scale
+//      })
+
+function updateBranch(
+  state:  EditSaved<RSettings>,
+  branch: EditBranch,
+  field:  Partial<RSettings>
+): EditSaved<RSettings> {
+  const s: RSettings = state[branch];
+  return {
+    ...state,
+    [branch]: {
+      ...s,
+      ...field
     }
   }
+}
 
-  static reducer(state: EditSaved<RSettings> = {
+export function reducer(
+  state: EditSaved<RSettings> = {
     editing: initialState, // form state while editing
     saved: initialState    // final state for rest of UI and persistence
-    }, action: any): EditSaved<RSettings> {
-    switch (action.type) {
-      case LOAD:
-        let newSaved = action.data
-        return {
-          saved: newSaved,
-          editing: newSaved
-        }
-      case SAVE_EDITS:
-        return {
-          ...state,
-          saved: state.editing
-        }
-      case CANCEL_EDITS:
-        return {
-          ...state,
-          editing: state.saved
-        }
-      case SET_PALETTE:
-        const branch: EditBranch = action.branch
-        return {
-          ...state,
-          [branch]: {
-            ...state[branch],
-            palettes: fp.arraySet(state[branch].palettes, action.idx, action.palette)
-          }
-        }
-      case SET_INTEGER_SCALE: {
-          const branch: EditBranch = action.branch
-          return {
-            ...state,
-            [branch]: {
-              ...state[branch],
-              integerScale: action.data
-            }
-          }
-        }
-      case SET_SELECTED_COLOR_PALETTE: {
-          const branch: EditBranch = action.branch
-          return {
-            ...state,
-            [branch]: {
-              ...state[branch],
-              selectedColorPalette: action.data
-            }
-          }
-        }
-      default:
-        return state
+  },
+  action: Actions
+): EditSaved<RSettings> {
+  switch (action.type) {
+    case LOAD:
+      let newSaved = action.data
+      return {
+        saved: newSaved,
+        editing: newSaved
+      }
+    case SAVE_EDITS:
+      return {
+        ...state,
+        saved: state.editing
+      }
+    case CANCEL_EDITS:
+      return {
+        ...state,
+        editing: state.saved
+      }
+    case SET_PALETTE:
+      const branch: EditBranch = action.data.branch;
+      return updateBranch(state, action.data.branch, {
+        palettes: fp.arraySet(state[branch].palettes, action.data.idx, action.data.palette)
+      });
+    case SET_INTEGER_SCALE: {
+      return updateBranch(state, action.data.branch, {
+        integerScale: action.data.scale
+      });
     }
-  }
-
-  static bindDispatch (dispatch: any) {
-    return bindActionCreators(Settings.actions, dispatch)
+    case SET_SELECTED_COLOR_PALETTE: {
+      return updateBranch(state, action.data.branch, {
+        selectedColorPalette: action.data.name
+      });
+    }
+    default:
+      return state;
   }
 }

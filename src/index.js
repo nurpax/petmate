@@ -5,7 +5,7 @@ import './app.global.css';
 
 import { formats, loadSettings } from './utils'
 import * as Screens from './redux/screens'
-import { Settings } from './redux/settings'
+import * as settings  from './redux/settings'
 import { Toolbar } from './redux/toolbar'
 import * as ReduxRoot from './redux/root'
 
@@ -22,7 +22,7 @@ render(<Root store={store} history={undefined} />,
   document.getElementById('root')
 );
 
-loadSettings((j) => store.dispatch(Settings.actions.load(j)))
+loadSettings((j) => store.dispatch(settings.actions.load(j)))
 
 function dispatchExport(type) {
   // Either open an export options modal or go to export directly if the

@@ -7,7 +7,7 @@ import {
 import { ActionCreators } from 'redux-undo';
 
 import { Framebuffer } from './editor'
-import { Settings } from './settings'
+import * as settings from './settings'
 import { Toolbar } from './toolbar'
 import {
   dialogLoadWorkspace,
@@ -116,7 +116,7 @@ export const actions = {
       dispatch({
         type: RESET_STATE
       })
-      loadSettings(j => dispatch(Settings.actions.load(j)))
+      loadSettings(j => dispatch(settings.actions.load(j)))
     }
   },
 
