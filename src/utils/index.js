@@ -25,6 +25,7 @@ const { ipcRenderer } = electron
 
 // TODO import VICE VPL files
 
+// TODO ts use FileFormat type
 export const formats = {
   png: {
     name: 'PNG .png',

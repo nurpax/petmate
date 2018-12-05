@@ -1,5 +1,6 @@
 
 import { Action } from 'redux'
+import { StateWithHistory } from 'redux-undo'
 
 interface ActionWithData<T extends string, D> extends Action<T> {
   data: D;
@@ -39,6 +40,12 @@ export interface Font {
   bits: number[];
   charOrder: number[];
 };
+
+export interface FileFormat {
+  name: string;
+  ext: string;
+  exportOptions: boolean;
+}
 
 export interface Framebuf {
   readonly framebuf: Pixel[][];
@@ -86,6 +93,8 @@ export interface Screens {
   list: number[];
 };
 
+export type UndoableFramebuf = StateWithHistory<Framebuf>;
+
 export interface RootState {
   settings: {
     saved: Settings;
@@ -93,6 +102,7 @@ export interface RootState {
   };
   toolbar: any; // TODO
   screens: Screens;
+  framebufList: UndoableFramebuf[];
 };
 
 /////////////////////////////////////////////////////
@@ -101,3 +111,6 @@ export interface FbAction<T> extends Action {
   undoId: number | undefined;
   data: T;
 }
+
+export type ExportOptions = any; // TODO ts
+export type SettingsJson = any;

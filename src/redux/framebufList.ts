@@ -1,11 +1,13 @@
 
 import { Reducer, Action, AnyAction } from 'redux'
-import undoable, { StateWithHistory } from 'redux-undo'
+import undoable from 'redux-undo'
 import { Framebuffer } from '../redux/editor'
 import {
   ActionsUnion,
   createAction,
-  Framebuf, FbAction
+  UndoableFramebuf,
+  Framebuf,
+  FbAction
 } from './types'
 
 import * as fp from '../utils/fp'
@@ -18,23 +20,23 @@ const actionCreators = {
   removeFramebuf: (index: number) => createAction(REMOVE_FRAMEBUF, index)
 };
 
-type Actions = ActionsUnion<typeof actionCreators>
+export type Actions = ActionsUnion<typeof actionCreators>
 
 export const actions = actionCreators;
 
-type UndoableFramebuf = StateWithHistory<Framebuf>;
+type UndoableFbReducer = (histFb: UndoableFramebuf|undefined, action: FbAction<any>) => UndoableFramebuf;
 
-function framebufListReducer(reducer: Reducer<UndoableFramebuf, FbAction<any>>): (state: UndoableFramebuf[], action: Actions) => UndoableFramebuf[] {
+function framebufListReducer(reducer: UndoableFbReducer) {
   return function (state: UndoableFramebuf[] = [], action: Actions): UndoableFramebuf[] {
     switch (action.type) {
     case ADD_FRAMEBUF:
-      const dummyAction = action as FbAction<any>;
+      const dummyAction = action as FbAction<any>; // TODO ts
       return state.concat(reducer(undefined, dummyAction));
     case REMOVE_FRAMEBUF: {
       return fp.arrayRemoveAt(state, action.data);
     }
     default:
-      const { framebufIndex } = action as FbAction<any>;
+      const { framebufIndex } = action as FbAction<any>; // TODO ts
       if (typeof framebufIndex !== 'undefined') {
         return state.map((item, i) => {
           if (framebufIndex === i) {

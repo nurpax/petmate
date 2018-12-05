@@ -1,11 +1,12 @@
-// @flow
+
 import { combineReducers } from 'redux'
 import { Toolbar } from '../redux/toolbar'
-import { Framebuffer } from '../redux/editor'
 import * as settings from '../redux/settings'
 import * as screens from '../redux/screens'
 import * as framebufList from '../redux/framebufList'
 import * as Root from '../redux/root'
+
+import { RootState } from '../redux/types'
 
 const rootReducer = combineReducers({
   framebufList: framebufList.reducer,
@@ -14,7 +15,10 @@ const rootReducer = combineReducers({
   settings: settings.reducer
 })
 
-const rootReducerTop = (state, action) => {
+const rootReducerTop = (
+  state: RootState,
+  action: screens.Actions | Root.Actions | framebufList.Actions
+) => {
   if (action.type === Root.RESET_STATE) {
     return rootReducer(undefined, action)
   }

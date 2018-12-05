@@ -113,7 +113,7 @@ export const actions = {
   newScreen
 }
 
-type Actions = ActionsUnion<typeof actionCreators>;
+export type Actions = ActionsUnion<typeof actionCreators>;
 
 export function reducer(state: Screens = {current: 0, list: []}, action: Actions): Screens {
   switch (action.type) {

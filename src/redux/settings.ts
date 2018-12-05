@@ -12,11 +12,10 @@ import {
   EditSaved,
   EditBranch,
   PaletteName,
-  RootState
+  RootState,
+  SettingsJson
 } from './types'
 import * as fp from '../utils/fp'
-
-type SettingsJson = any;
 
 const LOAD = 'LOAD'
 const SET_PALETTE = 'SET_PALETTE'
