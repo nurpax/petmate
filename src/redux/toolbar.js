@@ -18,6 +18,7 @@ export const TOOL_CHAR_DRAW = 2
 export const TOOL_BRUSH = 3
 export const TOOL_TEXT = 4
 
+// TODO ts Transform
 const emptyTransform = {
   mirror: 0,
   rotate: 0

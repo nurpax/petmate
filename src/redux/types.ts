@@ -58,7 +58,13 @@ export interface Rgb {
 
 export type RgbPalette = Rgb[];
 
-// TODO
+export type Angle360 = 0 | 90 | 180 | 270;
+
+export interface Transform {
+  mirror: number; // TODO ts
+  rotate: Angle360;
+}
+
 export type Brush = any;
 
 export type PaletteName = 'petmate' | 'colodore' | 'pepto';
