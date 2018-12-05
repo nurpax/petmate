@@ -10,22 +10,7 @@ import {
 import { mirrorBrush, findTransformedChar } from './brush'
 import { CHARSET_UPPER, CHARSET_LOWER } from './editor'
 
-export const getScreens = (state) => {
-  return state.screens.list
-}
-
-export const getCurrentScreenIndex = (state) => {
-  return state.screens.current
-}
-
-export const getCurrentScreenFramebufIndex = (state) => {
-  const idx = getCurrentScreenIndex(state)
-  const screens = getScreens(state)
-  if (idx !== null && idx < screens.length) {
-    return screens[idx]
-  }
-  return null
-}
+import { getCurrentScreenFramebufIndex } from './screensSelectors'
 
 export const getFramebufByIndex = (state, idx) => {
   if (idx !== null && idx < state.framebufList.length) {

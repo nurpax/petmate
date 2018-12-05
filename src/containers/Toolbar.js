@@ -18,6 +18,7 @@ import {
 } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
 import * as selectors from '../redux/selectors'
+import * as screensSelectors from '../redux/screensSelectors'
 import { getSettingsPaletteRemap, getSettingsCurrentColorPalette } from '../redux/settingsSelectors'
 import * as Root from '../redux/root'
 import { framebufIndexMergeProps } from '../redux/utils'
@@ -312,8 +313,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 const mapStateToProps = state => {
   const framebuf = selectors.getCurrentFramebuf(state)
   return {
-    framebufIndex: selectors.getCurrentScreenFramebufIndex(state),
-    screens: selectors.getScreens(state),
+    framebufIndex: screensSelectors.getCurrentScreenFramebufIndex(state),
+    screens: screensSelectors.getScreens(state),
     backgroundColor: fp.maybe(framebuf, null, fb => fb.backgroundColor),
     borderColor: fp.maybe(framebuf, null, fb => fb.borderColor),
     selectedTool: state.toolbar.selectedTool,

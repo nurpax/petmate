@@ -19,6 +19,7 @@ import { CharSelectStatusbar } from '../components/Statusbar'
 import * as utils from '../utils'
 import * as fp from '../utils/fp'
 import * as selectors from '../redux/selectors'
+import * as screensSelectors from '../redux/screensSelectors'
 import {
   getSettingsCurrentColorPalette
 } from '../redux/settingsSelectors'
@@ -220,7 +221,7 @@ const mapStateToProps = state => {
       state.toolbar.charTransform
     )
   return {
-    framebufIndex: selectors.getCurrentScreenFramebufIndex(state),
+    framebufIndex: screensSelectors.getCurrentScreenFramebufIndex(state),
     backgroundColor: framebuf.backgroundColor,
     selected,
     curScreencode: utils.charScreencodeFromRowCol(font, selected),

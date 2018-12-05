@@ -6,6 +6,7 @@ import { Framebuffer } from './editor'
 import * as Screens from './screens'
 
 import * as selectors from './selectors'
+import * as screensSelectors from '../redux/screensSelectors'
 import {
   getSettingsPaletteRemap
 } from '../redux/settingsSelectors'
@@ -41,7 +42,7 @@ function mirror(transform, mirror) {
 function dispatchForCurrentFramebuf (f) {
   return (dispatch, getState) => {
     const state = getState();
-    const framebufIndex = selectors.getCurrentScreenFramebufIndex(state);
+    const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state);
     const undoId = state.undoId;
     return f(dispatch, framebufIndex, undoId);
   }
@@ -241,7 +242,7 @@ export class Toolbar {
           if (state.toolbar.textCursorPos !== null && !metaOrCtrl) {
             // Don't match shortcuts if we're in "text tool" mode.
             const { textCursorPos, textColor } = state.toolbar
-            const framebufIndex = selectors.getCurrentScreenFramebufIndex(state)
+            const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state)
             const { width, height } = selectors.getFramebufByIndex(state, framebufIndex)
             if (textCursorPos !== null) {
               const c = convertAsciiToScreencode(shiftKey ? key.toUpperCase() : key)

@@ -7,7 +7,7 @@ import * as Screens from './screens'
 import { Framebuffer } from './editor'
 import { Framebuf } from './types'
 import * as Root from './root'
-import * as selectors from './selectors'
+import * as screensSelectors from './screensSelectors'
 
 // TODO remove this
 interface Workspace {
@@ -65,7 +65,7 @@ export function load(workspace: Workspace): ThunkActionCreator {
 
 // Typed wrapper until selectors are typed
 function getCurrentScreenIndex(state: RootState): number {
-  return selectors.getCurrentScreenIndex(state);
+  return screensSelectors.getCurrentScreenIndex(state);
 }
 
 export function importFramebufs(framebufs: Framebuf[], append: boolean): ThunkActionCreator {
@@ -73,16 +73,16 @@ export function importFramebufs(framebufs: Framebuf[], append: boolean): ThunkAc
     throw new Error('only appending is supported');
   }
   return (dispatch: DispatchFunc, _getState: GetStateFunc) => {
-    let firstNewScreenIdx: (number|null) = null;
+    let firstNewScreenIdx = -1;
     framebufs.forEach((framebuf) => {
       dispatch(Screens.actions.newScreen())
       dispatch((dispatch: DispatchFunc, getState: GetStateFunc) => {
         const state = getState()
         const newScreenIdx = getCurrentScreenIndex(state);
-        if (firstNewScreenIdx === null) {
+        if (firstNewScreenIdx === -1) {
           firstNewScreenIdx = newScreenIdx
         }
-        const newFramebufIdx = selectors.getScreens(state)[newScreenIdx]
+        const newFramebufIdx = screensSelectors.getScreens(state)[newScreenIdx]
         dispatch(Framebuffer.actions.importFile(framebuf, newFramebufIdx))
         dispatch({
           ...ActionCreators.clearHistory(),

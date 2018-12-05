@@ -19,6 +19,7 @@ import {
 
 import { Framebuffer } from '../redux/editor'
 import * as selectors from '../redux/selectors'
+import * as screensSelectors from '../redux/screensSelectors'
 import {
   getSettingsPaletteRemap,
   getSettingsCurrentColorPalette,
@@ -397,7 +398,7 @@ const FramebufferCont = connect(
     const framebuf = selectors.getCurrentFramebuf(state)
     const font = selectors.getCurrentFramebufFont(state)
     return {
-      framebufIndex: selectors.getCurrentScreenFramebufIndex(state),
+      framebufIndex: screensSelectors.getCurrentScreenFramebufIndex(state),
       framebuf: framebuf.framebuf,
       framebufWidth: framebuf.width,
       framebufHeight: framebuf.height,

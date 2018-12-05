@@ -81,12 +81,18 @@ export interface Settings {
   integerScale: boolean;
 };
 
+export interface Screens {
+  current: number;
+  list: number[];
+};
+
 export interface RootState {
   settings: {
     saved: Settings;
     editing: Settings;
   };
   toolbar: any; // TODO
+  screens: Screens;
 };
 
 /////////////////////////////////////////////////////

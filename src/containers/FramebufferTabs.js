@@ -13,6 +13,7 @@ import { Framebuffer } from '../redux/editor'
 import { Toolbar } from '../redux/toolbar'
 import * as Screens from '../redux/screens'
 import * as selectors from '../redux/selectors'
+import * as screensSelectors from '../redux/screensSelectors'
 import { getSettingsCurrentColorPalette } from '../redux/settingsSelectors'
 
 import * as utils from '../utils'
@@ -317,8 +318,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 
 const mapStateToProps = state => {
   return {
-    activeScreen: selectors.getCurrentScreenIndex(state),
-    screens: selectors.getScreens(state),
+    activeScreen: screensSelectors.getCurrentScreenIndex(state),
+    screens: screensSelectors.getScreens(state),
     getFramebufByIndex: (idx) => selectors.getFramebufByIndex(state, idx),
     getFont: (fb) => selectors.getFramebufFont(state, fb),
     colorPalette: getSettingsCurrentColorPalette(state)

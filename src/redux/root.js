@@ -8,6 +8,7 @@ import { ActionCreators } from 'redux-undo';
 
 import { Framebuffer } from './editor'
 import * as settings from './settings'
+import * as screensSelectors from '../redux/screensSelectors'
 import { Toolbar } from './toolbar'
 import {
   dialogLoadWorkspace,
@@ -26,7 +27,7 @@ export const LOAD_WORKSPACE = 'LOAD_WORKSPACE'
 const saveAsWorkspace = () => {
   return (dispatch, getState) => {
     const state = getState()
-    const screens = selectors.getScreens(state)
+    const screens = screensSelectors.getScreens(state)
     const getFramebufByIndex = (idx) => selectors.getFramebufByIndex(state, idx)
     dialogSaveAsWorkspace(
       dispatch,
@@ -50,7 +51,7 @@ export const actions = {
   fileSaveWorkspace: () => {
     return (dispatch, getState) => {
       const state = getState()
-      const screens = selectors.getScreens(state)
+      const screens = screensSelectors.getScreens(state)
       const getFramebufByIndex = (idx) => selectors.getFramebufByIndex(state, idx)
       const filename = state.toolbar.workspaceFilename
       if (filename === null) {
@@ -70,7 +71,7 @@ export const actions = {
   fileImport: (type) => {
     return (dispatch, getState) => {
       const state = getState()
-      const framebufIndex = selectors.getCurrentScreenFramebufIndex(state)
+      const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state)
       dialogImportFile(type, framebufs => {
         dispatch(Framebuffer.actions.importFile(framebufs[0], framebufIndex))
       })
@@ -80,7 +81,7 @@ export const actions = {
   fileImportAppend: (type) => {
     return (dispatch, getState) => {
       const state = getState()
-      const framebufIndex = selectors.getCurrentScreenFramebufIndex(state)
+      const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state)
       dialogImportFile(type, framebufs => {
         dispatch(importFramebufs(framebufs, true));
       })
@@ -90,9 +91,9 @@ export const actions = {
   fileExportAs: (type, options) => {
     return (dispatch, getState) => {
       const state = getState()
-      const screens = selectors.getScreens(state)
+      const screens = screensSelectors.getScreens(state)
       let remappedFbIndex = 0
-      const selectedFramebufIndex = selectors.getCurrentScreenFramebufIndex(state)
+      const selectedFramebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state)
       const framebufs = screens.map((fbIdx, i) => {
         const framebuf = selectors.getFramebufByIndex(state, fbIdx)
         if (selectedFramebufIndex === fbIdx) {
@@ -122,7 +123,7 @@ export const actions = {
 
   undo: () => {
     return (dispatch, getState) => {
-      const framebufIndex = selectors.getCurrentScreenFramebufIndex(getState())
+      const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(getState())
       dispatch({
         ...ActionCreators.undo(),
         framebufIndex
@@ -131,7 +132,7 @@ export const actions = {
   },
   redo: () => {
     return (dispatch, getState) => {
-      const framebufIndex = selectors.getCurrentScreenFramebufIndex(getState())
+      const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(getState())
       dispatch({
         ...ActionCreators.redo(),
         framebufIndex
