@@ -6,8 +6,8 @@ import { electron, path, fs } from '../utils/electronImports'
 
 import {
   ActionsUnion,
+  DispatchPropsFromActions,
   createAction,
-  MapReturnToVoid,
   Settings as RSettings,
   EditSaved,
   EditBranch,
@@ -56,7 +56,7 @@ function fromJson(json: SettingsJson): RSettings {
   }
 }
 
-export function saveEdits (): ThunkAction<void, RootState, undefined, Action> {
+function saveEdits (): ThunkAction<void, RootState, undefined, Action> {
   return (dispatch, _getState) => {
     dispatch(actions.saveEditsAction());
     dispatch((_dispatch, getState) => {
@@ -92,26 +92,14 @@ const actionCreators = {
   setIntegerScale: (data: SetIntegerScaleArgs) => createAction(SET_INTEGER_SCALE, data)
 };
 
-export type Actions = ActionsUnion<typeof actionCreators>
+type Actions = ActionsUnion<typeof actionCreators>
 
 export const actions = {
   ...actionCreators,
-  saveEdits
+  saveEdits,
 };
 
-export interface PropsFromDispatch {
-  load: MapReturnToVoid<typeof actions.load>;
-  cancelEdits: MapReturnToVoid<typeof actions.cancelEdits>;
-  setPalette: MapReturnToVoid<typeof actions.setPalette>;
-  setSelectedColorPaletteName: MapReturnToVoid<typeof actions.setSelectedColorPaletteName>;
-  setIntegerScale: MapReturnToVoid<typeof actions.setIntegerScale>;
-  saveEdits: MapReturnToVoid<typeof saveEdits>;
-};
-
-//      return updateBranch(state, action.data.branch, s => {
-//        ...s,
-///       integerScale: action.data.scale
-//      })
+export type PropsFromDispatch = DispatchPropsFromActions<typeof actions>;
 
 function updateBranch(
   state:  EditSaved<RSettings>,
