@@ -5,9 +5,6 @@ import { ThunkAction } from 'redux-thunk';
 import { electron, path, fs } from '../utils/electronImports'
 
 import {
-  ActionsUnion,
-  DispatchPropsFromActions,
-  createAction,
   Settings as RSettings,
   EditSaved,
   EditBranch,
@@ -15,6 +12,8 @@ import {
   RootState,
   SettingsJson
 } from './types'
+import { ActionsUnion, DispatchPropsFromActions, createAction } from './typeUtils'
+
 import * as fp from '../utils/fp'
 
 const LOAD = 'LOAD'

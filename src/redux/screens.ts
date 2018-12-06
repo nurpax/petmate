@@ -16,11 +16,10 @@ import {
 } from './editor'
 
 import {
-  ActionsUnion,
-  createAction,
   RootState,
   Screens
 } from './types'
+import { ActionsUnion, createAction } from './typeUtils'
 
 import { makeScreenName } from './utils'
 

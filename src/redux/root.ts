@@ -9,14 +9,13 @@ import {
 } from '../redux/settingsSelectors'
 
 import {
-  ActionsUnion,
-  createAction,
   Framebuf,
   RootState,
   FileFormat,
   SettingsJson,
   ExportOptions
 } from './types'
+import { ActionsUnion, createAction } from './typeUtils'
 import { Framebuffer } from './editor'
 import * as settings from './settings'
 import * as screensSelectors from '../redux/screensSelectors'

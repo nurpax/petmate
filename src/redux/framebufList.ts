@@ -3,12 +3,11 @@ import { Reducer, Action, AnyAction } from 'redux'
 import undoable from 'redux-undo'
 import { Framebuffer } from '../redux/editor'
 import {
-  ActionsUnion,
-  createAction,
   UndoableFramebuf,
   Framebuf,
   FbAction
 } from './types'
+import { ActionsUnion, createAction } from './typeUtils'
 
 import * as fp from '../utils/fp'
 
