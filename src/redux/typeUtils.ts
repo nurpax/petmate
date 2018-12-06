@@ -21,4 +21,3 @@ export function createAction<T extends string, D>(type: T, data: D): ActionWithD
 export function createAction<T extends string, D>(type: T, data?: D) {
   return data === undefined ? { type } : { type, data };
 }
-

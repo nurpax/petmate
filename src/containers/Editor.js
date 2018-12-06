@@ -158,26 +158,26 @@ class FramebufferView_ extends Component {
   }
 
   setChar = (clickLoc) => {
+    const { undoId } = this.props;
     const params = {
       ...clickLoc,
-      undoId: this.props.undoId
     }
     if (this.props.selectedTool === TOOL_DRAW) {
       this.props.Framebuffer.setPixel({
         ...params,
         color: this.props.textColor,
         screencode: this.props.curScreencode
-      })
+      }, undoId)
     } else if (this.props.selectedTool === TOOL_COLORIZE) {
       this.props.Framebuffer.setPixel({
         ...params,
         color: this.props.textColor,
-      })
+      }, undoId)
     } else if (this.props.selectedTool === TOOL_CHAR_DRAW) {
       this.props.Framebuffer.setPixel({
         ...params,
         screencode: this.props.curScreencode
-      })
+      }, undoId)
     } else {
       console.error('shouldn\'t get here')
     }
@@ -193,8 +193,7 @@ class FramebufferView_ extends Component {
     this.props.Framebuffer.setBrush({
       ...destPos,
       brush: this.props.brush,
-      undoId: this.props.undoId
-    })
+    }, this.props.undoId)
   }
 
   dragStart = (coord) => {

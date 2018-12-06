@@ -1,6 +1,5 @@
 
 import { StateWithHistory } from 'redux-undo'
-import { Action } from 'redux'
 
 export type Charset = 'upper' | 'lower';
 
@@ -83,13 +82,6 @@ export interface RootState {
   screens: Screens;
   framebufList: UndoableFramebuf[];
 };
-
-/////////////////////////////////////////////////////
-export interface FbAction<T> extends Action {
-  framebufIndex: number;
-  undoId: number | undefined;
-  data: T;
-}
 
 export type ExportOptions = any; // TODO ts
 export type SettingsJson = any;

@@ -1,17 +1,17 @@
 
-import { bindActionCreators } from 'redux'
+import { Action, Dispatch, bindActionCreators } from 'redux'
 
 import {
   Brush,
+  Charset,
   Coord2,
   Framebuf,
-  Pixel,
-  FbAction
+  Pixel
 } from './types'
 
-import { settable, reduxSettables } from './settable'
 import * as fp from '../utils/fp'
 import { makeScreenName } from './utils'
+import { ActionsUnion } from './typeUtils'
 
 export const CHARSET_UPPER = 'upper'
 export const CHARSET_LOWER = 'lower'
@@ -19,68 +19,74 @@ export const CHARSET_LOWER = 'lower'
 export const DEFAULT_BACKGROUND_COLOR = 6
 export const DEFAULT_BORDER_COLOR = 14
 
-const settables = reduxSettables([
-  settable('Framebuffer', 'backgroundColor', DEFAULT_BACKGROUND_COLOR),
-  settable('Framebuffer', 'borderColor', DEFAULT_BORDER_COLOR),
-  settable('Framebuffer', 'charset', CHARSET_UPPER),
-  settable('Framebuffer', 'name', null)
-])
-
-function mkActionCreator0(type: string) {
-  return (framebufIndex: number) => {
-    return {
-      type,
-      undoId: null,
-      framebufIndex: framebufIndex
-    }
-  }
+export interface FbActionWithData<T extends string, D> extends Action<T> {
+  data: D;
+  undoId: number | null;
+  framebufIndex: number;
 }
 
-function mkActionCreator(type: string) {
-  return (args: any, framebufIndex: number) => {
-    const { undoId = null, ...rest } = args;
-    return {
-      type,
-      data: rest,
-      undoId,
-      framebufIndex: framebufIndex
-    }
-  }
+// Fb actions are handled specially as these actions are always tagged
+// with a framebufIndex and an undoId.
+export function createFbAction<T extends string>(type: T, framebufIndex: number, undoId: number|null): FbActionWithData<T, undefined>
+export function createFbAction<T extends string, D>(type: T, framebufIndex: number, undoId: number|null, data: D): FbActionWithData<T, D>
+export function createFbAction<T extends string, D>(type: T, framebufIndex: number, undoId: number|null, data?: D) {
+  return data === undefined ?
+    { type, framebufIndex, undoId } :
+    { type, data, framebufIndex, undoId };
 }
+
+type SetCharParams = Coord2 & { screencode: number, color: number };
+type SetBrushParams = Coord2 & { brush: Brush };
+type ImportFileParams = any // TODO ts
+
+const SET_BACKGROUND_COLOR = 'Framebuffer/SET_BACKGROUND_COLOR'
+const SET_BORDER_COLOR = 'Framebuffer/SET_BORDER_COLOR'
+const SET_CHARSET = 'Framebuffer/SET_CHARSET'
+const SET_NAME = 'Framebuffer/SET_NAME'
+
+const SET_PIXEL = 'Framebuffer/SET_PIXEL'
+const SET_BRUSH = 'Framebuffer/SET_BRUSH'
+const SET_FIELDS = 'Framebuffer/SET_FIELDS'
+const IMPORT_FILE = 'Framebuffer/IMPORT_FILE'
+const CLEAR_CANVAS = 'Framebuffer/CLEAR_CANVAS'
+const COPY_FRAMEBUF = 'Framebuffer/COPY_FRAMEBUF'
+const SHIFT_HORIZONTAL = 'Framebuffer/SHIFT_HORIZONTAL'
+const SHIFT_VERTICAL = 'Framebuffer/SHIFT_VERTICAL'
+
+
+const actionCreators = {
+  setPixel: (data: SetCharParams, undoId: number, framebufIndex: number) => createFbAction(SET_PIXEL, framebufIndex, undoId, data),
+  setBrush: (data: SetBrushParams, undoId: number, framebufIndex: number) => createFbAction(SET_BRUSH, framebufIndex, undoId, data),
+  importFile: (data: ImportFileParams, framebufIndex: number) => createFbAction(IMPORT_FILE, framebufIndex, null, data),
+  clearCanvas: (framebufIndex: number) => createFbAction(CLEAR_CANVAS, framebufIndex, null),
+  copyFramebuf: (data: Framebuf, framebufIndex: number) => createFbAction(COPY_FRAMEBUF, framebufIndex, null, data),
+  setFields: (data: any, framebufIndex: number) => createFbAction(SET_FIELDS, framebufIndex, null, data),
+  shiftHorizontal: (data: -1|1, framebufIndex: number) => createFbAction(SHIFT_HORIZONTAL, framebufIndex, null, data),
+  shiftVertical: (data: -1|1, framebufIndex: number) => createFbAction(SHIFT_VERTICAL, framebufIndex, null, data),
+
+  setBackgroundColor: (data: number, framebufIndex: number) => createFbAction(SET_BACKGROUND_COLOR, framebufIndex, null, data),
+  setBorderColor: (data: number, framebufIndex: number) => createFbAction(SET_BORDER_COLOR, framebufIndex, null, data),
+  setCharset: (data: Charset, framebufIndex: number) => createFbAction(SET_CHARSET, framebufIndex, null, data),
+  setName: (data: string|undefined, framebufIndex: number) => createFbAction(SET_NAME, framebufIndex, null, data),
+};
+
+const actions = actionCreators;
+
+export type Actions = ActionsUnion<typeof actionCreators>;
 
 export class Framebuffer {
-  static SET_PIXEL = 'Framebuffer/SET_PIXEL'
-  static SET_BRUSH = 'Framebuffer/SET_BRUSH'
-  static SET_FIELDS = 'Framebuffer/SET_FIELDS'
-  static IMPORT_FILE = 'Framebuffer/IMPORT_FILE'
-  static CLEAR_CANVAS = 'Framebuffer/CLEAR_CANVAS'
-  static COPY_FRAMEBUF = 'Framebuffer/COPY_FRAMEBUF'
-  static SHIFT_HORIZONTAL = 'Framebuffer/SHIFT_HORIZONTAL'
-  static SHIFT_VERTICAL = 'Framebuffer/SHIFT_VERTICAL'
 
-  static actions = {
-    ...settables.actions,
-    setPixel:        mkActionCreator(Framebuffer.SET_PIXEL),
-    setBrush:        mkActionCreator(Framebuffer.SET_BRUSH),
-    importFile:      mkActionCreator(Framebuffer.IMPORT_FILE),
-    clearCanvas:     mkActionCreator0(Framebuffer.CLEAR_CANVAS),
-    copyFramebuf:    mkActionCreator(Framebuffer.COPY_FRAMEBUF),
-    setFields:       mkActionCreator(Framebuffer.SET_FIELDS),
-    shiftHorizontal: mkActionCreator(Framebuffer.SHIFT_HORIZONTAL),
-    shiftVertical:   mkActionCreator(Framebuffer.SHIFT_VERTICAL)
-  }
+  static actions = actions;
 
   static reducer = fbReducer
 
-  static bindDispatch (dispatch: any) {
+  static bindDispatch (dispatch: Dispatch) {
     return bindActionCreators(Framebuffer.actions, dispatch)
   }
 }
 
 const FB_WIDTH = 40;
 const FB_HEIGHT = 25;
-
-type SetCharParams = Coord2 & { screencode: number, color: number };
 
 function setChar(fbState: Framebuf, {row, col, screencode, color}: SetCharParams): Pixel[][] {
   const { framebuf, width, height } = fbState
@@ -106,8 +112,6 @@ function setChar(fbState: Framebuf, {row, col, screencode, color}: SetCharParams
     return pixelRow
   })
 }
-
-type SetBrushParams = Coord2 & { brush: Brush };
 
 function setBrush(framebuf: Pixel[][], {row, col, brush}: SetBrushParams): Pixel[][] {
   const { min, max } = brush.brushRegion
@@ -160,18 +164,19 @@ function mapPixels(fb: Framebuf, mapFn: (fb: Framebuf) => Pixel[][]) {
 export const fieldSetters = [
   {
     name: 'backgroundColor',
-    type: 'Framebuffer/SET_BACKGROUNDCOLOR'
+    type: SET_BACKGROUND_COLOR,
   },
   {
     name: 'borderColor',
-    type: 'Framebuffer/SET_BORDERCOLOR'
+    type: SET_BORDER_COLOR,
   },
   {
     name: 'charset',
-    type: 'Framebuffer/SET_CHARSET'
+    type: SET_CHARSET,
   },
   {
-    name: 'name', type: 'Framebuffer/SET_NAME'
+    name: 'name',
+    type: SET_NAME
   },
 ]
 
@@ -181,31 +186,31 @@ export function fbReducer(state: Framebuf = {
   height: 25,
   backgroundColor: DEFAULT_BACKGROUND_COLOR,
   borderColor: DEFAULT_BORDER_COLOR,
-  charset: 'upper',
+  charset: CHARSET_UPPER,
   name: undefined
-}, action: FbAction<any>): Framebuf {
+}, action: Actions): Framebuf {
   switch (action.type) {
-    case Framebuffer.SET_PIXEL:
+    case SET_PIXEL:
       return mapPixels(state, fb => setChar(fb, action.data));
-    case Framebuffer.SET_BRUSH:
+    case SET_BRUSH:
       return mapPixels(state, fb => setBrush(fb.framebuf, action.data));
-    case Framebuffer.CLEAR_CANVAS:
+    case CLEAR_CANVAS:
       return mapPixels(state, _fb => emptyFramebuf());
-    case Framebuffer.SHIFT_HORIZONTAL:
+    case SHIFT_HORIZONTAL:
       return mapPixels(state, fb => shiftHorizontal(fb.framebuf, action.data));
-    case Framebuffer.SHIFT_VERTICAL:
+    case SHIFT_VERTICAL:
       return mapPixels(state, fb => shiftVertical(fb.framebuf, action.data));
-    case Framebuffer.SET_FIELDS:
+    case SET_FIELDS:
       return {
         ...state,
         ...action.data
       }
-    case Framebuffer.COPY_FRAMEBUF:
+    case COPY_FRAMEBUF:
       return {
         ...state,
         ...action.data
       }
-    case Framebuffer.IMPORT_FILE:
+    case IMPORT_FILE:
       const c = action.data
       const name = fp.maybeDefault(c.name, makeScreenName(action.framebufIndex))
       return {

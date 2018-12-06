@@ -97,6 +97,9 @@ function newScreen(): ThunkAction<void, RootState, undefined, Action> {
     dispatch((dispatch, getState) => {
       const state = getState()
       const newFramebufIdx = getCurrentScreenFramebufIndex(state)
+      if (newFramebufIdx === null) {
+        return;
+      }
       dispatch(Framebuffer.actions.setFields({
         ...colors,
         name: makeScreenName(newFramebufIdx)

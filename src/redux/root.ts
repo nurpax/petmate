@@ -84,6 +84,9 @@ export const actions = {
     return (dispatch, getState) => {
       const state = getState()
       const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state)
+      if (framebufIndex === null) {
+        return;
+      }
       dialogImportFile(type, (framebufs: Framebuf[]) => {
         dispatch(Framebuffer.actions.importFile(framebufs[0], framebufIndex))
       })
