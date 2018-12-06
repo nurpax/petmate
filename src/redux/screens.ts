@@ -65,6 +65,9 @@ function cloneScreen(index: number): ThunkAction<void, RootState, undefined, Act
     const state = getState()
     const fbidx = getScreens(state)[index]
     const framebuf = selectors.getFramebufByIndex(state, fbidx)
+    if (!framebuf) {
+      throw new Error('invalid framebuf');
+    }
     dispatch(actionCreators.addScreenAndFramebuf(index));
     dispatch((dispatch, getState) => {
       const state = getState()

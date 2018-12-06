@@ -1,15 +1,12 @@
 
-import React, { Component, PureComponent } from 'react';
-import PropTypes from 'prop-types'
+import React, { Component, PureComponent, StatelessComponent as SFC } from 'react';
 import { connect } from 'react-redux'
+import { Dispatch, bindActionCreators } from 'redux'
 
-import { Framebuffer } from '../redux/editor'
-import {
-  Toolbar,
-  TOOL_DRAW,
-  TOOL_COLORIZE,
-  TOOL_BRUSH
-} from '../redux/toolbar'
+import { RootState, Charset, Font, Pixel, Coord2, Rgb } from '../redux/types'
+import * as framebuffer from '../redux/editor'
+
+import { Toolbar } from '../redux/toolbar'
 import { framebufIndexMergeProps } from '../redux/utils'
 
 import CharGrid from '../components/CharGrid'
@@ -28,7 +25,15 @@ import { CharPosition } from './hoc'
 
 import styles from './CharSelect.module.css'
 
-const SelectButton = ({name, current, setCharset, children}) => {
+interface SelectButtonProps {
+  name: Charset;
+  current: Charset;
+  setCharset: (c: Charset) => void;
+  children: {};
+}
+
+const SelectButton: SFC<SelectButtonProps> = (props: SelectButtonProps) => {
+  const { name, current, setCharset, children } = props;
   return (
     <div className={styles.charsetSelectButton} style={{
       borderStyle: 'solid',
@@ -42,12 +47,12 @@ const SelectButton = ({name, current, setCharset, children}) => {
   )
 }
 
-class FontSelector extends PureComponent {
-  static propTypes = {
-    currentCharset: PropTypes.string.isRequired,
-    setCharset: PropTypes.func.isRequired
-  }
+interface FontSelectorProps {
+  currentCharset: Charset;
+  setCharset: (c: Charset) => void;
+}
 
+class FontSelector extends PureComponent<FontSelectorProps> {
   render () {
     return (
       <div style={{
@@ -75,8 +80,32 @@ class FontSelector extends PureComponent {
   }
 }
 
-class CharSelect extends Component {
-  constructor (props) {
+interface CharSelectProps {
+  Toolbar: any; // TODO ts
+  Framebuffer: framebuffer.PropsFromDispatch;
+  font: Font;
+  canvasScale: {
+    scaleX: number, scaleY: number
+  };
+  colorPalette: Rgb[];
+  selected: Coord2 | null;
+  backgroundColor: number;
+  textColor: number;
+  curScreencode: number;
+}
+
+interface CharSelectState {
+  charPos: Coord2;
+  isActive: boolean;
+}
+
+class CharSelect extends Component<CharSelectProps, CharSelectState> {
+
+  fb: Pixel[][]|null = null;
+  font: Font|null = null;
+  prevTextColor = -1;
+
+  constructor (props: CharSelectProps) {
     super(props)
     this.computeCachedFb(0)
 
@@ -86,7 +115,7 @@ class CharSelect extends Component {
     }
   }
 
-  computeCachedFb(textColor) {
+  computeCachedFb(textColor: number) {
     const { font } = this.props
     this.fb = fp.mkArray(16, y => {
       return fp.mkArray(16, x => {
@@ -104,12 +133,12 @@ class CharSelect extends Component {
     this.props.Toolbar.setCurrentChar(this.state.charPos)
   }
 
-  handleCharPosChanged = (charPos) => {
+  handleCharPosChanged = (charPos: Coord2) => {
     this.setState({ charPos })
   }
 
-  handleActivationChanged = ({isActive}) => {
-    this.setState({ isActive })
+  handleActivationChanged = (args: { isActive: boolean}) => {
+    this.setState({ isActive: args.isActive })
   }
 
   render () {
@@ -204,14 +233,14 @@ class CharSelect extends Component {
   }
 }
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch: Dispatch) => {
   return {
-    Framebuffer: Framebuffer.bindDispatch(dispatch),
+    Framebuffer: bindActionCreators(framebuffer.actions, dispatch),
     Toolbar: Toolbar.bindDispatch(dispatch)
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state: RootState) => {
   const framebuf = selectors.getCurrentFramebuf(state)
   const font = selectors.getCurrentFramebufFont(state)
   const selected =
@@ -222,7 +251,7 @@ const mapStateToProps = state => {
     )
   return {
     framebufIndex: screensSelectors.getCurrentScreenFramebufIndex(state),
-    backgroundColor: framebuf.backgroundColor,
+    backgroundColor: framebuf ? framebuf.backgroundColor : framebuffer.DEFAULT_BACKGROUND_COLOR,
     selected,
     curScreencode: utils.charScreencodeFromRowCol(font, selected),
     textColor: state.toolbar.textColor,

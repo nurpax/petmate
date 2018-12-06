@@ -109,6 +109,9 @@ export const actions = {
       const selectedFramebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state)
       const framebufs = screens.map((fbIdx, i) => {
         const framebuf = selectors.getFramebufByIndex(state, fbIdx)
+        if (!framebuf) {
+          throw new Error('invalid framebuf');
+        }
         if (selectedFramebufIndex === fbIdx) {
           remappedFbIndex = i
         }

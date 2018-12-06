@@ -92,8 +92,7 @@ export const rowColFromScreencode = (font, code) => {
       }
     }
   }
-  console.error('impossible')
-  return null
+  throw new Error('rowColFromScreencode - the impossible happened');
 }
 
 const FILE_VERSION = 1

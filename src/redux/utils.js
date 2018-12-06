@@ -1,5 +1,5 @@
 
-const injectFramebufIndex = (stateProps, dispatchProps) => {
+function injectFramebufIndex(stateProps, dispatchProps) {
   let newDispatch = {}
   Object.keys(dispatchProps).map(key => {
     const c = dispatchProps[key]

@@ -70,7 +70,23 @@ const actionCreators = {
   setName: (data: string|undefined, framebufIndex: number) => createFbAction(SET_NAME, framebufIndex, null, data),
 };
 
-const actions = actionCreators;
+export const actions = actionCreators;
+
+// Map action dispatch functions to something that can be used
+// in React components.  This drops the last framebufIndex from the
+// type as it's implicitly plugged in by the connect() merge props
+// option.
+type MapReturnToVoidFB<T> =
+  T extends (framebufIndex: number) => any ? () => void :
+  T extends (a0: infer U, framebufIndex: number) => any ? (a0: U) => void :
+  T extends (a0: infer U, a1: infer V, framebufIndex: number) => any ? (a0: U, a1: V) => void :
+  T extends (a0: infer U, a1: infer V, a2: infer S, framebufIndex: number) => any ? (a0: U, a1: V, a2: S) => void : T;
+
+type DispatchPropsFromActionsFB<T> = {
+  [P in keyof T]: MapReturnToVoidFB<T[P]>;
+}
+
+export type PropsFromDispatch = DispatchPropsFromActionsFB<typeof actions>;
 
 export type Actions = ActionsUnion<typeof actionCreators>;
 
