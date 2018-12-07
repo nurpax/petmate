@@ -37,7 +37,6 @@ import {
   TOOL_BRUSH,
   TOOL_TEXT
 } from '../redux/toolbar'
-import { selectChar } from '../actions/editor'
 import * as utils from '../utils';
 
 import styles from './Editor.module.css';
