@@ -1,11 +1,11 @@
 
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import classnames from 'classnames'
+import React, { Component, CSSProperties } from 'react'
 
 import styles from './CharPosOverlay.module.css'
+import { Coord2 } from '../redux/types';
 
-const charPosOverlayStyleBase = {
+const charPosOverlayStyleBase: CSSProperties = {
+  position: 'absolute',
   outlineStyle: 'solid',
   outlineWidth: 0.5,
   backgroundColor: 'rgba(255,255,255,0)',
@@ -13,15 +13,22 @@ const charPosOverlayStyleBase = {
   pointerEvents:'none'
 }
 
-export default class CharPosOverlay extends Component {
+interface TextCursorOverlay {
+  framebufWidth: number;
+  framebufHeight: number;
+  charPos: Coord2;
+  grid: boolean;
+  color?: string;
+  fillColor: string;
+  opacity: number;
+}
+
+type CharPosOverlayProps = TextCursorOverlay & { blink: boolean };
+
+export default class CharPosOverlay extends Component<CharPosOverlayProps> {
   static defaultProps = {
     blink: false,
     fillColor: 'rgb(255,255,255)'
-  }
-
-  static propTypes = {
-    framebufWidth: PropTypes.number.isRequired,
-    framebufHeight: PropTypes.number.isRequired,
   }
 
   render () {
@@ -38,7 +45,6 @@ export default class CharPosOverlay extends Component {
     const s = {
       ...charPosOverlayStyleBase,
       outlineColor: outlineColor,
-      position: 'absolute',
       left: charPos.col*scale,
       top: charPos.row*scale,
       width: `${8}px`,
@@ -60,7 +66,7 @@ export default class CharPosOverlay extends Component {
   }
 }
 
-export const TextCursorOverlay = (props) => {
+export const TextCursorOverlay = (props: TextCursorOverlay) => {
   return (
     <CharPosOverlay {...props} blink={true} />
   )
