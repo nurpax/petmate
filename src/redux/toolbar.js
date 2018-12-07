@@ -251,8 +251,7 @@ export class Toolbar {
                   ...textCursorPos,
                   screencode: c,
                   color: textColor,
-                  undoId: null
-                }, framebufIndex))
+                }, null, framebufIndex))
                 const newCursorPos = moveTextCursor(
                   textCursorPos,
                   { col: 1, row: 0 },
