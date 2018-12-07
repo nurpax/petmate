@@ -2,19 +2,23 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 
-const FixedWidthCoord = ({axis, number}) => {
+import { Framebuf, Coord2 } from '../redux/types'
+
+const FixedWidthCoord = (props: { axis: string, number: number|string|null }) => {
+  const { axis, number } = props;
   return (
     <div style={{display: 'flex', flexDirection:'row'}}>
       <div style={{width: '15px', color:'rgb(120,120,120)'}}>{axis}:</div>
-      <div style={{width: '25px', color:'rgb(173,173,173)'}}>{number !== null ? number : null}</div>
+      <div style={{width: '25px', color:'rgb(173,173,173)'}}>{number}</div>
     </div>
   )
 }
 
-export class CharSelectStatusbar extends PureComponent {
-  static propTypes = {
-    curScreencode: PropTypes.number
-  }
+interface CharSelectStatusbarProps {
+  curScreencode: number | null;
+}
+
+export class CharSelectStatusbar extends PureComponent<CharSelectStatusbarProps> {
   render () {
     const { curScreencode } = this.props
     const screencodeStr = curScreencode !== null ?
@@ -22,14 +26,19 @@ export class CharSelectStatusbar extends PureComponent {
       null
     return (
       <div style={{fontSize: '0.8em', display: 'flex', flexDirection:'row'}}>
-        <FixedWidthCoord axis='C' number={`$${screencodeStr}`}
-        />
+        <FixedWidthCoord axis='C' number={`$${screencodeStr}`} />
       </div>
     )
   }
 }
 
-export class CanvasStatusbar extends PureComponent {
+interface CanvasStatusbarProps {
+  framebuf: Framebuf;
+  isActive: boolean;
+  charPos:  Coord2;
+}
+
+export class CanvasStatusbar extends PureComponent<CanvasStatusbarProps> {
   static propTypes = {
     framebuf: PropTypes.object.isRequired,
     isActive: PropTypes.bool,
@@ -38,14 +47,14 @@ export class CanvasStatusbar extends PureComponent {
   render () {
     const { isActive, charPos, framebuf } = this.props
     const { width, height } = framebuf
-    let insideViewport = false
     const cp = isActive ? charPos : null
+    let cc = null;
     if (cp !== null) {
-      insideViewport =
-        (cp.row >= 0 && cp.row < height) &&
-        (cp.col >= 0 && cp.col < width)
+      if ((cp.row >= 0 && cp.row < height) &&
+          (cp.col >= 0 && cp.col < width)) {
+            cc = framebuf.framebuf[cp.row][cp.col].code;
+      }
     }
-    const cc = insideViewport ? framebuf.framebuf[cp.row][cp.col].code : null
     return (
       <div style={{paddingTop: '4px', fontSize: '0.8em', display: 'flex', flexDirection:'row'}}>
         <FixedWidthCoord axis='X' number={cp !== null ? cp.col : null} />
