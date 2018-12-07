@@ -163,6 +163,9 @@ class CharSelect extends Component<CharSelectProps, CharSelectState> {
     if (this.state.isActive) {
       screencode = utils.charScreencodeFromRowCol(font, this.state.charPos)
     }
+    if (!this.fb) {
+      throw new Error('FB cannot be null here');
+    }
     return (
       <div style={{
         display: 'flex',
@@ -189,7 +192,6 @@ class CharSelect extends Component<CharSelectProps, CharSelectState> {
                 backgroundColor={backg}
                 grid={true}
                 framebuf={this.fb}
-                selected={this.props.selected}
                 font={this.props.font}
                 colorPalette={colorPalette}
               />

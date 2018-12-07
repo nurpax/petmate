@@ -313,20 +313,20 @@ class FramebufferView_ extends Component {
             opacity={0.5}
           />
         if (selectedTool === TOOL_COLORIZE) {
-          screencodeHighlight = null
+          screencodeHighlight = undefined;
         } else if (selectedTool === TOOL_CHAR_DRAW) {
-          colorHighlight = null
+          colorHighlight = undefined;
         }
         // Don't show current char/color when the ALT color/char picker is active
         if (this.props.altKey) {
-          highlightCharPos = false
+          highlightCharPos = false;
         }
       }
     }
 
     if (selectedTool === TOOL_TEXT) {
-      screencodeHighlight = null
-      colorHighlight = null
+      screencodeHighlight = undefined;
+      colorHighlight = undefined;
       const { textCursorPos, charPos, textColor } = this.props
       let textCursorOverlay = null
       if (textCursorPos !== null) {

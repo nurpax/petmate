@@ -1,12 +1,16 @@
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types'
-import classnames from 'classnames'
+import { Rgb, Font, Pixel, Coord2 } from '../redux/types';
 
 class CharsetCache {
-  constructor (ctx, fontBits, colorPalette) {
+  private images: ImageData[][] = Array(16);
+
+  constructor (
+    ctx: CanvasRenderingContext2D,
+    fontBits: number[],
+    colorPalette: Rgb[]
+  ) {
     const data = fontBits
-    this.images = Array(16)
 
     for (let colorIdx = 0; colorIdx < 16; colorIdx++) {
       const color = colorPalette[colorIdx]
@@ -14,7 +18,6 @@ class CharsetCache {
 
       for (let c = 0; c < 256; c++) {
         const boffs = c*8;
-        const char = []
 
         let dstIdx = 0
         let img = ctx.createImageData(8, 8);
@@ -36,32 +39,41 @@ class CharsetCache {
     }
   }
 
-  getImage(screencode, color) {
+  getImage(screencode: number, color: number) {
     return this.images[color][screencode]
   }
 }
 
-export default class CharGrid extends Component {
-  static propTypes = {
-    colorPalette: PropTypes.arrayOf(PropTypes.object).isRequired
-  }
+interface CharGridProps {
+  width: number;
+  height: number;
+  srcX: number;
+  srcY: number;
+  charPos: Coord2;
+  curScreencode?: number;
+  textColor?: number;
+  backgroundColor: string;
+  grid: boolean;
+  colorPalette: Rgb[];
+  font: Font;
+  framebuf: Pixel[][];
+}
+
+export default class CharGrid extends Component<CharGridProps> {
   static defaultProps = {
     srcX: 0,
     srcY: 0,
     charPos: null
   }
 
-  constructor (props) {
-    super(props)
-    this.canvasRef = React.createRef();
-    this.font = null
-  }
+  private font: CharsetCache | null = null;
+  private canvasRef = React.createRef<HTMLCanvasElement>();
 
   componentDidMount() {
     this.draw()
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate (prevProps: Readonly<CharGridProps>) {
     if (this.props.width !== prevProps.width ||
       this.props.height !== prevProps.height ||
       this.props.srcX !== prevProps.srcX ||
@@ -77,14 +89,17 @@ export default class CharGrid extends Component {
     }
   }
 
-  draw (prevProps) {
+  draw (prevProps?: CharGridProps) {
     const canvas = this.canvasRef.current
-    const ctx = canvas.getContext("2d")
+    if (!canvas) {
+      return;
+    }
+    const ctx = canvas.getContext("2d")!
     const framebuf = this.props.framebuf
     let invalidate = false
     if (this.font === null ||
-      this.props.font !== prevProps.font ||
-      this.props.colorPalette !== prevProps.colorPalette) {
+      this.props.font !== prevProps!.font ||
+      this.props.colorPalette !== prevProps!.colorPalette) {
       this.font = new CharsetCache(ctx, this.props.font.bits, this.props.colorPalette)
       invalidate = true
     }
@@ -105,7 +120,7 @@ export default class CharGrid extends Component {
         true
     for (var y = 0; y < this.props.height; y++) {
       const charRow = framebuf[y + srcY]
-      if (!dstSrcChanged && charRow === prevProps.framebuf[y + srcY]) {
+      if (!dstSrcChanged && charRow === prevProps!.framebuf[y + srcY]) {
         continue
       }
       for (var x = 0; x < this.props.width; x++) {
@@ -131,10 +146,10 @@ export default class CharGrid extends Component {
       if (charPos.row >= 0 && charPos.row < this.props.height &&
           charPos.col >= 0 && charPos.col < this.props.width) {
         const c = {
-          code: this.props.curScreencode !== null ?
+          code: this.props.curScreencode !== undefined ?
             this.props.curScreencode :
             framebuf[charPos.row][charPos.col].code,
-          color: this.props.textColor !== null ?
+          color: this.props.textColor !== undefined ?
             this.props.textColor :
             framebuf[charPos.row][charPos.col].color
         }
