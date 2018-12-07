@@ -1,12 +1,12 @@
 
 import React, { PureComponent } from 'react'
-import PropTypes from 'prop-types'
 
-export default class GridOverlay extends PureComponent {
-  static propTypes = {
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired
-  }
+interface GridOverlayProps {
+  width: number;
+  height: number;
+}
+
+export default class GridOverlay extends PureComponent<GridOverlayProps> {
   render () {
     const { width, height } = this.props
     const pixWidth = width*8
