@@ -1,18 +1,13 @@
 
 import React, { Component, Fragment } from 'react'
-import PropTypes from 'prop-types'
 import ReactDOM from 'react-dom'
-import classnames from 'classnames'
 
 import styles from './Modal.module.css'
 
 const modalRoot = document.getElementById('modal-root')
 
 class ModalBase extends Component {
-  constructor(props) {
-    super(props)
-    this.el = document.createElement('div')
-  }
+  private el = document.createElement('div')
 
   componentDidMount() {
     // The portal element is inserted in the DOM tree after
@@ -23,11 +18,15 @@ class ModalBase extends Component {
     // DOM node, or uses 'autoFocus' in a descendant, add
     // state to Modal and only render the children when Modal
     // is inserted in the DOM tree.
-    modalRoot.appendChild(this.el)
+    if (modalRoot) {
+      modalRoot.appendChild(this.el)
+    }
   }
 
   componentWillUnmount() {
-    modalRoot.removeChild(this.el)
+    if (modalRoot) {
+      modalRoot.removeChild(this.el)
+    }
   }
 
   render() {
@@ -38,14 +37,15 @@ class ModalBase extends Component {
   }
 }
 
-class ModalAnimWrapper extends Component {
+interface ModalAnimWrapperState {
+    init: boolean;
+}
+class ModalAnimWrapper extends Component<{}, ModalAnimWrapperState> {
   state = {
     init: true
   }
-  constructor (props) {
-    super(props)
-    this.ref = null
-  }
+
+  private ref: HTMLDivElement|null = null;
 
   componentDidMount () {
     // This is required to trigger the CSS animation
@@ -73,7 +73,6 @@ class ModalAnimWrapper extends Component {
             }}
           />
           <div
-            onKeyDown={this.props.onKeyDown}
             className={styles.modal}
             style={{
               opacity: this.state.init ? 0.0 : 1.0,
@@ -88,11 +87,11 @@ class ModalAnimWrapper extends Component {
   }
 }
 
-export default class Modal extends Component {
-  handleModalClose = () => {
-    this.props.onModalClose()
-  }
+interface ModalProps {
+  showModal: boolean;
+}
 
+export default class Modal extends Component<ModalProps> {
   modalBody = () => {
     return (
       <ModalAnimWrapper>
