@@ -39,11 +39,6 @@ type SetCharParams = Coord2 & { screencode: number, color: number };
 type SetBrushParams = Coord2 & { brush: Brush };
 type ImportFileParams = any // TODO ts
 
-const SET_BACKGROUND_COLOR = 'Framebuffer/SET_BACKGROUND_COLOR'
-const SET_BORDER_COLOR = 'Framebuffer/SET_BORDER_COLOR'
-const SET_CHARSET = 'Framebuffer/SET_CHARSET'
-const SET_NAME = 'Framebuffer/SET_NAME'
-
 const SET_PIXEL = 'Framebuffer/SET_PIXEL'
 const SET_BRUSH = 'Framebuffer/SET_BRUSH'
 const SET_FIELDS = 'Framebuffer/SET_FIELDS'
@@ -53,6 +48,10 @@ const COPY_FRAMEBUF = 'Framebuffer/COPY_FRAMEBUF'
 const SHIFT_HORIZONTAL = 'Framebuffer/SHIFT_HORIZONTAL'
 const SHIFT_VERTICAL = 'Framebuffer/SHIFT_VERTICAL'
 
+const SET_BACKGROUND_COLOR = 'Framebuffer/SET_BACKGROUND_COLOR'
+const SET_BORDER_COLOR = 'Framebuffer/SET_BORDER_COLOR'
+const SET_CHARSET = 'Framebuffer/SET_CHARSET'
+const SET_NAME = 'Framebuffer/SET_NAME'
 
 const actionCreators = {
   setPixel: (data: SetCharParams, undoId: number, framebufIndex: number) => createFbAction(SET_PIXEL, framebufIndex, undoId, data),
@@ -177,24 +176,16 @@ function mapPixels(fb: Framebuf, mapFn: (fb: Framebuf) => Pixel[][]) {
   }
 }
 
-export const fieldSetters = [
-  {
-    name: 'backgroundColor',
-    type: SET_BACKGROUND_COLOR,
-  },
-  {
-    name: 'borderColor',
-    type: SET_BORDER_COLOR,
-  },
-  {
-    name: 'charset',
-    type: SET_CHARSET,
-  },
-  {
-    name: 'name',
-    type: SET_NAME
-  },
-]
+function updateField<K extends keyof Framebuf>(
+  state:  Framebuf,
+  field:  K,
+  value:  Framebuf[K]
+): Framebuf {
+  return {
+    ...state,
+    [field]: value
+  }
+}
 
 export function fbReducer(state: Framebuf = {
   framebuf: emptyFramebuf(),
@@ -238,15 +229,15 @@ export function fbReducer(state: Framebuf = {
         charset: c.charset,
         name
       }
+    case SET_BACKGROUND_COLOR:
+      return updateField(state, 'backgroundColor', action.data);
+    case SET_BORDER_COLOR:
+      return updateField(state, 'borderColor', action.data);
+    case SET_CHARSET:
+      return updateField(state, 'charset', action.data);
+    case SET_NAME:
+      return updateField(state, 'name', action.data);
     default:
-      return fieldSetters.reduce((acc, cur) => {
-        if (cur.type === action.type) {
-          return {
-            ...state,
-            [cur.name]: action.data
-          }
-        }
-        return acc;
-      }, state);
+      return state;
   }
 }
