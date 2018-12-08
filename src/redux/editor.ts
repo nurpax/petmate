@@ -11,7 +11,7 @@ import {
 
 import * as fp from '../utils/fp'
 import { makeScreenName } from './utils'
-import { ActionsUnion } from './typeUtils'
+import { ActionsUnion, updateField } from './typeUtils'
 
 export const CHARSET_UPPER = 'upper'
 export const CHARSET_LOWER = 'lower'
@@ -173,17 +173,6 @@ function mapPixels(fb: Framebuf, mapFn: (fb: Framebuf) => Pixel[][]) {
   return {
     ...fb,
     framebuf: mapFn(fb)
-  }
-}
-
-function updateField<K extends keyof Framebuf>(
-  state:  Framebuf,
-  field:  K,
-  value:  Framebuf[K]
-): Framebuf {
-  return {
-    ...state,
-    [field]: value
   }
 }
 

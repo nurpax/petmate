@@ -21,3 +21,14 @@ export function createAction<T extends string, D>(type: T, data: D): ActionWithD
 export function createAction<T extends string, D>(type: T, data?: D) {
   return data === undefined ? { type } : { type, data };
 }
+
+export function updateField<State, K extends keyof State>(
+  state:  State,
+  field:  K,
+  value:  State[K]
+): State {
+  return {
+    ...state,
+    [field]: value
+  }
+}
