@@ -64,9 +64,9 @@ function cloneScreen(index: number): ThunkAction<void, RootState, undefined, Act
   return (dispatch, getState) => {
     const state = getState()
     const fbidx = getScreens(state)[index]
-    const framebuf = selectors.getFramebufByIndex(state, fbidx)
-    if (!framebuf) {
-      throw new Error('invalid framebuf');
+    const framebuf = selectors.getFramebufByIndex(state, fbidx);
+    if (framebuf === null) {
+      return;
     }
     dispatch(actionCreators.addScreenAndFramebuf(index));
     dispatch((dispatch, getState) => {
@@ -84,12 +84,11 @@ function cloneScreen(index: number): ThunkAction<void, RootState, undefined, Act
 function newScreen(): ThunkAction<void, RootState, undefined, Action> {
   return (dispatch, getState) => {
     const state = getState()
-    const fbidx = getCurrentScreenFramebufIndex(state);
-    const framebuf = selectors.getFramebufByIndex(state, fbidx)
     let colors = {
       backgroundColor: DEFAULT_BACKGROUND_COLOR,
       borderColor: DEFAULT_BORDER_COLOR
     }
+    const framebuf = selectors.getCurrentFramebuf(state);
     if (framebuf !== null) {
       colors = {
         backgroundColor: framebuf.backgroundColor,

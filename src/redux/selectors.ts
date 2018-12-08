@@ -14,11 +14,11 @@ import { CHARSET_UPPER, CHARSET_LOWER } from './editor'
 
 import { getCurrentScreenFramebufIndex } from './screensSelectors'
 
-export const getFramebufByIndex = (state: RootState, idx: number|null) => {
+export const getFramebufByIndex = (state: RootState, idx: number | null) => {
   if (idx !== null && idx < state.framebufList.length) {
     return state.framebufList[idx].present
   }
-  return null
+  return null;
 }
 
 export const getCurrentFramebuf = (state: RootState) => {

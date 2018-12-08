@@ -1,9 +1,10 @@
 
-import { bindActionCreators } from 'redux'
+import { bindActionCreators, Dispatch } from 'redux'
 
 import { settable, reduxSettables } from './settable'
 import { Framebuffer } from './editor'
 import * as Screens from './screens'
+import { Transform, RootStateThunk, Coord2, Pixel, BrushRegion } from './types'
 
 import * as selectors from './selectors'
 import * as screensSelectors from '../redux/screensSelectors'
@@ -25,26 +26,30 @@ const emptyTransform = {
   rotate: 0
 }
 
-function rotate(transform) {
+function rotate(transform: Transform) {
   return {
     ...transform,
     rotate: (transform.rotate + 90) % 360
   }
 }
 
-function mirror(transform, mirror) {
+function mirror(transform: Transform, mirror: number) {
   return {
     ...transform,
     mirror: transform.mirror ^ mirror
   }
 }
 
-function dispatchForCurrentFramebuf (f) {
+function dispatchForCurrentFramebuf (
+  f: (dispatch: Dispatch, framebufIndex: number) => void
+): RootStateThunk {
   return (dispatch, getState) => {
     const state = getState();
     const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state);
-    const undoId = state.undoId;
-    return f(dispatch, framebufIndex, undoId);
+    if (framebufIndex === null) {
+      return;
+    }
+    f(dispatch, framebufIndex);
   }
 }
 
@@ -72,7 +77,7 @@ const initialBrushValue = {
   brushTransform: emptyTransform
 }
 
-function moveTextCursor(curPos, dir, width, height) {
+function moveTextCursor(curPos: Coord2, dir: Coord2, width: number, height: number) {
   const idx = (curPos.row + dir.row)*width + (curPos.col + dir.col) + width*height
   const wrapped = idx % (width*height)
   return {
@@ -81,11 +86,11 @@ function moveTextCursor(curPos, dir, width, height) {
   }
 }
 
-function asc2int(asc) {
+function asc2int(asc: string) {
   return asc.charCodeAt(0)
 }
 
-function convertAsciiToScreencode(asc) {
+function convertAsciiToScreencode(asc: string) {
   if (asc.length !== 1) {
     return null
   }
@@ -98,7 +103,7 @@ function convertAsciiToScreencode(asc) {
   if (asc >= '0' && asc <= '9') {
     return asc2int(asc) - asc2int('0') + 0x30
   }
-  const otherChars = {
+  const otherChars: {[index:string]: number} = {
     '@': 0,
     ' ': 0x20,
     '!': 0x21,
@@ -128,20 +133,20 @@ function convertAsciiToScreencode(asc) {
   return null
 }
 
+const SET_SELECTED_CHAR = 'Toolbar/SET_SELECTED_CHAR'
+const RESET_BRUSH = 'Toolbar/RESET_BRUSH'
+const CAPTURE_BRUSH = 'Toolbar/CAPTURE_BRUSH'
+const MIRROR_BRUSH = 'Toolbar/MIRROR_BRUSH'
+const ROTATE_BRUSH = 'Toolbar/ROTATE_BRUSH'
+const MIRROR_CHAR = 'Toolbar/MIRROR_CHAR'
+const ROTATE_CHAR = 'Toolbar/ROTATE_CHAR'
+const NEXT_CHARCODE = 'Toolbar/NEXT_CHARCODE'
+const NEXT_COLOR = 'Toolbar/NEXT_COLOR'
+const INVERT_CHAR = 'Toolbar/INVERT_CHAR'
+const CLEAR_MOD_KEY_STATE = 'Toolbar/CLEAR_MOD_KEY_STATE'
+const INC_UNDO_ID = 'Toolbar/INC_UNDO_ID'
+
 export class Toolbar {
-  static SET_SELECTED_CHAR = `${Toolbar.name}/SET_SELECTED_CHAR`
-  static RESET_BRUSH = `${Toolbar.name}/RESET_BRUSH`
-  static RESET_BRUSH_REGION = `${Toolbar.name}/RESET_BRUSH_REGION`
-  static CAPTURE_BRUSH = `${Toolbar.name}/CAPTURE_BRUSH`
-  static MIRROR_BRUSH = `${Toolbar.name}/MIRROR_BRUSH`
-  static ROTATE_BRUSH = `${Toolbar.name}/ROTATE_BRUSH`
-  static MIRROR_CHAR = `${Toolbar.name}/MIRROR_CHAR`
-  static ROTATE_CHAR = `${Toolbar.name}/ROTATE_CHAR`
-  static NEXT_CHARCODE = `${Toolbar.name}/NEXT_CHARCODE`
-  static NEXT_COLOR = `${Toolbar.name}/NEXT_COLOR`
-  static INVERT_CHAR = `${Toolbar.name}/INVERT_CHAR`
-  static CLEAR_MOD_KEY_STATE = `${Toolbar.name}/CLEAR_MOD_KEY_STATE`
-  static INC_UNDO_ID = `${Toolbar.name}/INC_UNDO_ID`
 
   static MIRROR_X = 1
   static MIRROR_Y = 2
@@ -150,11 +155,11 @@ export class Toolbar {
     ...settables.actions,
     incUndoId: () => {
       return {
-        type: Toolbar.INC_UNDO_ID
+        type: INC_UNDO_ID
       }
     },
 
-    keyDown: (k) => {
+    keyDown: (k: string): RootStateThunk => {
       // Lower-case single keys in case the caps-lock is on.
       // Doing this for single char keys only to keep the other
       // keys (like 'ArrowLeft') in their original values.
@@ -182,6 +187,15 @@ export class Toolbar {
 
         if (inModal) {
           return
+        }
+
+        let width  = 1;
+        let height = 1;
+        const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state)
+        if (framebufIndex !== null) {
+          const { width: w, height: h } = selectors.getFramebufByIndex(state, framebufIndex)!;
+          width = w;
+          height = h;
         }
 
         let inTextInput = selectedTool === TOOL_TEXT && state.toolbar.textCursorPos !== null
@@ -242,16 +256,14 @@ export class Toolbar {
           if (state.toolbar.textCursorPos !== null && !metaOrCtrl) {
             // Don't match shortcuts if we're in "text tool" mode.
             const { textCursorPos, textColor } = state.toolbar
-            const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state)
-            const { width, height } = selectors.getFramebufByIndex(state, framebufIndex)
             if (textCursorPos !== null) {
               const c = convertAsciiToScreencode(shiftKey ? key.toUpperCase() : key)
-              if (c !== null) {
+              if (framebufIndex !== null && c !== null) {
                 dispatch(Framebuffer.actions.setPixel({
                   ...textCursorPos,
                   screencode: c,
                   color: textColor,
-                }, null, framebufIndex))
+                }, null, framebufIndex));
                 const newCursorPos = moveTextCursor(
                   textCursorPos,
                   { col: 1, row: 0 },
@@ -343,8 +355,8 @@ export class Toolbar {
       }
     },
 
-    keyUp: (key) => {
-      return (dispatch, getState) => {
+    keyUp: (key: string): RootStateThunk => {
+      return (dispatch, _getState) => {
         if (key === 'Shift') {
           dispatch(Toolbar.actions.setShiftKey(false))
         } else if (key === 'Meta') {
@@ -357,30 +369,30 @@ export class Toolbar {
       }
     },
 
-    clearCanvas: () => {
-      return dispatchForCurrentFramebuf((dispatch, framebufIndex, undoId) => {
-        dispatch(Framebuffer.actions.clearCanvas(framebufIndex, undoId))
+    clearCanvas: (): RootStateThunk => {
+      return dispatchForCurrentFramebuf((dispatch, framebufIndex) => {
+        dispatch(Framebuffer.actions.clearCanvas(framebufIndex))
       });
     },
 
     resetBrush: () => {
       return {
-        type: Toolbar.RESET_BRUSH
+        type: RESET_BRUSH
       }
     },
 
-    setSelectedChar: (rc) => {
+    setSelectedChar: (rc: Coord2) => {
       return {
-        type: Toolbar.SET_SELECTED_CHAR,
+        type: SET_SELECTED_CHAR,
         data: rc
       }
     },
 
-    nextCharcode: (dir) => {
+    nextCharcode: (dir: Coord2): RootStateThunk => {
       return (dispatch, getState) => {
         const font = selectors.getCurrentFramebufFont(getState())
         dispatch({
-          type: Toolbar.NEXT_CHARCODE,
+          type: NEXT_CHARCODE,
           data: {
             dir,
             font
@@ -389,11 +401,11 @@ export class Toolbar {
       }
     },
 
-    invertChar: () => {
+    invertChar: (): RootStateThunk => {
       return (dispatch, getState) => {
         const font = selectors.getCurrentFramebufFont(getState())
         dispatch({
-          type: Toolbar.INVERT_CHAR,
+          type: INVERT_CHAR,
           data: {
             font
           }
@@ -403,22 +415,22 @@ export class Toolbar {
 
     clearModKeyState: () => {
       return {
-        type: Toolbar.CLEAR_MOD_KEY_STATE
+        type: CLEAR_MOD_KEY_STATE
       }
     },
 
-    nextColor: (dir) => {
+    nextColor: (dir: number): RootStateThunk => {
       return (dispatch, getState) => {
         const state = getState()
         dispatch({
-          type: Toolbar.NEXT_COLOR,
+          type: NEXT_COLOR,
           data: dir,
           paletteRemap: getSettingsPaletteRemap(state)
         })
       }
     },
 
-    setScreencode: (code) => {
+    setScreencode: (code: number): RootStateThunk => {
       return (dispatch, getState) => {
         const state = getState()
         const font = selectors.getCurrentFramebufFont(state)
@@ -427,7 +439,7 @@ export class Toolbar {
       }
     },
 
-    setCurrentColor: (color) => {
+    setCurrentColor: (color: number): RootStateThunk => {
       return (dispatch, getState) => {
         const state = getState()
         dispatch(Toolbar.actions.setTextColor(color))
@@ -437,7 +449,7 @@ export class Toolbar {
       }
     },
 
-    setCurrentChar: (charPos) => {
+    setCurrentChar: (charPos: Coord2): RootStateThunk => {
       return (dispatch, getState) => {
         const state = getState()
         dispatch(Toolbar.actions.setSelectedChar(charPos))
@@ -449,7 +461,7 @@ export class Toolbar {
       }
     },
 
-    setCurrentScreencodeAndColor: (pix) => {
+    setCurrentScreencodeAndColor: (pix: Pixel): RootStateThunk => {
       return (dispatch, getState) => {
         const state = getState()
         dispatch(Toolbar.actions.setTextColor(pix.color))
@@ -461,7 +473,7 @@ export class Toolbar {
       }
     },
 
-    captureBrush: (framebuf, brushRegion) => {
+    captureBrush: (framebuf: Pixel[][], brushRegion: BrushRegion) => {
       const { min, max } = utils.sortRegion(brushRegion)
       const h = max.row - min.row + 1
       const w = max.col - min.col + 1
@@ -470,7 +482,7 @@ export class Toolbar {
         capfb[y] = framebuf[y + min.row].slice(min.col, max.col+1)
       }
       return {
-        type: Toolbar.CAPTURE_BRUSH,
+        type: CAPTURE_BRUSH,
         data: {
           framebuf: capfb,
           brushRegion: {
@@ -481,9 +493,9 @@ export class Toolbar {
       }
     },
 
-    mirrorBrush: (axis) => {
+    mirrorBrush: (axis: number) => {
       return {
-        type: Toolbar.MIRROR_BRUSH,
+        type: MIRROR_BRUSH,
         data: {
           mirror: axis
         }
@@ -492,13 +504,13 @@ export class Toolbar {
 
     rotateBrush: () => {
       return {
-        type: Toolbar.ROTATE_BRUSH,
+        type: ROTATE_BRUSH,
       }
     },
 
-    mirrorChar: (axis) => {
+    mirrorChar: (axis: number) => {
       return {
-        type: Toolbar.MIRROR_CHAR,
+        type: MIRROR_CHAR,
         data: {
           mirror: axis
         }
@@ -507,17 +519,17 @@ export class Toolbar {
 
     rotateChar: () => {
       return {
-        type: Toolbar.ROTATE_CHAR,
+        type: ROTATE_CHAR,
       }
     },
 
-    shiftHorizontal: (dir) => {
+    shiftHorizontal: (dir: -1|1): RootStateThunk => {
       return dispatchForCurrentFramebuf((dispatch, framebufIndex) => {
         dispatch(Framebuffer.actions.shiftHorizontal(dir, framebufIndex))
       });
     },
 
-    shiftVertical: (dir) => {
+    shiftVertical: (dir: -1|1) => {
       return dispatchForCurrentFramebuf((dispatch, framebufIndex) => {
         dispatch(Framebuffer.actions.shiftVertical(dir, framebufIndex))
       });
@@ -531,27 +543,27 @@ export class Toolbar {
       selectedChar: {row: 8, col: 0},
       charTransform: emptyTransform,
       undoId: 0
-    }, action) {
+    }, action: any) { // TODO ts action types
     switch (action.type) {
-      case Toolbar.RESET_BRUSH:
+      case RESET_BRUSH:
         return {
           ...state,
           ...initialBrushValue
         }
-      case Toolbar.CAPTURE_BRUSH:
+      case CAPTURE_BRUSH:
         return {
           ...state,
           ...initialBrushValue,
           brush: action.data
         }
-      case Toolbar.SET_SELECTED_CHAR:
+      case SET_SELECTED_CHAR:
         const rc = action.data
         return {
           ...state,
           selectedChar: rc,
           charTransform: emptyTransform
         }
-      case Toolbar.NEXT_CHARCODE: {
+      case NEXT_CHARCODE: {
         const { dir, font } = action.data
         const rc = selectors.getCharRowColWithTransform(state.selectedChar, font, state.charTransform)
         return {
@@ -563,7 +575,7 @@ export class Toolbar {
           charTransform: emptyTransform
         }
       }
-      case Toolbar.INVERT_CHAR: {
+      case INVERT_CHAR: {
         const { font } = action.data
         const curScreencode = selectors.getScreencodeWithTransform(state.selectedChar, font, state.charTransform)
         const inverseRowCol = utils.rowColFromScreencode(font, brush.findInverseChar(action.data.font, curScreencode))
@@ -573,7 +585,7 @@ export class Toolbar {
           charTransform: emptyTransform
         }
       }
-      case Toolbar.NEXT_COLOR: {
+      case NEXT_COLOR: {
         const remap = action.paletteRemap
         const idx = remap.indexOf(state.textColor)
         const dir = action.data
@@ -583,32 +595,32 @@ export class Toolbar {
           textColor: remap[nextIdx]
         }
         }
-      case Toolbar.INC_UNDO_ID:
+      case INC_UNDO_ID:
         return {
           ...state,
           undoId: state.undoId+1
         }
-      case Toolbar.MIRROR_BRUSH:
+      case MIRROR_BRUSH:
         return {
           ...state,
           brushTransform: mirror(state.brushTransform, action.data.mirror)
         }
-      case Toolbar.ROTATE_BRUSH:
+      case ROTATE_BRUSH:
         return {
           ...state,
           brushTransform: rotate(state.brushTransform)
         }
-      case Toolbar.MIRROR_CHAR:
+      case MIRROR_CHAR:
         return {
           ...state,
           charTransform: mirror(state.charTransform, action.data.mirror)
         }
-      case Toolbar.ROTATE_CHAR:
+      case ROTATE_CHAR:
         return {
           ...state,
           charTransform: rotate(state.charTransform)
         }
-      case Toolbar.CLEAR_MOD_KEY_STATE:
+      case CLEAR_MOD_KEY_STATE:
         return {
           ...state,
           altKey: false,
@@ -621,7 +633,7 @@ export class Toolbar {
     }
   }
 
-  static bindDispatch (dispatch) {
+  static bindDispatch (dispatch: Dispatch) {
     return bindActionCreators(Toolbar.actions, dispatch)
   }
 }

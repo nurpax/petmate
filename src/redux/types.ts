@@ -1,5 +1,7 @@
 
 import { StateWithHistory } from 'redux-undo'
+import { Action } from 'redux'
+import { ThunkAction } from 'redux-thunk'
 
 export type Charset = 'upper' | 'lower';
 
@@ -50,6 +52,11 @@ export interface Transform {
   rotate: Angle360;
 }
 
+export interface BrushRegion {
+  min: Coord2;
+  max: Coord2;
+}
+
 export type Brush = any;
 
 export type PaletteName = 'petmate' | 'colodore' | 'pepto';
@@ -82,6 +89,8 @@ export interface RootState {
   screens: Screens;
   framebufList: UndoableFramebuf[];
 };
+
+export type RootStateThunk = ThunkAction<void, RootState, undefined, Action>;
 
 export type ExportOptions = any; // TODO ts
 export type SettingsJson = any;

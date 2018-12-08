@@ -14,6 +14,6 @@ export function getCurrentScreenFramebufIndex(state: RootState) {
   if (idx !== null && idx < screens.length) {
     return screens[idx]
   }
-  return null
+  return null;
 }
 

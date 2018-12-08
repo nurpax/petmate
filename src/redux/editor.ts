@@ -54,8 +54,8 @@ const SET_CHARSET = 'Framebuffer/SET_CHARSET'
 const SET_NAME = 'Framebuffer/SET_NAME'
 
 const actionCreators = {
-  setPixel: (data: SetCharParams, undoId: number, framebufIndex: number) => createFbAction(SET_PIXEL, framebufIndex, undoId, data),
-  setBrush: (data: SetBrushParams, undoId: number, framebufIndex: number) => createFbAction(SET_BRUSH, framebufIndex, undoId, data),
+  setPixel: (data: SetCharParams, undoId: number|null, framebufIndex: number) => createFbAction(SET_PIXEL, framebufIndex, undoId, data),
+  setBrush: (data: SetBrushParams, undoId: number|null, framebufIndex: number) => createFbAction(SET_BRUSH, framebufIndex, undoId, data),
   importFile: (data: ImportFileParams, framebufIndex: number) => createFbAction(IMPORT_FILE, framebufIndex, null, data),
   clearCanvas: (framebufIndex: number) => createFbAction(CLEAR_CANVAS, framebufIndex, null),
   copyFramebuf: (data: Framebuf, framebufIndex: number) => createFbAction(COPY_FRAMEBUF, framebufIndex, null, data),
