@@ -1,6 +1,6 @@
 
 import { combineReducers } from 'redux'
-import { Toolbar } from '../redux/toolbar'
+import * as toolbar from '../redux/toolbar'
 import * as settings from '../redux/settings'
 import * as screens from '../redux/screens'
 import * as framebufList from '../redux/framebufList'
@@ -10,14 +10,14 @@ import { RootState } from '../redux/types'
 
 const rootReducer = combineReducers({
   framebufList: framebufList.reducer,
-  toolbar: Toolbar.reducer,
+  toolbar: toolbar.Toolbar.reducer,
   screens: screens.reducer,
   settings: settings.reducer
 })
 
 const rootReducerTop = (
   state: RootState,
-  action: screens.Actions | Root.Actions | framebufList.Actions
+  action: screens.Actions | Root.Actions | framebufList.Actions | toolbar.Actions
 ) => {
   if (action.type === Root.RESET_STATE) {
     return rootReducer(undefined, action)

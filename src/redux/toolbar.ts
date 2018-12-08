@@ -1,10 +1,9 @@
 
 import { bindActionCreators, Dispatch } from 'redux'
 
-import { settable, reduxSettables } from './settable'
 import { Framebuffer } from './editor'
 import * as Screens from './screens'
-import { Transform, RootStateThunk, Coord2, Pixel, BrushRegion } from './types'
+import { Toolbar as IToolbar, Transform, RootStateThunk, Coord2, Pixel, BrushRegion, Font, Brush, Tool, Angle360 } from './types'
 
 import * as selectors from './selectors'
 import * as screensSelectors from '../redux/screensSelectors'
@@ -13,6 +12,7 @@ import {
 } from '../redux/settingsSelectors'
 import * as utils from '../utils'
 import * as brush from './brush'
+import { ActionsUnion, createAction, updateField } from './typeUtils'
 
 export const TOOL_DRAW = 0
 export const TOOL_COLORIZE = 1
@@ -20,16 +20,15 @@ export const TOOL_CHAR_DRAW = 2
 export const TOOL_BRUSH = 3
 export const TOOL_TEXT = 4
 
-// TODO ts Transform
-const emptyTransform = {
+const emptyTransform: Transform = {
   mirror: 0,
   rotate: 0
 }
 
-function rotate(transform: Transform) {
+function rotate(transform: Transform): Transform {
   return {
     ...transform,
-    rotate: (transform.rotate + 90) % 360
+    rotate: ((transform.rotate + 90) % 360) as Angle360
   }
 }
 
@@ -53,27 +52,9 @@ function dispatchForCurrentFramebuf (
   }
 }
 
-const settables = reduxSettables([
-  settable('Toolbar', 'textColor', 14),
-  settable('Toolbar', 'textCursorPos', null),
-  settable('Toolbar', 'selectedTool', TOOL_DRAW),
-  settable('Toolbar', 'brushRegion', null),
-  settable('Toolbar', 'brush', null),
-  settable('Toolbar', 'workspaceFilename', null),
-  settable('Toolbar', 'altKey', false),
-  settable('Toolbar', 'ctrlKey', false),
-  settable('Toolbar', 'metaKey', false),
-  settable('Toolbar', 'shiftKey', false),
-  settable('Toolbar', 'showSettings', false),
-  settable('Toolbar', 'showExport', {show: false}),
-  settable('Toolbar', 'selectedPaletteRemap', 0),
-  settable('Toolbar', 'canvasGrid', false),
-  settable('Toolbar', 'shortcutsActive', true)
-])
-
 const initialBrushValue = {
-  brush: null,
-  brushRegion: null,
+  brush: null as (Brush|null),
+  brushRegion: null as (BrushRegion|null),
   brushTransform: emptyTransform
 }
 
@@ -146,18 +127,82 @@ const INVERT_CHAR = 'Toolbar/INVERT_CHAR'
 const CLEAR_MOD_KEY_STATE = 'Toolbar/CLEAR_MOD_KEY_STATE'
 const INC_UNDO_ID = 'Toolbar/INC_UNDO_ID'
 
+const SET_TEXT_COLOR = 'Toolbar/SET_TEXT_COLOR';
+const SET_TEXT_CURSOR_POS = 'Toolbar/SET_TEXT_CURSOR_POS';
+const SET_SELECTED_TOOL = 'Toolbar/SET_SELECTED_TOOL';
+const SET_BRUSH_REGION = 'Toolbar/SET_BRUSH_REGION';
+const SET_BRUSH = 'Toolbar/SET_BRUSH';
+const SET_WORKSPACE_FILENAME = 'Toolbar/SET_WORKSPACE_FILENAME';
+const SET_ALT_KEY = 'Toolbar/SET_ALT_KEY';
+const SET_CTRL_KEY = 'Toolbar/SET_CTRL_KEY';
+const SET_META_KEY = 'Toolbar/SET_META_KEY';
+const SET_SHIFT_KEY = 'Toolbar/SET_SHIFT_KEY';
+const SET_SHOW_SETTINGS = 'Toolbar/SET_SHOW_SETTINGS';
+const SET_SHOW_EXPORT = 'Toolbar/SET_SHOW_EXPORT';
+const SET_SELECTED_PALETTE_REMAP = 'Toolbar/SET_SELECTED_PALETTE_REMAP';
+const SET_CANVAS_GRID = 'Toolbar/SET_CANVAS_GRID';
+const SET_SHORTCUTS_ACTIVE = 'Toolbar/SET_SHORTCUTS_ACTIVE';
+
+function captureBrush(framebuf: Pixel[][], brushRegion: BrushRegion) {
+  const { min, max } = utils.sortRegion(brushRegion)
+  const h = max.row - min.row + 1
+  const w = max.col - min.col + 1
+  const capfb = Array(h)
+  for (var y = 0; y < h; y++) {
+    capfb[y] = framebuf[y + min.row].slice(min.col, max.col+1)
+  }
+  return createAction(CAPTURE_BRUSH, {
+    framebuf: capfb,
+    brushRegion: {
+      min: { row: 0, col: 0 },
+      max: { row: h-1, col: w-1 }
+    }
+  })
+}
+
+
+const actionCreators = {
+  incUndoId: () => createAction(INC_UNDO_ID),
+  resetBrush: () => createAction(RESET_BRUSH),
+  setSelectedChar: (coord: Coord2) => createAction(SET_SELECTED_CHAR, coord),
+  nextCharcodeAction: (dir: Coord2, font: Font) => createAction(NEXT_CHARCODE, { dir, font }),
+  nextColorAction: (dir: number, paletteRemap: number[]) => createAction(NEXT_COLOR, { dir, paletteRemap }),
+  invertCharAction: (font: Font) => createAction(INVERT_CHAR, font),
+  clearModKeyState: () => createAction(CLEAR_MOD_KEY_STATE),
+  captureBrush,
+  mirrorBrush: (axis:number) => createAction(MIRROR_BRUSH, axis),
+  rotateBrush: () => createAction(ROTATE_BRUSH),
+  mirrorChar: (axis: number) => createAction(MIRROR_CHAR, axis),
+  rotateChar: () => createAction(ROTATE_CHAR),
+
+  setTextColor: (c: number) => createAction(SET_TEXT_COLOR, c),
+  setTextCursorPos: (pos: Coord2|null) => createAction(SET_TEXT_CURSOR_POS, pos),
+  setSelectedTool: (t: Tool) => createAction(SET_SELECTED_TOOL, t),
+  setBrushRegion: (br: BrushRegion) => createAction(SET_BRUSH_REGION, br),
+  setBrush: (b: Brush) => createAction(SET_BRUSH, b),
+  setWorkspaceFilename: (fname: string|null) => createAction(SET_WORKSPACE_FILENAME, fname),
+  setAltKey: (flag: boolean) => createAction(SET_ALT_KEY, flag),
+  setCtrlKey: (flag: boolean) => createAction(SET_CTRL_KEY, flag),
+  setMetaKey: (flag: boolean) => createAction(SET_META_KEY, flag),
+  setShiftKey: (flag: boolean) => createAction(SET_SHIFT_KEY, flag),
+  setShowSettings: (flag: boolean) => createAction(SET_SHOW_SETTINGS, flag),
+  setShowExport: (show: {show:boolean, type?:any}) => createAction(SET_SHOW_EXPORT, show),
+  setSelectedPaletteRemap: (remapIdx: number) => createAction(SET_SELECTED_PALETTE_REMAP, remapIdx),
+  setCanvasGrid: (flag: boolean) => createAction(SET_CANVAS_GRID, flag),
+  setShortcutsActive: (flag: boolean) => createAction(SET_SHORTCUTS_ACTIVE, flag),
+};
+
+export type Actions = ActionsUnion<typeof actionCreators>;
+
+//export type PropsFromDispatch = DispatchPropsFromActions<typeof Toolbar.actions>;
+
 export class Toolbar {
 
   static MIRROR_X = 1
   static MIRROR_Y = 2
 
   static actions = {
-    ...settables.actions,
-    incUndoId: () => {
-      return {
-        type: INC_UNDO_ID
-      }
-    },
+    ...actionCreators,
 
     keyDown: (k: string): RootStateThunk => {
       // Lower-case single keys in case the caps-lock is on.
@@ -375,58 +420,24 @@ export class Toolbar {
       });
     },
 
-    resetBrush: () => {
-      return {
-        type: RESET_BRUSH
-      }
-    },
-
-    setSelectedChar: (rc: Coord2) => {
-      return {
-        type: SET_SELECTED_CHAR,
-        data: rc
-      }
-    },
-
     nextCharcode: (dir: Coord2): RootStateThunk => {
       return (dispatch, getState) => {
         const font = selectors.getCurrentFramebufFont(getState())
-        dispatch({
-          type: NEXT_CHARCODE,
-          data: {
-            dir,
-            font
-          }
-        })
+        dispatch(actionCreators.nextCharcodeAction(dir, font));
       }
     },
 
     invertChar: (): RootStateThunk => {
       return (dispatch, getState) => {
         const font = selectors.getCurrentFramebufFont(getState())
-        dispatch({
-          type: INVERT_CHAR,
-          data: {
-            font
-          }
-        })
-      }
-    },
-
-    clearModKeyState: () => {
-      return {
-        type: CLEAR_MOD_KEY_STATE
+        dispatch(actionCreators.invertCharAction(font));
       }
     },
 
     nextColor: (dir: number): RootStateThunk => {
       return (dispatch, getState) => {
         const state = getState()
-        dispatch({
-          type: NEXT_COLOR,
-          data: dir,
-          paletteRemap: getSettingsPaletteRemap(state)
-        })
+        dispatch(actionCreators.nextColorAction(dir, getSettingsPaletteRemap(state)));
       }
     },
 
@@ -473,56 +484,6 @@ export class Toolbar {
       }
     },
 
-    captureBrush: (framebuf: Pixel[][], brushRegion: BrushRegion) => {
-      const { min, max } = utils.sortRegion(brushRegion)
-      const h = max.row - min.row + 1
-      const w = max.col - min.col + 1
-      const capfb = Array(h)
-      for (var y = 0; y < h; y++) {
-        capfb[y] = framebuf[y + min.row].slice(min.col, max.col+1)
-      }
-      return {
-        type: CAPTURE_BRUSH,
-        data: {
-          framebuf: capfb,
-          brushRegion: {
-            min: { row: 0, col: 0 },
-            max: { row: h-1, col: w-1 }
-          }
-        }
-      }
-    },
-
-    mirrorBrush: (axis: number) => {
-      return {
-        type: MIRROR_BRUSH,
-        data: {
-          mirror: axis
-        }
-      }
-    },
-
-    rotateBrush: () => {
-      return {
-        type: ROTATE_BRUSH,
-      }
-    },
-
-    mirrorChar: (axis: number) => {
-      return {
-        type: MIRROR_CHAR,
-        data: {
-          mirror: axis
-        }
-      }
-    },
-
-    rotateChar: () => {
-      return {
-        type: ROTATE_CHAR,
-      }
-    },
-
     shiftHorizontal: (dir: -1|1): RootStateThunk => {
       return dispatchForCurrentFramebuf((dispatch, framebufIndex) => {
         dispatch(Framebuffer.actions.shiftHorizontal(dir, framebufIndex))
@@ -537,13 +498,27 @@ export class Toolbar {
 
   }
 
-  static reducer(state = {
-      ...settables.initialValues,
+  static reducer(state: IToolbar = {
       ...initialBrushValue,
       selectedChar: {row: 8, col: 0},
       charTransform: emptyTransform,
-      undoId: 0
-    }, action: any) { // TODO ts action types
+      undoId: 0,
+      textColor: 14,
+      textCursorPos: null as (Coord2|null),
+      selectedTool: TOOL_DRAW,
+      brushRegion: null as (BrushRegion|null),
+      brush: null as (Brush|null),
+      workspaceFilename: null as (string|null),
+      altKey: false,
+      ctrlKey: false,
+      metaKey: false,
+      shiftKey: false,
+      showSettings: false,
+      showExport: { show: false },
+      selectedPaletteRemap: 0,
+      canvasGrid: false,
+      shortcutsActive: true
+    }, action: Actions) {
     switch (action.type) {
       case RESET_BRUSH:
         return {
@@ -576,9 +551,9 @@ export class Toolbar {
         }
       }
       case INVERT_CHAR: {
-        const { font } = action.data
+        const font = action.data
         const curScreencode = selectors.getScreencodeWithTransform(state.selectedChar, font, state.charTransform)
-        const inverseRowCol = utils.rowColFromScreencode(font, brush.findInverseChar(action.data.font, curScreencode))
+        const inverseRowCol = utils.rowColFromScreencode(font, brush.findInverseChar(font, curScreencode))
         return {
           ...state,
           selectedChar: inverseRowCol,
@@ -586,15 +561,15 @@ export class Toolbar {
         }
       }
       case NEXT_COLOR: {
-        const remap = action.paletteRemap
-        const idx = remap.indexOf(state.textColor)
-        const dir = action.data
-        const nextIdx = Math.max(0, Math.min(15, idx + dir))
+        const remap = action.data.paletteRemap;
+        const idx = remap.indexOf(state.textColor);
+        const dir = action.data.dir;
+        const nextIdx = Math.max(0, Math.min(15, idx + dir));
         return {
           ...state,
           textColor: remap[nextIdx]
         }
-        }
+      }
       case INC_UNDO_ID:
         return {
           ...state,
@@ -603,7 +578,7 @@ export class Toolbar {
       case MIRROR_BRUSH:
         return {
           ...state,
-          brushTransform: mirror(state.brushTransform, action.data.mirror)
+          brushTransform: mirror(state.brushTransform, action.data)
         }
       case ROTATE_BRUSH:
         return {
@@ -613,7 +588,7 @@ export class Toolbar {
       case MIRROR_CHAR:
         return {
           ...state,
-          charTransform: mirror(state.charTransform, action.data.mirror)
+          charTransform: mirror(state.charTransform, action.data)
         }
       case ROTATE_CHAR:
         return {
@@ -628,8 +603,38 @@ export class Toolbar {
           metaKey: false,
           shiftKey: false
         }
+      case SET_TEXT_COLOR:
+        return updateField(state, 'textColor', action.data);
+      case SET_TEXT_CURSOR_POS:
+        return updateField(state, 'textCursorPos', action.data);
+      case SET_SELECTED_TOOL:
+        return updateField(state, 'selectedTool', action.data);
+      case SET_BRUSH_REGION:
+        return updateField(state, 'brushRegion', action.data);
+      case SET_BRUSH:
+        return updateField(state, 'brush', action.data);
+      case SET_WORKSPACE_FILENAME:
+        return updateField(state, 'workspaceFilename', action.data);
+      case SET_ALT_KEY:
+        return updateField(state, 'altKey', action.data);
+      case SET_CTRL_KEY:
+        return updateField(state, 'ctrlKey', action.data);
+      case SET_META_KEY:
+        return updateField(state, 'metaKey', action.data);
+      case SET_SHIFT_KEY:
+        return updateField(state, 'shiftKey', action.data);
+      case SET_SHOW_SETTINGS:
+        return updateField(state, 'showSettings', action.data);
+      case SET_SHOW_EXPORT:
+        return updateField(state, 'showExport', action.data);
+      case SET_SELECTED_PALETTE_REMAP:
+        return updateField(state, 'selectedPaletteRemap', action.data);
+      case SET_CANVAS_GRID:
+        return updateField(state, 'canvasGrid', action.data);
+      case SET_SHORTCUTS_ACTIVE:
+        return updateField(state, 'shortcutsActive', action.data);
       default:
-        return settables.reducer(state, action)
+        return state;
     }
   }
 

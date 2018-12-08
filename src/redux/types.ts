@@ -78,6 +78,30 @@ export interface Screens {
   list: number[];
 };
 
+export type Tool = number; // TODO Ts
+
+export interface Toolbar {
+  brush: Brush | null;
+  brushRegion: BrushRegion | null;
+  brushTransform: Transform;
+  selectedChar: Coord2;
+  charTransform: Transform;
+  undoId: number;
+  textColor: number;
+  textCursorPos: Coord2|null;
+  selectedTool: Tool;
+  workspaceFilename: string|null;
+  altKey: boolean;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  shiftKey: boolean;
+  showSettings: boolean;
+  showExport: { show: boolean, type?: any}; // TODO ts
+  selectedPaletteRemap: number;
+  canvasGrid: boolean;
+  shortcutsActive: boolean;
+}
+
 export type UndoableFramebuf = StateWithHistory<Framebuf>;
 
 export interface RootState {
@@ -85,7 +109,7 @@ export interface RootState {
     saved: Settings;
     editing: Settings;
   };
-  toolbar: any; // TODO
+  toolbar: Toolbar; // TODO
   screens: Screens;
   framebufList: UndoableFramebuf[];
 };

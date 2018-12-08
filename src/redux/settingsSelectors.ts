@@ -12,13 +12,9 @@ export const getSettingsEditing = (state: RootState) => {
 
 export const getSettingsPaletteRemap = (state: RootState) => {
   const idx = state.toolbar.selectedPaletteRemap
-  if (idx === undefined) {
-    return undefined
-  }
   const palettes = getSettings(state).palettes
   if (idx >= palettes.length) {
-    console.error('trying to use an undefined palette idx', idx)
-    return undefined
+    throw new Error(`trying to use an undefined palette idx=${idx}`);
   }
   return palettes[idx]
 }
