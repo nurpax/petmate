@@ -1,30 +1,20 @@
 
+import { Action } from 'redux'
 import { ActionCreators } from 'redux-undo';
+import { ThunkAction } from 'redux-thunk';
 
 import * as fp from '../utils/fp'
 
-import * as Screens from './screens'
+import * as rscreens from './screens'
 import { Framebuffer } from './editor'
-import { Framebuf } from './types'
+import { Framebuf, RootState } from './types'
 import * as Root from './root'
 import * as screensSelectors from './screensSelectors'
 
-// TODO remove this
 interface Workspace {
-  screens: any[]; // TODO types
+  screens: number[];
   framebufs: Framebuf[];
 };
-
-// TODO remove this
-type RootState = any
-// TODO remove this
-type Action = any;
-type DispatchThunkFunc = (dispatch: DispatchFunc, getState: GetStateFunc) => void;
-type DispatchFunc = (arg: Action | DispatchThunkFunc) => void;
-// TODO remove this
-type GetStateFunc = () => RootState;
-// TODO remove this
-type ThunkActionCreator = any;
 
 export function framebufFromJson(c: any): Framebuf {
   return {
@@ -38,8 +28,8 @@ export function framebufFromJson(c: any): Framebuf {
   }
 }
 
-export function load(workspace: Workspace): ThunkActionCreator {
-  return (dispatch: DispatchFunc, _getState: GetStateFunc) => {
+export function load(workspace: Workspace): ThunkAction<void, RootState, undefined, Action> {
+  return (dispatch, _getState) => {
     dispatch(Root.actions.resetState())
 
     const { screens, framebufs } = workspace
@@ -47,7 +37,7 @@ export function load(workspace: Workspace): ThunkActionCreator {
       if (fbIdx !== screenIdx) {
         console.warn('fbidx should be screenIdx, this should be ensured by workspace save code')
       }
-      dispatch(Screens.actions.newScreen())
+      dispatch(rscreens.actions.newScreen())
 
       dispatch(Framebuffer.actions.importFile(
         framebufFromJson(framebufs[fbIdx]),
@@ -59,7 +49,7 @@ export function load(workspace: Workspace): ThunkActionCreator {
         framebufIndex: fbIdx
       })
     })
-    dispatch(Screens.actions.setCurrentScreenIndex(0))
+    dispatch(rscreens.actions.setCurrentScreenIndex(0))
   }
 }
 
@@ -68,15 +58,15 @@ function getCurrentScreenIndex(state: RootState): number {
   return screensSelectors.getCurrentScreenIndex(state);
 }
 
-export function importFramebufs(framebufs: Framebuf[], append: boolean): ThunkActionCreator {
+export function importFramebufs(framebufs: Framebuf[], append: boolean): ThunkAction<void, RootState, undefined, Action> {
   if (!append) {
     throw new Error('only appending is supported');
   }
-  return (dispatch: DispatchFunc, _getState: GetStateFunc) => {
+  return (dispatch, _getState) => {
     let firstNewScreenIdx = -1;
     framebufs.forEach((framebuf) => {
-      dispatch(Screens.actions.newScreen())
-      dispatch((dispatch: DispatchFunc, getState: GetStateFunc) => {
+      dispatch(rscreens.actions.newScreen())
+      dispatch((dispatch, getState) => {
         const state = getState()
         const newScreenIdx = getCurrentScreenIndex(state);
         if (firstNewScreenIdx === -1) {
@@ -90,6 +80,6 @@ export function importFramebufs(framebufs: Framebuf[], append: boolean): ThunkAc
         })
       })
     })
-    dispatch(Screens.actions.setCurrentScreenIndex(firstNewScreenIdx))
+    dispatch(rscreens.actions.setCurrentScreenIndex(firstNewScreenIdx))
   };
 }
