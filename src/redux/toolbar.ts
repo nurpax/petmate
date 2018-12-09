@@ -127,22 +127,6 @@ const INVERT_CHAR = 'Toolbar/INVERT_CHAR'
 const CLEAR_MOD_KEY_STATE = 'Toolbar/CLEAR_MOD_KEY_STATE'
 const INC_UNDO_ID = 'Toolbar/INC_UNDO_ID'
 
-const SET_TEXT_COLOR = 'Toolbar/SET_TEXT_COLOR';
-const SET_TEXT_CURSOR_POS = 'Toolbar/SET_TEXT_CURSOR_POS';
-const SET_SELECTED_TOOL = 'Toolbar/SET_SELECTED_TOOL';
-const SET_BRUSH_REGION = 'Toolbar/SET_BRUSH_REGION';
-const SET_BRUSH = 'Toolbar/SET_BRUSH';
-const SET_WORKSPACE_FILENAME = 'Toolbar/SET_WORKSPACE_FILENAME';
-const SET_ALT_KEY = 'Toolbar/SET_ALT_KEY';
-const SET_CTRL_KEY = 'Toolbar/SET_CTRL_KEY';
-const SET_META_KEY = 'Toolbar/SET_META_KEY';
-const SET_SHIFT_KEY = 'Toolbar/SET_SHIFT_KEY';
-const SET_SHOW_SETTINGS = 'Toolbar/SET_SHOW_SETTINGS';
-const SET_SHOW_EXPORT = 'Toolbar/SET_SHOW_EXPORT';
-const SET_SELECTED_PALETTE_REMAP = 'Toolbar/SET_SELECTED_PALETTE_REMAP';
-const SET_CANVAS_GRID = 'Toolbar/SET_CANVAS_GRID';
-const SET_SHORTCUTS_ACTIVE = 'Toolbar/SET_SHORTCUTS_ACTIVE';
-
 function captureBrush(framebuf: Pixel[][], brushRegion: BrushRegion) {
   const { min, max } = utils.sortRegion(brushRegion)
   const h = max.row - min.row + 1
@@ -160,7 +144,6 @@ function captureBrush(framebuf: Pixel[][], brushRegion: BrushRegion) {
   })
 }
 
-
 const actionCreators = {
   incUndoId: () => createAction(INC_UNDO_ID),
   resetBrush: () => createAction(RESET_BRUSH),
@@ -175,21 +158,21 @@ const actionCreators = {
   mirrorChar: (axis: number) => createAction(MIRROR_CHAR, axis),
   rotateChar: () => createAction(ROTATE_CHAR),
 
-  setTextColor: (c: number) => createAction(SET_TEXT_COLOR, c),
-  setTextCursorPos: (pos: Coord2|null) => createAction(SET_TEXT_CURSOR_POS, pos),
-  setSelectedTool: (t: Tool) => createAction(SET_SELECTED_TOOL, t),
-  setBrushRegion: (br: BrushRegion) => createAction(SET_BRUSH_REGION, br),
-  setBrush: (b: Brush) => createAction(SET_BRUSH, b),
-  setWorkspaceFilename: (fname: string|null) => createAction(SET_WORKSPACE_FILENAME, fname),
-  setAltKey: (flag: boolean) => createAction(SET_ALT_KEY, flag),
-  setCtrlKey: (flag: boolean) => createAction(SET_CTRL_KEY, flag),
-  setMetaKey: (flag: boolean) => createAction(SET_META_KEY, flag),
-  setShiftKey: (flag: boolean) => createAction(SET_SHIFT_KEY, flag),
-  setShowSettings: (flag: boolean) => createAction(SET_SHOW_SETTINGS, flag),
-  setShowExport: (show: {show:boolean, type?:any}) => createAction(SET_SHOW_EXPORT, show),
-  setSelectedPaletteRemap: (remapIdx: number) => createAction(SET_SELECTED_PALETTE_REMAP, remapIdx),
-  setCanvasGrid: (flag: boolean) => createAction(SET_CANVAS_GRID, flag),
-  setShortcutsActive: (flag: boolean) => createAction(SET_SHORTCUTS_ACTIVE, flag),
+  setTextColor: (c: number) => createAction('Toolbar/SET_TEXT_COLOR', c),
+  setTextCursorPos: (pos: Coord2|null) => createAction('Toolbar/SET_TEXT_CURSOR_POS', pos),
+  setSelectedTool: (t: Tool) => createAction('Toolbar/SET_SELECTED_TOOL', t),
+  setBrushRegion: (br: BrushRegion) => createAction('Toolbar/SET_BRUSH_REGION', br),
+  setBrush: (b: Brush) => createAction('Toolbar/SET_BRUSH', b),
+  setWorkspaceFilename: (fname: string|null) => createAction('Toolbar/SET_WORKSPACE_FILENAME', fname),
+  setAltKey: (flag: boolean) => createAction('Toolbar/SET_ALT_KEY', flag),
+  setCtrlKey: (flag: boolean) => createAction('Toolbar/SET_CTRL_KEY', flag),
+  setMetaKey: (flag: boolean) => createAction('Toolbar/SET_META_KEY', flag),
+  setShiftKey: (flag: boolean) => createAction('Toolbar/SET_SHIFT_KEY', flag),
+  setShowSettings: (flag: boolean) => createAction('Toolbar/SET_SHOW_SETTINGS', flag),
+  setShowExport: (show: {show:boolean, type?:any}) => createAction('Toolbar/SET_SHOW_EXPORT', show),
+  setSelectedPaletteRemap: (remapIdx: number) => createAction('Toolbar/SET_SELECTED_PALETTE_REMAP', remapIdx),
+  setCanvasGrid: (flag: boolean) => createAction('Toolbar/SET_CANVAS_GRID', flag),
+  setShortcutsActive: (flag: boolean) => createAction('Toolbar/SET_SHORTCUTS_ACTIVE', flag),
 };
 
 export type Actions = ActionsUnion<typeof actionCreators>;
@@ -603,35 +586,35 @@ export class Toolbar {
           metaKey: false,
           shiftKey: false
         }
-      case SET_TEXT_COLOR:
+      case 'Toolbar/SET_TEXT_COLOR':
         return updateField(state, 'textColor', action.data);
-      case SET_TEXT_CURSOR_POS:
+      case 'Toolbar/SET_TEXT_CURSOR_POS':
         return updateField(state, 'textCursorPos', action.data);
-      case SET_SELECTED_TOOL:
+      case 'Toolbar/SET_SELECTED_TOOL':
         return updateField(state, 'selectedTool', action.data);
-      case SET_BRUSH_REGION:
+      case 'Toolbar/SET_BRUSH_REGION':
         return updateField(state, 'brushRegion', action.data);
-      case SET_BRUSH:
+      case 'Toolbar/SET_BRUSH':
         return updateField(state, 'brush', action.data);
-      case SET_WORKSPACE_FILENAME:
+      case 'Toolbar/SET_WORKSPACE_FILENAME':
         return updateField(state, 'workspaceFilename', action.data);
-      case SET_ALT_KEY:
+      case 'Toolbar/SET_ALT_KEY':
         return updateField(state, 'altKey', action.data);
-      case SET_CTRL_KEY:
+      case 'Toolbar/SET_CTRL_KEY':
         return updateField(state, 'ctrlKey', action.data);
-      case SET_META_KEY:
+      case 'Toolbar/SET_META_KEY':
         return updateField(state, 'metaKey', action.data);
-      case SET_SHIFT_KEY:
+      case 'Toolbar/SET_SHIFT_KEY':
         return updateField(state, 'shiftKey', action.data);
-      case SET_SHOW_SETTINGS:
+      case 'Toolbar/SET_SHOW_SETTINGS':
         return updateField(state, 'showSettings', action.data);
-      case SET_SHOW_EXPORT:
+      case 'Toolbar/SET_SHOW_EXPORT':
         return updateField(state, 'showExport', action.data);
-      case SET_SELECTED_PALETTE_REMAP:
+      case 'Toolbar/SET_SELECTED_PALETTE_REMAP':
         return updateField(state, 'selectedPaletteRemap', action.data);
-      case SET_CANVAS_GRID:
+      case 'Toolbar/SET_CANVAS_GRID':
         return updateField(state, 'canvasGrid', action.data);
-      case SET_SHORTCUTS_ACTIVE:
+      case 'Toolbar/SET_SHORTCUTS_ACTIVE':
         return updateField(state, 'shortcutsActive', action.data);
       default:
         return state;
