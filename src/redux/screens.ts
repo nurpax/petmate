@@ -19,7 +19,7 @@ import {
   RootState,
   Screens
 } from './types'
-import { ActionsUnion, createAction } from './typeUtils'
+import { ActionsUnion, createAction, DispatchPropsFromActions } from './typeUtils'
 
 import { makeScreenName } from './utils'
 
@@ -118,6 +118,7 @@ export const actions = {
 }
 
 export type Actions = ActionsUnion<typeof actionCreators>;
+export type PropsFromDispatch = DispatchPropsFromActions<typeof actions>;
 
 export function reducer(state: Screens = {current: 0, list: []}, action: Actions): Screens {
   switch (action.type) {

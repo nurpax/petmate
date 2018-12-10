@@ -7,7 +7,7 @@ const { Menu } = remote;
 
 interface ContextMenuAreaProps {
   menuItems: any[];
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
 };
 
 // Copied from https://github.com/johot/react-electron-contextmenu (with some

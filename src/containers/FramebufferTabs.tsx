@@ -1,7 +1,7 @@
 
 import React, { Component, PureComponent } from 'react';
 import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
+import { Dispatch, bindActionCreators } from 'redux'
 import { SortableContainer, SortableElement, arrayMove } from '../external/react-sortable-hoc'
 
 import classnames from 'classnames'
@@ -9,9 +9,9 @@ import classnames from 'classnames'
 import ContextMenuArea from './ContextMenuArea'
 
 import CharGrid from '../components/CharGrid'
-import { Framebuffer } from '../redux/editor'
-import { Toolbar } from '../redux/toolbar'
-import * as Screens from '../redux/screens'
+import * as framebuf from '../redux/editor'
+import * as toolbar from '../redux/toolbar'
+import * as screens from '../redux/screens'
 import * as selectors from '../redux/selectors'
 import * as screensSelectors from '../redux/screensSelectors'
 import { getSettingsCurrentColorPalette } from '../redux/settingsSelectors'
@@ -23,11 +23,28 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import styles from './FramebufferTabs.module.css'
+import { Framebuf, Rgb, Font, RootState } from '../redux/types';
+
+interface NameInputDispatchProps {
+  Toolbar: toolbar.PropsFromDispatch;
+}
+
+interface NameInputProps {
+  name: string;
+
+  onSubmit: (name: string) => void;
+  onCancel: () => void;
+  onBlur: () => void;
+}
+
+interface NameInputState {
+  name: string;
+}
 
 // This class is a bit funky with how it disables/enables keyboard shortcuts
 // globally for the app while the input element has focus.  Maybe there'd be a
 // better way to do this, but this seems to work.
-class NameInput_ extends Component {
+class NameInput_ extends Component<NameInputProps & NameInputDispatchProps, NameInputState> {
   state = {
     name: this.props.name
   }
@@ -36,17 +53,18 @@ class NameInput_ extends Component {
     this.props.Toolbar.setShortcutsActive(true)
   }
 
-  handleSubmit = (e) => {
+  handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     this.props.onSubmit(this.state.name)
     this.props.Toolbar.setShortcutsActive(true)
   }
 
-  handleChange = (e) => {
-    this.setState({ name: e.target.value })
+  handleChange = (e: React.FormEvent<EventTarget>) => {
+    let target = e.target as HTMLInputElement;
+    this.setState({ name: target.value })
   }
 
-  handleKeyDown = (e) => {
+  handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       e.preventDefault()
       this.props.onCancel()
@@ -54,14 +72,15 @@ class NameInput_ extends Component {
     }
   }
 
-  handleBlur = (e) => {
+  handleBlur = (_e: React.FormEvent<HTMLInputElement>) => {
     this.props.onBlur()
     this.props.Toolbar.setShortcutsActive(true)
   }
 
-  handleFocus = (e) => {
+  handleFocus = (e: React.FormEvent<HTMLInputElement>) => {
+    let target = e.target as HTMLInputElement;
     this.props.Toolbar.setShortcutsActive(false)
-    e.target.select()
+    target.select()
   }
 
   render () {
@@ -90,17 +109,27 @@ class NameInput_ extends Component {
 
 const NameInput = connect(
   null,
-  (dispatch, ownProps) => {
+  (dispatch) => {
     return {
-      Toolbar: Toolbar.bindDispatch(dispatch)
+      Toolbar: bindActionCreators(toolbar.Toolbar.actions, dispatch)
     }
   }
 )(NameInput_)
 
 
-class NameEditor extends Component {
+interface NameEditorProps {
+  name: string;
+
+  onNameSave: (name: string) => void;
+}
+
+interface NameEditorState {
+  editing: boolean;
+}
+
+class NameEditor extends Component<NameEditorProps, NameEditorState> {
   state = {
-    editing: false,
+    editing: false
   }
 
   handleEditingClick = () => {
@@ -111,7 +140,7 @@ class NameEditor extends Component {
     this.setState({ editing: false})
   }
 
-  handleSubmit = (name) => {
+  handleSubmit = (name: string) => {
     this.setState({ editing: false})
     this.props.onNameSave(name)
   }
@@ -139,7 +168,21 @@ class NameEditor extends Component {
   }
 }
 
-class FramebufTab extends PureComponent {
+interface FramebufTabProps {
+  id: number;
+  active: boolean;
+  framebufId: number;
+  framebuf: Framebuf;
+  colorPalette: Rgb[];
+  font: Font;
+
+  setName: (name: string, framebufId: number) => void;
+  onSetActiveTab: (id: number) => void;
+  onDuplicateTab: (id: number) => void;
+  onRemoveTab: (id: number) => void;
+};
+
+class FramebufTab extends PureComponent<FramebufTabProps> {
   handleSelect = () => {
     this.props.onSetActiveTab(this.props.id)
   }
@@ -152,7 +195,7 @@ class FramebufTab extends PureComponent {
     this.props.onRemoveTab(this.props.id)
   }
 
-  handleNameSave = (name) => {
+  handleNameSave = (name: string) => {
     if (name !== '') {
       this.props.setName(name, this.props.framebufId)
     }
@@ -223,7 +266,7 @@ class FramebufTab extends PureComponent {
           </div>
         </ContextMenuArea>
         <NameEditor
-          name={fp.maybeDefault(this.props.framebuf.name, 'Untitled')}
+          name={fp.maybeDefault(this.props.framebuf.name, 'Untitled' as string)}
           onNameSave={this.handleNameSave}
         />
       </div>
@@ -231,20 +274,35 @@ class FramebufTab extends PureComponent {
   }
 }
 
-const SortableFramebufTab = SortableElement((props) =>
+const SortableFramebufTab = SortableElement((props: FramebufTabProps) =>
   <FramebufTab {...props} />
 )
 
-const SortableTabList = SortableContainer(({children}) => {
+const SortableTabList = SortableContainer((props: {children: any}) => {
   return (
     <div className={styles.tabs}>
-      {children}
+      {props.children}
     </div>
   )
 })
 
-class FramebufferTabs_ extends Component {
-  handleActiveClick = (idx) => {
+interface FramebufferTabsDispatch {
+  Screens: screens.PropsFromDispatch;
+  Toolbar: toolbar.PropsFromDispatch;
+}
+
+interface FramebufferTabsProps {
+  screens: number[];
+  activeScreen: number;
+  colorPalette: Rgb[];
+
+  getFramebufByIndex: (framebufId: number) => Framebuf | null;
+  getFont: (framebuf: Framebuf) => Font;
+  setFramebufName: (name: string) => void;
+}
+
+class FramebufferTabs_ extends Component<FramebufferTabsProps & FramebufferTabsDispatch> {
+  handleActiveClick = (idx: number) => {
     this.props.Screens.setCurrentScreenIndex(idx)
   }
 
@@ -254,25 +312,25 @@ class FramebufferTabs_ extends Component {
     this.props.Toolbar.setCtrlKey(false)
   }
 
-  handleRemoveTab = (idx) => {
+  handleRemoveTab = (idx: number) => {
     this.props.Screens.removeScreen(idx)
     // Context menu eats the ctrl key up event, so force it to false
     this.props.Toolbar.setCtrlKey(false)
   }
 
-  handleDuplicateTab = (idx) => {
+  handleDuplicateTab = (idx: number) => {
     this.props.Screens.cloneScreen(idx)
     // Context menu eats the ctrl key up event, so force it to false
     this.props.Toolbar.setCtrlKey(false)
   }
 
-  onSortEnd = ({oldIndex, newIndex}) => {
-    this.props.Screens.setScreenOrder(arrayMove(this.props.screens, oldIndex, newIndex))
+  onSortEnd = (args: {oldIndex: number, newIndex: number}) => {
+    this.props.Screens.setScreenOrder(arrayMove(this.props.screens, args.oldIndex, args.newIndex))
   }
 
   render () {
     const lis = this.props.screens.map((framebufId, i) => {
-      const framebuf = this.props.getFramebufByIndex(framebufId)
+      const framebuf = this.props.getFramebufByIndex(framebufId)!
       return (
         <SortableFramebufTab
           key={framebufId}
@@ -286,10 +344,13 @@ class FramebufferTabs_ extends Component {
           active={i === this.props.activeScreen}
           font={this.props.getFont(framebuf)}
           colorPalette={this.props.colorPalette}
-          setName={this.props.Framebuffer.setName}
+          setName={this.props.setFramebufName}
         />
       )
     })
+    // onClick is not in FontAwesomeIcon props and don't know how to pass
+    // it otherwise.
+    const typingWorkaround = { onClick: this.handleNewTab };
     return (
       <div className={styles.tabHeadings}>
         <SortableTabList
@@ -300,7 +361,7 @@ class FramebufferTabs_ extends Component {
         >
           {lis}
           <div className={classnames(styles.tab, styles.newScreen)}>
-            <FontAwesomeIcon onClick={this.handleNewTab} icon={faPlus} />
+            <FontAwesomeIcon {...typingWorkaround} icon={faPlus} />
           </div>
         </SortableTabList>
       </div>
@@ -308,24 +369,28 @@ class FramebufferTabs_ extends Component {
   }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    Toolbar: Toolbar.bindDispatch(dispatch),
-    Framebuffer: Framebuffer.bindDispatch(dispatch),
-    Screens: bindActionCreators(Screens.actions, dispatch)
-  }
-}
-
-const mapStateToProps = state => {
-  return {
-    activeScreen: screensSelectors.getCurrentScreenIndex(state),
-    screens: screensSelectors.getScreens(state),
-    getFramebufByIndex: (idx) => selectors.getFramebufByIndex(state, idx),
-    getFont: (fb) => selectors.getFramebufFont(state, fb),
-    colorPalette: getSettingsCurrentColorPalette(state)
-  }
-}
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
+  (state: RootState) => {
+    return {
+      activeScreen: screensSelectors.getCurrentScreenIndex(state),
+      screens: screensSelectors.getScreens(state),
+      getFramebufByIndex: (idx: number) => selectors.getFramebufByIndex(state, idx),
+      getFont: (fb: Framebuf) => selectors.getFramebufFont(state, fb),
+      colorPalette: getSettingsCurrentColorPalette(state)
+    }
+  },
+  (dispatch) => {
+    return {
+      Toolbar: toolbar.Toolbar.bindDispatch(dispatch),
+      Screens: bindActionCreators(screens.actions, dispatch),
+      setFramebufName: (name: string) => {
+        return (dispatch: Dispatch, getState: () => RootState) => {
+          const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(getState());
+          if (framebufIndex != null) {
+            dispatch(framebuf.actions.setName(name, framebufIndex));
+          }
+        }
+      }
+    }
+  }
 )(FramebufferTabs_)
