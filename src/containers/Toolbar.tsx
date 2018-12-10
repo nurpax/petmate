@@ -130,10 +130,10 @@ class FbColorPicker_ extends PureComponent<FbColorPickerProps> {
           }}
         >
           <ColorPicker
-            color={this.props.color}
             onSelectColor={this.handleSelectColor}
             paletteRemap={this.props.paletteRemap}
             colorPalette={colorPalette}
+            selected={this.props.color}
             scale={{scaleX:1.5, scaleY:1.5}}
             twoRows={true}
           />

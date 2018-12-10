@@ -1,13 +1,19 @@
 // @flow
-import React, { Component } from 'react';
+import React, { Component, FunctionComponent } from 'react';
 import * as utils from '../utils'
 import * as fp from '../utils/fp'
 
 import { SortableContainer, SortableElement, arrayMove } from '../external/react-sortable-hoc'
 
 import styles from './ColorPicker.module.css';
+import { Rgb } from '../redux/types';
 
-const ColorBlock = ({ color, colorPalette, hover }) => {
+interface PaletteIndexProps {
+  color: number;
+  colorPalette: Rgb[];
+}
+
+const ColorBlock: FunctionComponent<PaletteIndexProps & {hover:boolean}> = ({ color, colorPalette, hover }) => {
   const bg = utils.colorIndexToCssRgb(colorPalette, color)
   const style = {
     backgroundColor: bg,
@@ -21,28 +27,34 @@ const ColorBlock = ({ color, colorPalette, hover }) => {
   )
 }
 
-const SortableItem = SortableElement(({color, colorPalette}) =>
+const SortableItem = SortableElement(({color, colorPalette}: PaletteIndexProps) =>
   <ColorBlock color={color} hover={true} colorPalette={colorPalette} />
 )
 
-const SortableList = SortableContainer(({items, colorPalette}) => {
+const SortableList = SortableContainer((props: { items: number[], colorPalette: Rgb[] }) => {
   return (
     <div className={styles.container}>
-      {items.map((value, index) => (
+      {props.items.map((value, index) => (
         <SortableItem
           key={`item-${index}`}
           index={index}
           color={value}
-          colorPalette={colorPalette}
+          colorPalette={props.colorPalette}
         />
       ))}
     </div>
   );
 })
 
-export class SortableColorPalette extends Component {
-  onSortEnd = ({oldIndex, newIndex}) => {
-    const newArr = arrayMove(this.props.palette, oldIndex, newIndex)
+interface SortableColorPaletteProps {
+  colorPalette: Rgb[];
+  palette: number[];
+  setPalette: (remap: number[]) => void;
+}
+
+export class SortableColorPalette extends Component<SortableColorPaletteProps> {
+  onSortEnd = (args: {oldIndex: number, newIndex: number}) => {
+    const newArr = arrayMove(this.props.palette, args.oldIndex, args.newIndex)
     this.props.setPalette(newArr)
   }
   render () {
@@ -59,7 +71,7 @@ export class SortableColorPalette extends Component {
   }
 }
 
-export class ColorPalette extends Component {
+export class ColorPalette extends Component<{colorPalette: Rgb[]}> {
   render () {
     const items = fp.mkArray(16, i => i)
     return (
@@ -82,7 +94,17 @@ export class ColorPalette extends Component {
   }
 }
 
-export default class ColorPicker extends Component {
+interface ColorPickerProps {
+  scale: { scaleX: number, scaleY: number };
+  paletteRemap: number[];
+  colorPalette: Rgb[];
+  selected: number;
+  twoRows: boolean;
+
+  onSelectColor: (idx: number) => void;
+}
+
+export default class ColorPicker extends Component<ColorPickerProps> {
   static defaultProps = {
     paletteRemap: fp.mkArray(16, i => i),
     twoRows: false,
