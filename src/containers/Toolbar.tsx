@@ -1,5 +1,5 @@
 
-import React, { Component, Fragment, PureComponent } from 'react';
+import React, { Component, Fragment, PureComponent, StatelessComponent as SFC } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import classnames from 'classnames'
@@ -17,11 +17,14 @@ import {
   TOOL_TEXT
 } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
+import * as framebuf from '../redux/editor';
+import * as toolbar from '../redux/toolbar';
 import * as selectors from '../redux/selectors'
 import * as screensSelectors from '../redux/screensSelectors'
 import { getSettingsPaletteRemap, getSettingsCurrentColorPalette } from '../redux/settingsSelectors'
 import * as Root from '../redux/root'
 import { framebufIndexMergeProps } from '../redux/utils'
+import { Tool, Rgb, RootState } from '../redux/types';
 
 import { withHoverFade } from './hoc'
 
@@ -31,11 +34,21 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import styles from './Toolbar.module.css';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
-class Icon extends PureComponent {
+interface IconProps {
+  selected?: boolean;
+  tooltip: string | null;
+  iconName: IconProp;
+  bottom: boolean;
+  subIcon?: SFC<{}>;
+  onIconClick: () => void;
+}
+
+class Icon extends PureComponent<IconProps> {
   static defaultProps = {
     bottom: false,
-    subIcon: null
+    subIcon: undefined
   }
   render () {
     const selectedClass = this.props.selected !== undefined && this.props.selected ? styles.selectedTool : null
@@ -48,14 +61,22 @@ class Icon extends PureComponent {
         onClick={() => this.props.onIconClick()}
       >
         <FontAwesomeIcon className={styles.icon} icon={this.props.iconName} />
-        {this.props.subIcon !== null ? this.props.subIcon() : null}
+        {this.props.subIcon !== undefined ? <this.props.subIcon /> : null}
         {tooltip}
       </div>
     )
   }
 }
 
-class SelectableTool extends PureComponent {
+interface SelectableToolProps {
+  tool: Tool;
+  selectedTool: Tool;
+  setSelectedTool: (tool: Tool) => void;
+}
+
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>
+
+class SelectableTool extends PureComponent<SelectableToolProps & Omit<IconProps, 'onIconClick'|'bottom'>> {
   handleClick = () => {
     this.props.setSelectedTool(this.props.tool)
   }
@@ -71,9 +92,21 @@ class SelectableTool extends PureComponent {
   }
 }
 
-class FbColorPicker_ extends PureComponent {
-  handleSelectColor = (idx) => {
-    this.props.onSelectColor(idx, null)
+interface FbColorPickerProps {
+  active: boolean;
+  fadeOut: boolean;
+  colorPalette: Rgb[];
+  paletteRemap: number[];
+  color: number;
+  tooltip: string;
+
+  onSelectColor: (idx: number) => void;
+  onToggleActive: () => void;
+}
+
+class FbColorPicker_ extends PureComponent<FbColorPickerProps> {
+  handleSelectColor = (idx: number) => {
+    this.props.onSelectColor(idx)
   }
 
   render () {
@@ -121,7 +154,7 @@ class FbColorPicker_ extends PureComponent {
 }
 const FbColorPicker = withHoverFade(FbColorPicker_)
 
-const renderColorizeSubIcon = () => {
+const renderColorizeSubIcon: SFC<{}> = () => {
   return (
     <div style={{
       backgroundColor: '#d77',
@@ -136,7 +169,7 @@ const renderColorizeSubIcon = () => {
   )
 }
 
-const renderCharSubIcon = () => {
+const renderCharSubIcon: SFC<{}> = () => {
   return (
     <div style={{
       position: 'absolute',
@@ -155,7 +188,35 @@ const renderCharSubIcon = () => {
   )
 }
 
-class ToolbarView extends Component {
+interface ToolbarSelectorProps {
+  framebufIndex: number | null;
+  selectedTool: Tool;
+  backgroundColor: number | null;
+  borderColor: number | null;
+  paletteRemap: number[];
+  colorPalette: Rgb[];
+}
+
+interface ToolbarViewProps extends ToolbarSelectorProps {
+  readonly Framebuffer: framebuf.PropsFromDispatch;
+  readonly Toolbar: toolbar.PropsFromDispatch;
+  // Undoable dispatchers
+  undo: () => void;
+  redo: () => void;
+}
+
+interface ToolbarViewState {
+  readonly pickerActive: {
+    border: boolean;
+    background: boolean;
+    brush: boolean;
+  };
+}
+
+class ToolbarView extends Component<
+  ToolbarViewProps & ToolbarSelectorProps,
+  ToolbarViewState
+> {
   state = {
     pickerActive: {
       border: false,
@@ -164,7 +225,7 @@ class ToolbarView extends Component {
     }
   }
 
-  setPickerActive = (pickerId, val) => {
+  setPickerActive = (pickerId: 'border'|'background'|'brush', val: boolean) => {
     this.setState(prevState => {
       return {
         pickerActive: {
@@ -175,33 +236,27 @@ class ToolbarView extends Component {
     })
   }
 
-  handleSelectBgColor = (color) => {
+  handleSelectBgColor = (color: number) => {
     this.setPickerActive('background', false)
     this.props.Framebuffer.setBackgroundColor(color)
   }
 
-  handleSelectBorderColor = (color) => {
+  handleSelectBorderColor = (color: number) => {
     this.setPickerActive('border', false)
     this.props.Framebuffer.setBorderColor(color)
-  }
-
-  handleClickBrushSelect = (sub) => {
-    this.setPickerActive('brush', false)
-  }
-
-  handleSaveWorkspace = () => {
-    this.props.fileSaveAsWorkspace()
-  }
-
-  handleLoadWorkspace = () => {
-    this.props.fileOpenWorkspace()
   }
 
   render() {
     if (this.props.backgroundColor === null) {
       return null
     }
-    const mkTool = ({ tool, iconName, tooltip, subIcon }) => {
+    type MkToolArgs = {
+      tool: Tool;
+      iconName: IconProp;
+      tooltip: string;
+      subIcon?: SFC<{}>;
+    };
+    const mkTool = ({ tool, iconName, tooltip, subIcon }: MkToolArgs) => {
       return (
         <SelectableTool
           key={tool}
@@ -287,39 +342,37 @@ class ToolbarView extends Component {
 }
 
 const undoActions = {
-  undo: (framebufIndex) => {
+  undo: (framebufIndex: number) => {
     return {
       ...ActionCreators.undo(),
       framebufIndex
     }
   },
-  redo: (framebufIndex) => {
+  redo: (framebufIndex: number) => {
     return {
       ...ActionCreators.redo(),
       framebufIndex
     }
   }
 }
-const mapDispatchToProps = (dispatch, ownProps) => {
+const mapDispatchToProps = (dispatch: any) => {
   return {
     ...bindActionCreators(undoActions, dispatch),
     ...bindActionCreators(Root.actions, dispatch),
-    dispatch: (action) => dispatch(action),
-    Toolbar: Toolbar.bindDispatch(dispatch),
+    Toolbar:     Toolbar.bindDispatch(dispatch),
     Framebuffer: Framebuffer.bindDispatch(dispatch)
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state: RootState): ToolbarSelectorProps => {
   const framebuf = selectors.getCurrentFramebuf(state)
   return {
-    framebufIndex: screensSelectors.getCurrentScreenFramebufIndex(state),
-    screens: screensSelectors.getScreens(state),
+    framebufIndex:   screensSelectors.getCurrentScreenFramebufIndex(state),
     backgroundColor: fp.maybe(framebuf, null, fb => fb.backgroundColor),
-    borderColor: fp.maybe(framebuf, null, fb => fb.borderColor),
-    selectedTool: state.toolbar.selectedTool,
-    paletteRemap: getSettingsPaletteRemap(state),
-    colorPalette: getSettingsCurrentColorPalette(state)
+    borderColor:     fp.maybe(framebuf, null, fb => fb.borderColor),
+    selectedTool:    state.toolbar.selectedTool,
+    paletteRemap:    getSettingsPaletteRemap(state),
+    colorPalette:    getSettingsCurrentColorPalette(state)
   }
 }
 export default connect(

@@ -12,7 +12,7 @@ import {
 } from '../redux/settingsSelectors'
 import * as utils from '../utils'
 import * as brush from './brush'
-import { ActionsUnion, createAction, updateField } from './typeUtils'
+import { ActionsUnion, createAction, updateField, DispatchPropsFromActions } from './typeUtils'
 
 export const TOOL_DRAW = 0
 export const TOOL_COLORIZE = 1
@@ -177,7 +177,7 @@ const actionCreators = {
 
 export type Actions = ActionsUnion<typeof actionCreators>;
 
-//export type PropsFromDispatch = DispatchPropsFromActions<typeof Toolbar.actions>;
+export type PropsFromDispatch = DispatchPropsFromActions<typeof Toolbar.actions>;
 
 export class Toolbar {
 
