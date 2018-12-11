@@ -1,16 +1,37 @@
 
-import React, { Component } from 'react';
+import React, { Component, CSSProperties } from 'react';
 import ReactCursorPosition from 'react-cursor-position'
-import PropTypes from 'prop-types'
+import { Coord2 } from '../redux/types';
 
-export class CharPosition extends Component {
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
+type Subtract<T, K> = Omit<T, keyof K>;
 
-  constructor (props) {
+type DragStartFunc = (charPos: Coord2) => void;
+type DragMoveFunc = (charPos: Coord2) => void;
+type DragEndFunc   = () => void;
+type AltClickFunc  = (charPos: Coord2) => void;
+
+type Position = {
+  position: { x: number, y: number };
+  elementDimensions: { width: number, height: number };
+}
+
+type IsActive = { isActive: boolean };
+interface CharPositionProps {
+  onActivationChanged(args: IsActive): void;
+  onCharPosChanged: (pos: Coord2|null) => void;
+}
+
+export class CharPosition extends Component<CharPositionProps> {
+
+  prevCharPos: Coord2|null = null;
+
+  constructor (props: CharPositionProps) {
     super(props)
     this.prevCharPos = null
   }
 
-  toCharPos = ({position, elementDimensions}) => {
+  toCharPos = ({position, elementDimensions}: Position): Coord2|null => {
     if (elementDimensions === null) {
       return null
     }
@@ -24,17 +45,17 @@ export class CharPosition extends Component {
   // The parent component needs to know if the cursor is active (inside the
   // child div) to conditionally render sibling components like cursor pos,
   // char under cursor, etc.
-  handleActivationChanged = ({isActive})  => {
+  handleActivationChanged = ({isActive}: {isActive: boolean})  => {
     this.props.onActivationChanged({isActive})
   }
 
   // The parent component needs to know what the current charpos is inside the
   // child div).
-  handlePositionChanged = (vals)  => {
+  handlePositionChanged = (vals: Position)  => {
     if (vals.elementDimensions === undefined) {
       return
     }
-    const { row, col } = this.toCharPos(vals)
+    const { row, col } = this.toCharPos(vals)!
     if (this.prevCharPos === null ||
       row !== this.prevCharPos.row ||
       col !== this.prevCharPos.col) {
@@ -56,21 +77,54 @@ export class CharPosition extends Component {
   }
 }
 
-export const withMouseCharPositionShiftLockAxis = C => {
-  class ToCharRowCol extends Component {
-    static propTypes = {
-      altKey: PropTypes.bool.isRequired,
-      shiftKey: PropTypes.bool.isRequired
-    }
-    constructor (props) {
-      super(props)
+// The component wrapped by withMouseCharPositionShiftLockAxis must
+// have these props in its component type.
+interface WithMouseCharPosWrappeeProps {
+  charPos: Coord2|null;
+  onMouseDown: (e: any, dragStart: DragStartFunc, altClick: AltClickFunc) => void;
+  onMouseMove: (e: any, dragMove: DragMoveFunc) => void;
+  onMouseUp:   (e: any, dragEnd: DragEndFunc) => void;
+}
 
-      this.prevCharPos = null
-      this.dragging = false
-      this.prevCoord = null
-      this.lockStartCoord = null
-      this.lockedCharPos = null
-      this.shiftLockAxis = null
+interface WithMouseCharPositionShiftLockAxisProps {
+  altKey: boolean;
+  shiftKey: boolean;
+  isActive: boolean;
+  onCharPosChange: (args:{
+    isActive: boolean;
+    charPos: Coord2
+  }) => void;
+}
+
+interface CursorPositionProps {
+  containerSize: CSSProperties;
+  onActivationChanged(args: IsActive): void;
+}
+
+interface ToCharRowColProps extends Position {
+  framebufWidth: number;
+  framebufHeight: number;
+}
+
+export const withMouseCharPositionShiftLockAxis = <P extends object>(C: React.ComponentType<WithMouseCharPosWrappeeProps>) => {
+  class ToCharRowCol extends Component<P & CursorPositionProps & WithMouseCharPositionShiftLockAxisProps & ToCharRowColProps> {
+
+    prevCharPos:    Coord2|null = null;
+    prevCoord:      Coord2|null = null;
+    lockStartCoord: Coord2|null = null;
+    lockedCharPos:  Coord2|null = null;
+    shiftLockAxis:  'shift'|'row'|'col'|null = null;
+    dragging = false;
+
+    constructor (props: P & CursorPositionProps & WithMouseCharPositionShiftLockAxisProps & ToCharRowColProps) {
+      super(props);
+
+      this.prevCharPos = null;
+      this.dragging = false;
+      this.prevCoord = null;
+      this.lockStartCoord = null;
+      this.lockedCharPos = null;
+      this.shiftLockAxis = null;
     }
 
     currentCharPos = () => {
@@ -87,13 +141,13 @@ export const withMouseCharPositionShiftLockAxis = C => {
       }
     }
 
-    handleMouseDown = (e, dragStart, altClick) => {
+    handleMouseDown = (e: any, dragStart: DragStartFunc, altClick: AltClickFunc) => {
       const charPos = this.currentCharPos()
       // alt-left click doesn't start dragging
       if (this.props.altKey) {
-        this.dragging = false
-        altClick(charPos)
-        return
+        this.dragging = false;
+        altClick(charPos);
+        return;
       }
 
       this.dragging = true
@@ -110,7 +164,7 @@ export const withMouseCharPositionShiftLockAxis = C => {
       }
     }
 
-    handleMouseUp = (e, dragEnd) => {
+    handleMouseUp = (_e: React.PointerEvent, dragEnd: DragEndFunc) => {
       if (this.dragging) {
         dragEnd()
       }
@@ -120,7 +174,7 @@ export const withMouseCharPositionShiftLockAxis = C => {
       this.shiftLockAxis = null
     }
 
-    handleMouseMove = (e, dragMove) => {
+    handleMouseMove = (_e:any, dragMove: DragMoveFunc) => {
       const charPos = this.currentCharPos()
 
       if (this.prevCharPos === null ||
@@ -134,21 +188,22 @@ export const withMouseCharPositionShiftLockAxis = C => {
         return
       }
 
-      const coord = charPos
-      if (this.prevCoord.row !== coord.row ||
-          this.prevCoord.col !== coord.col) {
+      // Note: prevCoord is known to be not null here as it's been set
+      // in mouse down
+      const coord = charPos;
+      if (this.prevCoord!.row !== coord.row || this.prevCoord!.col !== coord.col) {
 
         if (this.shiftLockAxis === 'shift') {
-          if (this.prevCoord.row === coord.row) {
+          if (this.prevCoord!.row === coord.row) {
             this.shiftLockAxis = 'row'
-          } else if (this.prevCoord.col === coord.col) {
+          } else if (this.prevCoord!.col === coord.col) {
             this.shiftLockAxis = 'col'
           }
         }
 
         if (this.shiftLockAxis !== null) {
           let lockedCharPos = {
-            ...this.lockStartCoord
+            ...this.lockStartCoord!
           }
 
           if (this.shiftLockAxis === 'row') {
@@ -184,7 +239,7 @@ export const withMouseCharPositionShiftLockAxis = C => {
       )
     }
   }
-  return class extends Component {
+  return class extends Component<P & WithMouseCharPositionShiftLockAxisProps & CursorPositionProps & ToCharRowColProps> {
     render () {
       return (
         <ReactCursorPosition
@@ -192,22 +247,36 @@ export const withMouseCharPositionShiftLockAxis = C => {
             ...this.props.containerSize
           }}
           onActivationChanged={this.props.onActivationChanged}>
-          <ToCharRowCol {...this.props}/>
+          <ToCharRowCol {...this.props} />
         </ReactCursorPosition>
       )
     }
   }
 }
 
-export const withHoverFade = (C, options) => {
-  return class extends Component {
-    constructor (props) {
-      super(props)
-      this.timerId = null
-      this.state = {
-        fadeOut: false
-      }
-    }
+interface WithHoverInjectedProps {
+  onToggleActive: () => void;
+  fadeOut: boolean;
+}
+
+interface WithHoverFadeProps {
+  pickerId: any;
+  active: boolean;
+  containerClassName: string;
+  onSetActive: (pickerId: any, active: boolean) => void;
+}
+
+interface WithHoverFadeState {
+  fadeOut: boolean;
+}
+
+// See https://medium.com/@jrwebdev/react-higher-order-component-patterns-in-typescript-42278f7590fb
+export const withHoverFade = <P extends WithHoverInjectedProps>(C: React.ComponentType<P>) => {
+  return class extends Component<Subtract<P, WithHoverInjectedProps> & WithHoverFadeProps, WithHoverFadeState> {
+    state: WithHoverFadeState = {
+      fadeOut: false
+    };
+    timerId: any = null;
 
     componentWillUnmount () {
       if (this.timerId !== null) {
@@ -244,6 +313,20 @@ export const withHoverFade = (C, options) => {
     }
 
     render () {
+//      const { pickerId, active, containerClassName, onSetActive, ...rest} = this.props as WithHoverFadeProps;
+      // See: https://github.com/Microsoft/TypeScript/issues/28938
+      const ts32workAround: any = {
+        ...this.props,
+        onToggleActive: this.handleToggleActive,
+        fadeOut: this.state.fadeOut
+      }
+/*
+          <C
+            {...rest}
+            onToggleActive={this.handleToggleActive}
+            fadeOut={this.state.fadeOut}
+          />
+*/
       return (
         <div
           className={this.props.containerClassName}
@@ -251,9 +334,7 @@ export const withHoverFade = (C, options) => {
           onMouseEnter={this.handleMouseEnter}
         >
           <C
-            onToggleActive={this.handleToggleActive}
-            fadeOut={this.state.fadeOut}
-            {...this.props}
+            {...ts32workAround}
           />
         </div>
       )

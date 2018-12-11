@@ -95,7 +95,7 @@ interface CharSelectProps {
 }
 
 interface CharSelectState {
-  charPos: Coord2;
+  charPos: Coord2 | null;
   isActive: boolean;
 }
 
@@ -133,7 +133,7 @@ class CharSelect extends Component<CharSelectProps, CharSelectState> {
     this.props.Toolbar.setCurrentChar(this.state.charPos)
   }
 
-  handleCharPosChanged = (charPos: Coord2) => {
+  handleCharPosChanged = (charPos: Coord2 | null) => {
     this.setState({ charPos })
   }
 
@@ -161,7 +161,7 @@ class CharSelect extends Component<CharSelectProps, CharSelectState> {
     }
     let screencode = this.props.curScreencode
     if (this.state.isActive) {
-      screencode = utils.charScreencodeFromRowCol(font, this.state.charPos)
+      screencode = utils.charScreencodeFromRowCol(font, this.state.charPos!)
     }
     if (!this.fb) {
       throw new Error('FB cannot be null here');
@@ -201,7 +201,7 @@ class CharSelect extends Component<CharSelectProps, CharSelectState> {
                   framebufHeight={H}
                   grid={true}
                   opacity={0.5}
-                  charPos={this.state.charPos}
+                  charPos={this.state.charPos!}
                 />
                 : null}
               {this.props.selected ?

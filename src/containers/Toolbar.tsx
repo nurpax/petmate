@@ -314,7 +314,7 @@ class ToolbarView extends Component<
           pickerId='border'
           containerClassName={styles.tooltip}
           active={this.state.pickerActive.border}
-          color={this.props.borderColor}
+          color={this.props.borderColor!}
           onSetActive={this.setPickerActive}
           onSelectColor={this.handleSelectBorderColor}
           paletteRemap={this.props.paletteRemap}
