@@ -13,13 +13,6 @@ import {
 import * as utils from '../utils'
 import * as brush from './brush'
 import { ActionsUnion, createAction, updateField, DispatchPropsFromActions } from './typeUtils'
-import {
-  TOOL_DRAW,
-  TOOL_COLORIZE,
-  TOOL_CHAR_DRAW,
-  TOOL_BRUSH,
-  TOOL_TEXT
-} from './types'
 
 const emptyTransform: Transform = {
   mirror: 0,
@@ -227,7 +220,7 @@ export class Toolbar {
           height = h;
         }
 
-        let inTextInput = selectedTool === TOOL_TEXT && state.toolbar.textCursorPos !== null
+        let inTextInput = selectedTool === Tool.Text && state.toolbar.textCursorPos !== null
         // These shortcuts should work regardless of what drawing tool is selected.
         if (noMods) {
           if (!inTextInput) {
@@ -244,19 +237,19 @@ export class Toolbar {
               dispatch(Toolbar.actions.nextColor(+1))
               return
             } else if (key === 'x' || key === '1') {
-              dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
+              dispatch(Toolbar.actions.setSelectedTool(Tool.Draw))
               return
             } else if (key === 'c' || key === '2') {
-              dispatch(Toolbar.actions.setSelectedTool(TOOL_COLORIZE))
+              dispatch(Toolbar.actions.setSelectedTool(Tool.Colorize))
               return
             } else if (key === '3') {
-              dispatch(Toolbar.actions.setSelectedTool(TOOL_CHAR_DRAW))
+              dispatch(Toolbar.actions.setSelectedTool(Tool.CharDraw))
               return
             } else if (key === 'b' || key === '4') {
-              dispatch(Toolbar.actions.setSelectedTool(TOOL_BRUSH))
+              dispatch(Toolbar.actions.setSelectedTool(Tool.Brush))
               return
             } else if (key === 't' || key === '5') {
-              dispatch(Toolbar.actions.setSelectedTool(TOOL_TEXT))
+              dispatch(Toolbar.actions.setSelectedTool(Tool.Text))
               return
             } else if (key === 'g') {
               return dispatch((dispatch, getState) => {
@@ -277,7 +270,7 @@ export class Toolbar {
           }
         }
 
-        if (selectedTool === TOOL_TEXT) {
+        if (selectedTool === Tool.Text) {
           if (key === 'Escape') {
             dispatch(Toolbar.actions.setTextCursorPos(null))
           }
@@ -321,7 +314,7 @@ export class Toolbar {
           }
         } else if (noMods) {
           if (key === 'Escape') {
-            if (selectedTool === TOOL_BRUSH) {
+            if (selectedTool === Tool.Brush) {
               dispatch(Toolbar.actions.resetBrush())
             }
           } else if (key === 'a') {
@@ -337,17 +330,17 @@ export class Toolbar {
             if (key === 'h') {
               mirror = Toolbar.MIRROR_X
             }
-            if (selectedTool === TOOL_BRUSH) {
+            if (selectedTool === Tool.Brush) {
               dispatch(Toolbar.actions.mirrorBrush(mirror))
-            } else if (selectedTool === TOOL_DRAW || selectedTool === TOOL_CHAR_DRAW) {
+            } else if (selectedTool === Tool.Draw || selectedTool === Tool.CharDraw) {
               dispatch(Toolbar.actions.mirrorChar(mirror))
             }
           } else if (key === 'f') {
             dispatch(Toolbar.actions.invertChar())
           } else if (key === 'r') {
-            if (selectedTool === TOOL_BRUSH) {
+            if (selectedTool === Tool.Brush) {
               dispatch(Toolbar.actions.rotateBrush())
-            } else if (selectedTool === TOOL_DRAW || selectedTool === TOOL_CHAR_DRAW) {
+            } else if (selectedTool === Tool.Draw || selectedTool === Tool.CharDraw) {
               dispatch(Toolbar.actions.rotateChar())
             }
           }
@@ -438,8 +431,8 @@ export class Toolbar {
       return (dispatch, getState) => {
         const state = getState()
         dispatch(Toolbar.actions.setTextColor(color))
-        if (state.toolbar.selectedTool === TOOL_BRUSH) {
-          dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
+        if (state.toolbar.selectedTool === Tool.Brush) {
+          dispatch(Toolbar.actions.setSelectedTool(Tool.Draw))
         }
       }
     },
@@ -448,10 +441,10 @@ export class Toolbar {
       return (dispatch, getState) => {
         const state = getState()
         dispatch(Toolbar.actions.setSelectedChar(charPos))
-        if (state.toolbar.selectedTool === TOOL_BRUSH ||
-          state.toolbar.selectedTool === TOOL_COLORIZE ||
-          state.toolbar.selectedTool === TOOL_TEXT) {
-          dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
+        if (state.toolbar.selectedTool === Tool.Brush ||
+          state.toolbar.selectedTool === Tool.Colorize ||
+          state.toolbar.selectedTool === Tool.Text) {
+          dispatch(Toolbar.actions.setSelectedTool(Tool.Draw))
         }
       }
     },
@@ -461,9 +454,9 @@ export class Toolbar {
         const state = getState()
         dispatch(Toolbar.actions.setTextColor(pix.color))
         dispatch(Toolbar.actions.setScreencode(pix.code))
-        if (state.toolbar.selectedTool === TOOL_BRUSH ||
-          state.toolbar.selectedTool === TOOL_TEXT) {
-          dispatch(Toolbar.actions.setSelectedTool(TOOL_DRAW))
+        if (state.toolbar.selectedTool === Tool.Brush ||
+          state.toolbar.selectedTool === Tool.Text) {
+          dispatch(Toolbar.actions.setSelectedTool(Tool.Draw))
         }
       }
     },
@@ -489,7 +482,7 @@ export class Toolbar {
       undoId: 0,
       textColor: 14,
       textCursorPos: null as (Coord2|null),
-      selectedTool: TOOL_DRAW,
+      selectedTool: Tool.Draw,
       brushRegion: null as (BrushRegion|null),
       brush: null as (Brush|null),
       workspaceFilename: null as (string|null),

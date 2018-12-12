@@ -17,14 +17,7 @@ import * as screensSelectors from '../redux/screensSelectors'
 import { getSettingsPaletteRemap, getSettingsCurrentColorPalette } from '../redux/settingsSelectors'
 import * as Root from '../redux/root'
 import { framebufIndexMergeProps } from '../redux/utils'
-import {
-  Tool, Rgb, RootState,
-  TOOL_DRAW,
-  TOOL_COLORIZE,
-  TOOL_CHAR_DRAW,
-  TOOL_BRUSH,
-  TOOL_TEXT
-} from '../redux/types';
+import { Tool, Rgb, RootState } from '../redux/types';
 
 import { withHoverFade } from './hoc'
 
@@ -271,29 +264,29 @@ class ToolbarView extends Component<
     }
     const tools = [
       mkTool({
-        tool: TOOL_DRAW,
+        tool: Tool.Draw,
         iconName: faPencilAlt,
         tooltip: 'Char & Color'
       }),
       mkTool({
-        tool: TOOL_COLORIZE,
+        tool: Tool.Colorize,
         iconName: faPencilAlt,
         tooltip: 'Color only',
         subIcon: renderColorizeSubIcon
       }),
       mkTool({
-        tool: TOOL_CHAR_DRAW,
+        tool: Tool.CharDraw,
         iconName: faPencilAlt,
         tooltip: 'Char only',
         subIcon: renderCharSubIcon
       }),
       mkTool({
-        tool: TOOL_BRUSH,
+        tool: Tool.Brush,
         iconName: faBrush,
         tooltip: 'Brush'
       }),
       mkTool({
-        tool: TOOL_TEXT,
+        tool: Tool.Text,
         iconName: faFont,
         tooltip: 'Text'
       })
