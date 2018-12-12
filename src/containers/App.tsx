@@ -1,6 +1,7 @@
 
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, ReactNode } from 'react';
 import { connect } from 'react-redux'
+import { Dispatch } from 'redux'
 import ResizeObserver from 'resize-observer-polyfill'
 
 import Toolbar from './Toolbar'
@@ -15,14 +16,30 @@ import { loadWorkspaceNoDialog } from '../utils'
 
 import s from './App.module.css'
 
-class DivSize extends Component {
-  constructor (props) {
-    super(props)
-    this.ref = React.createRef()
+interface Dims {
+  width: number;
+  height: number;
+}
 
-    this.state = {
-      containerSize: null
-    }
+interface DivSizeProps {
+  className: string;
+  render: (props: Dims) => ReactNode;
+}
+
+interface DivSizeState {
+  containerSize: Dims | null;
+}
+
+class DivSize extends Component<DivSizeProps, DivSizeState> {
+
+  private ref = React.createRef<HTMLDivElement>();
+  private ro: ResizeObserver | null = null;
+  state = {
+    containerSize: null
+  };
+
+  constructor (props: DivSizeProps) {
+    super(props)
 
     this.ro = new ResizeObserver(entries => {
       const e = entries[0]
@@ -36,30 +53,36 @@ class DivSize extends Component {
   }
 
   componentDidMount () {
-    this.ro.observe(this.ref.current)
+    if (this.ro && this.ref.current) {
+      this.ro.observe(this.ref.current)
+    }
   }
 
   componentWillUnmount () {
-    this.ro.unobserve(this.ref.current)
+    if (this.ro && this.ref.current) {
+      this.ro.unobserve(this.ref.current);
+    }
   }
 
 
   render () {
-    const { children } = this.props;
-    const childrenWithProps = React.Children.map(children, child =>
-      React.cloneElement(child, { containerSize: this.state.containerSize }))
     return (
       <div
         className={this.props.className}
         ref={this.ref}
       >
-        {childrenWithProps}
+        {this.props.render(this.state.containerSize!)}
       </div>
     )
   }
 }
 
-class AppView extends Component {
+interface AppViewProps {
+  Toolbar: reduxToolbar.PropsFromDispatch;
+  dispatch: Dispatch
+}
+
+class AppView extends Component<AppViewProps> {
 
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyDown);
@@ -71,17 +94,17 @@ class AppView extends Component {
     document.removeEventListener('keyup', this.handleKeyUp);
   }
 
-  handleKeyDown = (event) => {
+  handleKeyDown = (event: KeyboardEvent) => {
     this.props.Toolbar.keyDown(event.key)
   }
 
-  handleKeyUp = (event) => {
+  handleKeyUp = (event: KeyboardEvent) => {
     this.props.Toolbar.keyUp(event.key)
   }
 
-  handleLoadPetmate = (filename) => {
+  handleLoadPetmate = (filename: string) => {
     const { dispatch } = this.props;
-    const setWorkspaceFilename = (filename) => this.props.Toolbar.setWorkspaceFilename(filename);
+    const setWorkspaceFilename = (filename: string) => this.props.Toolbar.setWorkspaceFilename(filename);
     loadWorkspaceNoDialog(dispatch, filename, setWorkspaceFilename);
   }
 
@@ -98,9 +121,10 @@ class AppView extends Component {
           <div className={s.leftmenubar}>
             <Toolbar />
           </div>
-          <DivSize className={s.editor}>
-            <Editor />
-          </DivSize>
+          <DivSize
+            className={s.editor}
+            render={(containerSize: Dims) => <Editor containerSize={containerSize} />}
+          />
         </FileDrop>
         <Settings />
         <ExportModal />
@@ -109,14 +133,11 @@ class AppView extends Component {
   }
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    Toolbar: reduxToolbar.Toolbar.bindDispatch(dispatch),
-    dispatch
-  }
-}
-
 export default connect(
   null,
-  mapDispatchToProps
-)(AppView)
+  dispatch => {
+    return {
+      Toolbar: reduxToolbar.Toolbar.bindDispatch(dispatch),
+      dispatch
+    }
+  })(AppView)
