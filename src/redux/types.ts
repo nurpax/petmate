@@ -78,7 +78,14 @@ export interface Screens {
   list: number[];
 };
 
-export type Tool = number; // TODO Ts
+
+export const TOOL_DRAW = 0
+export const TOOL_COLORIZE = 1
+export const TOOL_CHAR_DRAW = 2
+export const TOOL_BRUSH = 3
+export const TOOL_TEXT = 4
+
+export type Tool = number;
 
 export interface Toolbar {
   brush: Brush | null;

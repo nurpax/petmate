@@ -17,10 +17,10 @@ interface TextCursorOverlay {
   framebufWidth: number;
   framebufHeight: number;
   charPos: Coord2;
-  grid: boolean;
+  grid?: boolean;
   color?: string;
   fillColor: string;
-  opacity: number;
+  opacity?: number;
 }
 
 type CharPosOverlayProps = TextCursorOverlay & { blink: boolean };
@@ -28,13 +28,15 @@ type CharPosOverlayProps = TextCursorOverlay & { blink: boolean };
 export default class CharPosOverlay extends Component<CharPosOverlayProps> {
   static defaultProps = {
     blink: false,
-    fillColor: 'rgb(255,255,255)'
+    fillColor: 'rgb(255,255,255)',
+    grid: false
   }
 
   render () {
     const { charPos, grid, framebufWidth, framebufHeight, blink } = this.props
     const scale = grid ? 9 : 8
-    let outlineColor = `rgba(255, 255, 255, ${this.props.opacity})`
+    let alpha = this.props.opacity != undefined ? this.props.opacity : 0;
+    let outlineColor = `rgba(255, 255, 255, ${alpha})`
     if (this.props.color !== undefined) {
       outlineColor = this.props.color
     }

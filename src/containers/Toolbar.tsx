@@ -8,14 +8,7 @@ import { ActionCreators } from 'redux-undo';
 import ColorPicker from '../components/ColorPicker'
 import * as utils from '../utils'
 import * as fp from '../utils/fp'
-import {
-  Toolbar,
-  TOOL_DRAW,
-  TOOL_COLORIZE,
-  TOOL_CHAR_DRAW,
-  TOOL_BRUSH,
-  TOOL_TEXT
-} from '../redux/toolbar'
+import { Toolbar } from '../redux/toolbar'
 import { Framebuffer } from '../redux/editor'
 import * as framebuf from '../redux/editor';
 import * as toolbar from '../redux/toolbar';
@@ -24,7 +17,14 @@ import * as screensSelectors from '../redux/screensSelectors'
 import { getSettingsPaletteRemap, getSettingsCurrentColorPalette } from '../redux/settingsSelectors'
 import * as Root from '../redux/root'
 import { framebufIndexMergeProps } from '../redux/utils'
-import { Tool, Rgb, RootState } from '../redux/types';
+import {
+  Tool, Rgb, RootState,
+  TOOL_DRAW,
+  TOOL_COLORIZE,
+  TOOL_CHAR_DRAW,
+  TOOL_BRUSH,
+  TOOL_TEXT
+} from '../redux/types';
 
 import { withHoverFade } from './hoc'
 

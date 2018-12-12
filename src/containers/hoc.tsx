@@ -1,15 +1,15 @@
 
-import React, { Component, CSSProperties } from 'react';
+import React, { Component } from 'react';
 import ReactCursorPosition from 'react-cursor-position'
 import { Coord2 } from '../redux/types';
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 type Subtract<T, K> = Omit<T, keyof K>;
 
-type DragStartFunc = (charPos: Coord2) => void;
-type DragMoveFunc = (charPos: Coord2) => void;
-type DragEndFunc   = () => void;
-type AltClickFunc  = (charPos: Coord2) => void;
+export type DragStartFunc = (charPos: Coord2) => void;
+export type DragMoveFunc = (charPos: Coord2) => void;
+export type DragEndFunc   = () => void;
+export type AltClickFunc  = (charPos: Coord2) => void;
 
 type Position = {
   position: { x: number, y: number };
@@ -97,7 +97,7 @@ interface WithMouseCharPositionShiftLockAxisProps {
 }
 
 interface CursorPositionProps {
-  containerSize: CSSProperties;
+  containerSize: { width: number, height: number};
   onActivationChanged(args: IsActive): void;
 }
 
@@ -106,8 +106,8 @@ interface ToCharRowColProps extends Position {
   framebufHeight: number;
 }
 
-export const withMouseCharPositionShiftLockAxis = <P extends object>(C: React.ComponentType<WithMouseCharPosWrappeeProps>) => {
-  class ToCharRowCol extends Component<P & CursorPositionProps & WithMouseCharPositionShiftLockAxisProps & ToCharRowColProps> {
+export const withMouseCharPositionShiftLockAxis = <P extends WithMouseCharPosWrappeeProps>(C: React.ComponentType<P>) => {
+  class ToCharRowCol extends Component<any> {
 
     prevCharPos:    Coord2|null = null;
     prevCoord:      Coord2|null = null;
@@ -228,12 +228,18 @@ export const withMouseCharPositionShiftLockAxis = <P extends object>(C: React.Co
       const row = Math.floor(this.props.position.y / height * framebufHeight)
       const locked = this.shiftLockAxis === 'row' || this.shiftLockAxis === 'col'
       const charPos = locked ? this.lockedCharPos : {row, col}
+      // See hover fade HOC, this could be made to work better.  But this whole
+      // HOC is such a mess anyway that it's not worth spending time fixing
+      // this.
+      const tsWorkaround: any = {
+        charPos,
+        onMouseDown: this.handleMouseDown,
+        onMouseUp: this.handleMouseUp,
+        onMouseMove: this.handleMouseMove
+      };
       return (
         <C
-          charPos={charPos}
-          onMouseDown={this.handleMouseDown}
-          onMouseUp={this.handleMouseUp}
-          onMouseMove={this.handleMouseMove}
+          {...tsWorkaround}
           {...props}
         />
       )

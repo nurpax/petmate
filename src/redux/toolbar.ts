@@ -13,12 +13,13 @@ import {
 import * as utils from '../utils'
 import * as brush from './brush'
 import { ActionsUnion, createAction, updateField, DispatchPropsFromActions } from './typeUtils'
-
-export const TOOL_DRAW = 0
-export const TOOL_COLORIZE = 1
-export const TOOL_CHAR_DRAW = 2
-export const TOOL_BRUSH = 3
-export const TOOL_TEXT = 4
+import {
+  TOOL_DRAW,
+  TOOL_COLORIZE,
+  TOOL_CHAR_DRAW,
+  TOOL_BRUSH,
+  TOOL_TEXT
+} from './types'
 
 const emptyTransform: Transform = {
   mirror: 0,

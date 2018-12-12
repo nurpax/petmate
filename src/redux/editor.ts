@@ -35,7 +35,7 @@ export function createFbAction<T extends string, D>(type: T, framebufIndex: numb
     { type, data, framebufIndex, undoId };
 }
 
-type SetCharParams = Coord2 & { screencode: number, color: number };
+type SetCharParams = Coord2 & { screencode?: number, color?: number };
 type SetBrushParams = Coord2 & { brush: Brush };
 type ImportFileParams = any // TODO ts
 
@@ -114,7 +114,7 @@ function setChar(fbState: Framebuf, {row, col, screencode, color}: SetCharParams
       return pixelRow.map((pix, x) => {
         if (col === x) {
           if (screencode === undefined) {
-            return { ...pix, color }
+            return { ...pix, color: color! }
           }
           if (color === undefined) {
             return { ...pix, code:screencode }

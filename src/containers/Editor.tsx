@@ -1,8 +1,6 @@
 
-import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types'
+import React, { Component, Fragment, CSSProperties } from 'react';
 import { connect } from 'react-redux'
-import classnames from 'classnames'
 
 import ColorPicker from '../components/ColorPicker'
 import CharGrid from '../components/CharGrid'
@@ -12,11 +10,9 @@ import { CanvasStatusbar } from '../components/Statusbar'
 
 import CharSelect from './CharSelect'
 
-import {
-  withMouseCharPosition,
-  withMouseCharPositionShiftLockAxis
-} from './hoc'
+import { withMouseCharPositionShiftLockAxis, DragStartFunc, AltClickFunc, DragMoveFunc, DragEndFunc } from './hoc'
 
+import * as framebuf from '../redux/editor'
 import { Framebuffer } from '../redux/editor'
 import * as selectors from '../redux/selectors'
 import * as screensSelectors from '../redux/screensSelectors'
@@ -29,28 +25,40 @@ import {
 
 import { framebufIndexMergeProps }  from '../redux/utils'
 
-import {
-  Toolbar,
-  TOOL_DRAW,
-  TOOL_COLORIZE,
-  TOOL_CHAR_DRAW,
-  TOOL_BRUSH,
-  TOOL_TEXT
-} from '../redux/toolbar'
+
+import * as toolbar from '../redux/toolbar'
+import { Toolbar } from '../redux/toolbar'
 import * as utils from '../utils';
 
 import styles from './Editor.module.css';
+import {
+  RootState,
+  BrushRegion,
+  Coord2,
+  Rgb,
+  Brush,
+  Font,
+  Tool,
+  TOOL_DRAW, TOOL_COLORIZE, TOOL_CHAR_DRAW, TOOL_BRUSH, TOOL_TEXT, Pixel, Framebuf
+} from '../redux/types'
 
-const brushOverlayStyleBase = {
+const brushOverlayStyleBase: CSSProperties = {
   outlineColor: 'rgba(128, 255, 128, 0.5)',
   outlineStyle: 'solid',
   outlineWidth: 0.5,
   backgroundColor: 'rgba(255,255,255,0)',
   zIndex: 1,
-  pointerEvents:'none'
+  pointerEvents: 'none'
 }
 
-class BrushSelectOverlay extends Component {
+interface BrushSelectOverlayProps {
+  framebufWidth: number;
+  framebufHeight: number;
+  brushRegion: BrushRegion | null;
+  charPos: Coord2;
+}
+
+class BrushSelectOverlay extends Component<BrushSelectOverlayProps> {
   render () {
     if (this.props.brushRegion === null) {
       return (
@@ -63,7 +71,7 @@ class BrushSelectOverlay extends Component {
       )
     }
     const { min, max } = utils.sortRegion(this.props.brushRegion)
-    const s = {
+    const s: CSSProperties = {
       ...brushOverlayStyleBase,
       position: 'absolute',
       left: min.col*8,
@@ -78,17 +86,24 @@ class BrushSelectOverlay extends Component {
   }
 }
 
-function computeBrushDstPos (charPos, { width, height }) {
+function computeBrushDstPos (charPos: Coord2, dims: { width: number, height: number }) {
   return {
-    col: charPos.col - Math.floor(width/2),
-    row: charPos.row - Math.floor(height/2)
+    col: charPos.col - Math.floor(dims.width/2),
+    row: charPos.row - Math.floor(dims.height/2)
   }
 }
 
-class BrushOverlay extends Component {
-  static propTypes = {
-    colorPalette: PropTypes.arrayOf(PropTypes.object).isRequired
-  }
+interface BrushOverlayProps {
+  charPos: Coord2;
+  framebufWidth: number;
+  framebufHeight: number;
+  backgroundColor: string;
+  colorPalette: Rgb[];
+  brush: Brush | null;
+  font: Font;
+}
+
+class BrushOverlay extends Component<BrushOverlayProps> {
   render () {
     if (this.props.brush === null) {
       return null
@@ -123,7 +138,7 @@ class BrushOverlay extends Component {
     if (bw <= 0 || bh <= 0) {
       return null
     }
-    const s = {
+    const s: CSSProperties = {
       ...brushOverlayStyleBase,
       position: 'absolute',
       left: dstx*8,
@@ -149,14 +164,47 @@ class BrushOverlay extends Component {
   }
 }
 
-class FramebufferView_ extends Component {
+interface FramebufferViewProps {
+  undoId: number | null;
 
-  constructor (props) {
-    super(props)
-    this.prevDragPos = null
-  }
+  isActive: boolean;
+  charPos: Coord2;
+  onMouseDown: (e: any, dragStart: DragStartFunc, altClick: AltClickFunc) => void;
+  onMouseMove: (e: any, dragMove: DragMoveFunc) => void;
+  onMouseUp:   (e: any, dragEnd: DragEndFunc) => void;
 
-  setChar = (clickLoc) => {
+  altKey: boolean;
+  shiftKey: boolean;
+
+  textCursorPos: Coord2;
+  canvasScale: { scaleX: number, scaleY: number };
+
+  framebuf: Pixel[][];
+  framebufWidth: number;
+  framebufHeight: number;
+  selectedTool: Tool;
+  brush: Brush | null;
+  brushRegion: BrushRegion | null;
+
+  backgroundColor: number;
+  textColor: number;
+  curScreencode: number;
+  colorPalette: Rgb[];
+
+  font: Font;
+
+  canvasGrid: boolean;
+}
+
+interface FramebufferViewDispatch {
+  Framebuffer: framebuf.PropsFromDispatch;
+  Toolbar: toolbar.PropsFromDispatch;
+}
+class FramebufferView_ extends Component<FramebufferViewProps & FramebufferViewDispatch> {
+
+  prevDragPos: Coord2|null = null;
+
+  setChar = (clickLoc: Coord2) => {
     const { undoId } = this.props;
     const params = {
       ...clickLoc,
@@ -182,7 +230,7 @@ class FramebufferView_ extends Component {
     }
   }
 
-  brushDraw = (coord) => {
+  brushDraw = (coord: Coord2) => {
     const { min, max } = this.props.brush.brushRegion
     const area = {
       width: max.col - min.col + 1,
@@ -195,7 +243,7 @@ class FramebufferView_ extends Component {
     }, this.props.undoId)
   }
 
-  dragStart = (coord) => {
+  dragStart = (coord: Coord2) => {
     const { selectedTool } = this.props
     if (selectedTool === TOOL_DRAW ||
         selectedTool === TOOL_COLORIZE ||
@@ -216,14 +264,15 @@ class FramebufferView_ extends Component {
     this.prevDragPos = coord
   }
 
-  dragMove = (coord) => {
+  dragMove = (coord: Coord2) => {
+    const prevDragPos = this.prevDragPos!; // set in dragStart
     const { selectedTool, brush, brushRegion } = this.props
     if (selectedTool === TOOL_DRAW ||
         selectedTool === TOOL_COLORIZE ||
         selectedTool === TOOL_CHAR_DRAW) {
       utils.drawLine((x,y) => {
         this.setChar({ row:y, col:x })
-      }, this.prevDragPos.col, this.prevDragPos.row, coord.col, coord.row)
+      }, prevDragPos.col, prevDragPos.row, coord.col, coord.row)
     } else if (selectedTool === TOOL_BRUSH) {
       if (brush !== null) {
         this.brushDraw(coord)
@@ -254,7 +303,7 @@ class FramebufferView_ extends Component {
     this.props.Toolbar.incUndoId()
   }
 
-  altClick = (charPos) => {
+  altClick = (charPos: Coord2) => {
     const x = charPos.col
     const y = charPos.row
     if (y >= 0 && y < this.props.framebufHeight &&
@@ -273,8 +322,8 @@ class FramebufferView_ extends Component {
     const backg = utils.colorIndexToCssRgb(this.props.colorPalette, this.props.backgroundColor)
     const { selectedTool } = this.props
     let overlays = null
-    let screencodeHighlight = this.props.curScreencode
-    let colorHighlight = this.props.textColor
+    let screencodeHighlight: number|undefined = this.props.curScreencode
+    let colorHighlight: number|undefined = this.props.textColor
     let highlightCharPos = true
     if (this.props.isActive) {
       if (selectedTool === TOOL_BRUSH) {
@@ -355,7 +404,7 @@ class FramebufferView_ extends Component {
     }
 
     const { scaleX, scaleY } = this.props.canvasScale
-    const scale = {
+    const scale: CSSProperties = {
       width: W*8,
       height: H*8,
       transform: `scale(${scaleX},${scaleY})`,
@@ -375,7 +424,7 @@ class FramebufferView_ extends Component {
           grid={false}
           backgroundColor={backg}
           framebuf={this.props.framebuf}
-          charPos={this.props.isActive && highlightCharPos ? this.props.charPos : null}
+          charPos={this.props.isActive && highlightCharPos ? this.props.charPos : undefined}
           curScreencode={screencodeHighlight}
           textColor={colorHighlight}
           font={this.props.font}
@@ -390,10 +439,13 @@ class FramebufferView_ extends Component {
 const FramebufferView = withMouseCharPositionShiftLockAxis(FramebufferView_)
 
 const FramebufferCont = connect(
-  state => {
+  (state: RootState) => {
     const selected = state.toolbar.selectedChar
     const charTransform = state.toolbar.charTransform
-    const framebuf = selectors.getCurrentFramebuf(state)
+    const framebuf = selectors.getCurrentFramebuf(state)!
+    if (framebuf == null) {
+      throw new Error('cannot render FramebufferCont with a null framebuf, see Editor checks.')
+    }
     const font = selectors.getCurrentFramebufFont(state)
     return {
       framebufIndex: screensSelectors.getCurrentScreenFramebufIndex(state),
@@ -424,25 +476,39 @@ const FramebufferCont = connect(
   framebufIndexMergeProps
 )(FramebufferView)
 
-class Editor extends Component {
+interface EditorProps {
+  framebuf: Framebuf | null;
+  textColor: number;
+  colorPalette: Rgb[];
+  paletteRemap: number[];
+
+  integerScale: boolean;
+  containerSize: { width: number, height: number };
+}
+
+interface EditorDispatch {
+  Toolbar: toolbar.PropsFromDispatch;
+}
+
+class Editor extends Component<EditorProps & EditorDispatch> {
   state = {
     isActive: false,
     charPos: null
   }
 
-  handleSetColor = (color) => {
+  handleSetColor = (color: number) => {
     this.props.Toolbar.setCurrentColor(color)
   }
 
-  handleCharPosChange = ({charPos}) => {
+  handleCharPosChange = (args: { charPos: Coord2 }) => {
     this.setState({
-      charPos
+      charPos: args.charPos
     })
   }
 
-  handleActivationChanged = ({isActive}) => {
+  handleActivationChanged = (args: {isActive: boolean}) => {
     this.setState({
-      isActive
+      isActive: args.isActive
     })
   }
 
@@ -520,25 +586,21 @@ class Editor extends Component {
   }
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    Toolbar: Toolbar.bindDispatch(dispatch)
-  }
-}
-
-const mapStateToProps = state => {
-  const framebuf = selectors.getCurrentFramebuf(state)
-  return {
-    framebuf,
-    textColor: state.toolbar.textColor,
-    paletteRemap: getSettingsPaletteRemap(state),
-    colorPalette: getSettingsCurrentColorPalette(state),
-    integerScale: getSettingsIntegerScale(state)
-  }
-}
-
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  (state: RootState) => {
+    const framebuf = selectors.getCurrentFramebuf(state)
+    return {
+      framebuf,
+      textColor: state.toolbar.textColor,
+      paletteRemap: getSettingsPaletteRemap(state),
+      colorPalette: getSettingsCurrentColorPalette(state),
+      integerScale: getSettingsIntegerScale(state)
+    }
+  },
+  dispatch => {
+    return {
+      Toolbar: Toolbar.bindDispatch(dispatch)
+    }
+  }
 )(Editor)
 

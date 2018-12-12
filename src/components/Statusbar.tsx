@@ -35,7 +35,7 @@ export class CharSelectStatusbar extends PureComponent<CharSelectStatusbarProps>
 interface CanvasStatusbarProps {
   framebuf: Framebuf;
   isActive: boolean;
-  charPos:  Coord2;
+  charPos:  Coord2 | null;
 }
 
 export class CanvasStatusbar extends PureComponent<CanvasStatusbarProps> {
