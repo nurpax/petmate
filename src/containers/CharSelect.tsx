@@ -120,7 +120,7 @@ class CharSelect extends Component<CharSelectProps, CharSelectState> {
     this.fb = fp.mkArray(16, y => {
       return fp.mkArray(16, x => {
         return {
-          code: utils.charScreencodeFromRowCol(font, {row:y, col:x}),
+          code: utils.charScreencodeFromRowCol(font, {row:y, col:x})!,
           color: textColor
         }
       })
@@ -159,7 +159,7 @@ class CharSelect extends Component<CharSelectProps, CharSelectState> {
       this.font !== this.props.font) {
       this.computeCachedFb(this.props.textColor)
     }
-    let screencode = this.props.curScreencode
+    let screencode: number|null = this.props.curScreencode
     if (this.state.isActive) {
       screencode = utils.charScreencodeFromRowCol(font, this.state.charPos!)
     }

@@ -38,9 +38,8 @@ function saveAsWorkspace(): ThunkAction<void, RootState, undefined, Action> {
   return (dispatch, getState) => {
     const state = getState()
     const screens = screensSelectors.getScreens(state)
-    const getFramebufByIndex = (idx: number) => selectors.getFramebufByIndex(state, idx)
+    const getFramebufByIndex = (idx: number) => selectors.getFramebufByIndex(state, idx)!
     dialogSaveAsWorkspace(
-      dispatch,
       screens,
       getFramebufByIndex,
       (filename: string) => dispatch(Toolbar.actions.setWorkspaceFilename(filename))
@@ -71,7 +70,7 @@ export const actions = {
     return (dispatch, getState) => {
       const state = getState()
       const screens = screensSelectors.getScreens(state)
-      const getFramebufByIndex = (idx: number) => selectors.getFramebufByIndex(state, idx)
+      const getFramebufByIndex = (idx: number) => selectors.getFramebufByIndex(state, idx)!
       const filename = state.toolbar.workspaceFilename
       if (filename === null) {
         return dispatch(saveAsWorkspace())

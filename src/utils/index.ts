@@ -1,10 +1,7 @@
 
 import * as workspace from '../redux/workspace'
 
-import {
-  loadCalTxtFramebuf,
-  loadMarqCFramebuf
- } from './importers'
+import { loadMarqCFramebuf } from './importers'
 import {
   savePNG,
   saveMarqC,
@@ -20,13 +17,15 @@ import {
 import { colorPalettes } from './palette'
 
 import { electron, fs, path } from './electronImports'
+import { FileFormat, Rgb, Font, Coord2, Framebuf, ExportOptions, RootStateThunk, Settings } from '../redux/types';
+import { FramebufWithFont } from './exporters/types';
 const { ipcRenderer } = electron
 
 
 // TODO import VICE VPL files
 
 // TODO ts use FileFormat type
-export const formats = {
+export const formats: { [index: string]: FileFormat } = {
   png: {
     name: 'PNG .png',
     ext: 'png',
@@ -59,18 +58,18 @@ export const formats = {
   }
 }
 
-export function rgbToCssRgb(o) {
+export function rgbToCssRgb(o: Rgb) {
   return `rgb(${o.r}, ${o.g}, ${o.b}`
 }
 
-export function colorIndexToCssRgb(palette, idx) {
+export function colorIndexToCssRgb(palette: Rgb[], idx: number) {
   return rgbToCssRgb(palette[idx])
 }
 
 export const charOrderUpper = [ 32, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 46, 44, 59, 33, 63, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 34, 35, 36, 37, 38, 39, 112, 110, 108, 123, 85, 73, 79, 80, 113, 114, 40, 41, 60, 62, 78, 77, 109, 125, 124, 126, 74, 75, 76, 122, 107, 115, 27, 29, 31, 30, 95, 105, 100, 111, 121, 98, 120, 119, 99, 116, 101, 117, 97, 118, 103, 106, 91, 43, 82, 70, 64, 45, 67, 68, 69, 84, 71, 66, 93, 72, 89, 47, 86, 42, 61, 58, 28, 0, 127, 104, 92, 102, 81, 87, 65, 83, 88, 90, 94, 96, 160, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 174, 172, 187, 161, 191, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 162, 163, 164, 165, 166, 167, 240, 238, 236, 251, 213, 201, 207, 208, 241, 242, 168, 169, 188, 190, 206, 205, 237, 253, 252, 254, 202, 203, 204, 250, 235, 243, 155, 157, 159, 158, 223, 233, 228, 239, 249, 226, 248, 247, 227, 244, 229, 245, 225, 246, 231, 234, 219, 171, 210, 198, 192, 173, 195, 196, 197, 212, 199, 194, 221, 200, 217, 175, 214, 170, 189, 186, 156, 128, 255, 232, 220, 230, 209, 215, 193, 211, 216, 218, 222, 224 ]
 export const charOrderLower = [ 32, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 46, 44, 59, 33, 63, 96, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 34, 35, 36, 37, 38, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 43, 45, 42, 61, 39, 0, 112, 110, 108, 123, 113, 114, 40, 41, 95, 105, 92, 127, 60, 62, 28, 47, 109, 125, 124, 126, 107, 115, 27, 29, 94, 102, 104, 58, 30, 31, 91, 122, 100, 111, 121, 98, 99, 119, 120, 101, 116, 117, 97, 103, 106, 118, 64, 93, 160, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 174, 172, 187, 161, 191, 224, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 162, 163, 164, 165, 166, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 171, 173, 170, 189, 167, 128, 240, 238, 236, 251, 241, 242, 168, 169, 223, 233, 220, 255, 188, 190, 156, 175, 237, 253, 252, 254, 235, 243, 155, 157, 222, 230, 232, 186, 158, 159, 219, 250, 228, 239, 249, 226, 227, 247, 248, 229, 244, 245, 225, 231, 234, 246, 192, 221 ]
 
-export const charScreencodeFromRowCol = (font, {row, col}) => {
+export const charScreencodeFromRowCol = (font: Font, {row, col}: Coord2) => {
   if (font === null) {
     return 0xa0
   }
@@ -82,7 +81,7 @@ export const charScreencodeFromRowCol = (font, {row, col}) => {
   return font.charOrder[idx]
 }
 
-export const rowColFromScreencode = (font, code) => {
+export const rowColFromScreencode = (font: Font, code: number) => {
   const charOrder = font.charOrder
   for (let i = 0; i < charOrder.length; i++) {
     if (charOrder[i] === code) {
@@ -95,9 +94,8 @@ export const rowColFromScreencode = (font, code) => {
   throw new Error('rowColFromScreencode - the impossible happened');
 }
 
-const FILE_VERSION = 1
-
-const framebufFields = (framebuf) => {
+//const FILE_VERSION = 1
+const framebufFields = (framebuf: Framebuf) => {
   return {
     width: framebuf.width,
     height: framebuf.height,
@@ -109,7 +107,7 @@ const framebufFields = (framebuf) => {
   }
 }
 
-export const saveFramebufs = (filename, framebufs, palette, options) => {
+export const saveFramebufs = (filename: string, framebufs: FramebufWithFont[], palette: Rgb[], options: ExportOptions) => {
   const { selectedFramebufIndex } = options
   const selectedFramebuf = framebufs[selectedFramebufIndex]
   const ext = path.extname(filename)
@@ -130,12 +128,14 @@ export const saveFramebufs = (filename, framebufs, palette, options) => {
   }
 }
 
+type GetFramebufByIdFunc = (fbidx: number) => Framebuf;
+
 const WORKSPACE_VERSION = 1
-export const saveWorkspace = (filename, screens, getFramebufById) => {
+export const saveWorkspace = (filename: string, screens: number[], getFramebufById: GetFramebufByIdFunc) => {
   const content = JSON.stringify({
     version: WORKSPACE_VERSION,
     // Renumber screen indices to 0,1,2,..,N and drop unused framebufs
-    screens: screens.map((dummy,idx )=> idx),
+    screens: screens.map((_t,idx )=> idx),
     framebufs: screens.map(fbid => {
       return {
         ...framebufFields(getFramebufById(fbid))
@@ -150,7 +150,7 @@ export const saveWorkspace = (filename, screens, getFramebufById) => {
   }
 }
 
-export const loadWorkspace = (filename, dispatch) => {
+export const loadWorkspace = (filename: string, dispatch: (thunk: RootStateThunk) => void) => {
   try {
     const content = fs.readFileSync(filename, 'utf-8')
     const c = JSON.parse(content)
@@ -162,22 +162,7 @@ export const loadWorkspace = (filename, dispatch) => {
   }
 }
 
-const loadJsonFramebuf = (filename, importFile) => {
-  try {
-    const content = fs.readFileSync(filename, 'utf-8')
-    const c = JSON.parse(content)
-    if (c.version === 1) {
-      importFile(workspace.framebufFromJson(c))
-    } else {
-      alert(`Unknown file format version ${c.version}!`)
-    }
-  }
-  catch(e) {
-    alert(`Failed to load file '${filename}'!`)
-  }
-}
-
-export const loadFramebuf = (filename, importFile) => {
+export const loadFramebuf = (filename: string, importFile: (fbs: Framebuf[]) => void) => {
   const ext = path.extname(filename)
   if (ext === '.c') {
     return loadMarqCFramebuf(filename, importFile)
@@ -186,7 +171,8 @@ export const loadFramebuf = (filename, importFile) => {
   }
 }
 
-export const sortRegion = ({min, max}) => {
+export const sortRegion = (region: { min: Coord2, max: Coord2}) => {
+  const { min, max } = region;
   const minx = Math.min(min.col, max.col)
   const miny = Math.min(min.row, max.row)
   const maxx = Math.max(min.col, max.col)
@@ -203,7 +189,7 @@ export const sortRegion = ({min, max}) => {
  * @param myArray {Array} array to split
  * @param chunk_size {Integer} Size of every group
  */
-export function chunkArray(myArray, chunk_size){
+export function chunkArray<T>(myArray: T[], chunk_size: number){
     var index = 0;
     var arrayLength = myArray.length;
     var tempArray = [];
@@ -218,7 +204,7 @@ export function chunkArray(myArray, chunk_size){
 }
 
 
-export const loadAppFile = (filename) => {
+export const loadAppFile = (filename: string) => {
   const appPath = electron.remote.app.getAppPath()
   return fs.readFileSync(path.resolve(appPath, filename));
 }
@@ -227,17 +213,25 @@ export const systemFontData = loadAppFile('assets/system-charset.bin')
 export const systemFontDataLower = loadAppFile('assets/system-charset-lower.bin')
 export const executablePrgTemplate = loadAppFile('assets/template.prg')
 
-function setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename) {
+function setWorkspaceFilenameWithTitle(setWorkspaceFilename: (fname: string) => void, filename: string) {
   setWorkspaceFilename(filename)
   ipcRenderer.send('set-title', `Petmate - ${filename}`)
 }
 
-export function loadWorkspaceNoDialog(dispatch, filename, setWorkspaceFilename) {
+type StoreDispatch = any;
+export function loadWorkspaceNoDialog(
+  dispatch: StoreDispatch,
+  filename: string,
+  setWorkspaceFilename: (fname: string) => void
+) {
   loadWorkspace(filename, dispatch)
   setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename)
 }
 
-export function dialogLoadWorkspace(dispatch, setWorkspaceFilename) {
+export function dialogLoadWorkspace(
+  dispatch: StoreDispatch,
+  setWorkspaceFilename: (fname: string) => void
+) {
   const {dialog} = electron.remote
   const filters = [
     {name: 'Petmate workspace', extensions: ['petmate']},
@@ -253,7 +247,11 @@ export function dialogLoadWorkspace(dispatch, setWorkspaceFilename) {
   }
 }
 
-export function dialogSaveAsWorkspace(dispatch, screens, getFramebufByIndex, setWorkspaceFilename) {
+export function dialogSaveAsWorkspace(
+  screens: number[],
+  getFramebufByIndex: (fbidx: number) => Framebuf,
+  setWorkspaceFilename: (fname: string) => void
+) {
   const {dialog} = electron.remote
   const filters = [
     {name: 'Petmate workspace file', extensions: ['petmate']},
@@ -266,7 +264,7 @@ export function dialogSaveAsWorkspace(dispatch, screens, getFramebufByIndex, set
   setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename)
 }
 
-export function dialogExportFile(type, framebufs, palette, options) {
+export function dialogExportFile(type: FileFormat, framebufs: FramebufWithFont[], palette: Rgb[], options: ExportOptions) {
   const {dialog} = electron.remote
   const filters = [
     {name: type.name, extensions: [type.ext]}
@@ -278,7 +276,7 @@ export function dialogExportFile(type, framebufs, palette, options) {
   saveFramebufs(filename, framebufs, palette, options)
 }
 
-export function dialogImportFile(type, importFile) {
+export function dialogImportFile(type: FileFormat, importFile: (fbs: Framebuf[]) => void) {
   const {dialog} = electron.remote
   const filters = [
     { name: type.name, extensions: [type.ext] }
@@ -294,7 +292,7 @@ export function dialogImportFile(type, importFile) {
   }
 }
 
-export function loadSettings(dispatchSettingsLoad) {
+export function loadSettings(dispatchSettingsLoad: (json: Settings) => void) {
   let settingsFile = path.join(electron.remote.app.getPath('userData'), 'Settings')
   if (fs.existsSync(settingsFile)) {
     const c = fs.readFileSync(settingsFile, 'utf-8')

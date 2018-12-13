@@ -65,7 +65,7 @@ const rowColFromScreencodeMemoized = memoize(rowColFromScreencodeMemoized_)
 
 const computeScreencodeWithTransform = (rowcol: Coord2, font: Font, transform: Transform) => {
   const sc = charScreencodeFromRowCol(font, rowcol)
-  return findTransformedChar(font, sc, transform)
+  return findTransformedChar(font, sc!, transform)
 }
 const computeScreencodeWithTransformMemoized = memoize(computeScreencodeWithTransform)
 export const getScreencodeWithTransform = (rowcol: Coord2, font: Font, transform: Transform) => {
