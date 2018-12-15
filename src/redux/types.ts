@@ -2,6 +2,7 @@
 import { StateWithHistory } from 'redux-undo'
 import { Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
+import { FileFormat } from './typesExport';
 
 export type Charset = 'upper' | 'lower';
 
@@ -21,12 +22,6 @@ export interface Font {
   charOrder: number[];
 };
 
-export interface FileFormat {
-  name: string;
-  ext: string;
-  exportOptions: boolean;
-}
-
 export interface Framebuf {
   readonly framebuf: Pixel[][];
   readonly width: number;
@@ -36,6 +31,13 @@ export interface Framebuf {
   readonly charset: Charset;
   readonly name?: string;
 };
+
+// This is the basically the same as the redux Framebuf except
+// that it's been amended with some extra fields with selectors
+// when an export is initiated.
+export interface FramebufWithFont extends Framebuf {
+  font: Font;
+}
 
 export interface Rgb {
   r: number;
@@ -103,7 +105,7 @@ export interface Toolbar {
   metaKey: boolean;
   shiftKey: boolean;
   showSettings: boolean;
-  showExport: { show: boolean, type?: any}; // TODO ts
+  showExport: { show: boolean, fmt?: FileFormat}; // fmt undefined only when show=false
   selectedPaletteRemap: number;
   canvasGrid: boolean;
   shortcutsActive: boolean;
@@ -123,5 +125,6 @@ export interface RootState {
 
 export type RootStateThunk = ThunkAction<void, RootState, undefined, Action>;
 
-export type ExportOptions = any; // TODO ts
 export type SettingsJson = any;
+
+export * from './typesExport'

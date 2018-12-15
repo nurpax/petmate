@@ -1,6 +1,5 @@
 
-import { FramebufWithFont } from './types'
-import { RgbPalette } from '../../redux/types'
+import { FramebufWithFont, RgbPalette } from '../../redux/types'
 
 export function framebufToPixelsIndexed(fb: FramebufWithFont): Buffer  {
   const { width, height, framebuf, backgroundColor, font } = fb

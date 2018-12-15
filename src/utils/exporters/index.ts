@@ -1,9 +1,8 @@
 
 import { chunkArray, executablePrgTemplate } from '../../utils'
 import { framebufToPixels } from './util'
-import { FramebufWithFont, ExportOptions, PngExportOptions } from './types'
 
-import { Framebuf, RgbPalette } from '../../redux/types'
+import { FramebufWithFont, FileFormatPng, Framebuf, RgbPalette, FileFormat } from '../../redux/types'
 import { CHARSET_LOWER } from '../../redux/editor'
 
 import { saveAsm } from './asm'
@@ -42,8 +41,9 @@ function doublePixels(buf: Buffer, w: number, h: number): Buffer {
   return dst
 }
 
-const savePNG = (filename: string, fb: FramebufWithFont, palette: RgbPalette, options: PngExportOptions) => {
+const savePNG = (filename: string, fb: FramebufWithFont, palette: RgbPalette, fmt: FileFormatPng) => {
   try {
+    const options = fmt.exportOptions;
     const { width, height } = fb
     const dwidth = width*8
     const dheight = height*8
@@ -102,7 +102,7 @@ function convertToMarqC(lines: string[], fb: Framebuf, idx: number) {
   lines.push('};')
 }
 
-function saveMarqC(filename: string, fbs: Framebuf[], _options: ExportOptions) {
+function saveMarqC(filename: string, fbs: Framebuf[], _options: FileFormat) {
   try {
     let lines: string[] = []
     fbs.forEach((fb,idx) => convertToMarqC(lines, fb, idx))
@@ -121,7 +121,7 @@ function saveMarqC(filename: string, fbs: Framebuf[], _options: ExportOptions) {
   }
 }
 
-function saveExecutablePRG(filename: string, fb: Framebuf, _options: ExportOptions) {
+function saveExecutablePRG(filename: string, fb: Framebuf, _options: FileFormat) {
   try {
     const {
       width,

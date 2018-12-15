@@ -2,9 +2,7 @@
 import { framebufToPixelsIndexed } from './util'
 
 import { fs } from '../electronImports'
-import { FramebufWithFont } from  './types';
-import { RgbPalette } from  '../../redux/types';
-import { GifExportOptions } from  './types';
+import { FramebufWithFont, RgbPalette, FileFormatGif } from  '../../redux/types';
 
 type GifEncoder = any;
 const GifEncoder: GifEncoder = require('gif-encoder');
@@ -14,9 +12,10 @@ const exportGIF = (encoder: GifEncoder, fb: FramebufWithFont) => {
   encoder.addFrame(pixels)
 }
 
-export const saveGIF = (filename: string, fbs: FramebufWithFont[], palette: RgbPalette, options: GifExportOptions) => {
+export const saveGIF = (filename: string, fbs: FramebufWithFont[], palette: RgbPalette, fmt: FileFormatGif) => {
   try {
-    const selectedFb = fbs[options.selectedFramebufIndex]
+    const options = fmt.exportOptions;
+    const selectedFb = fbs[fmt.commonExportParams.selectedFramebufIndex]
 
     const gifPalette = Array(16*3).fill(0)
     palette.forEach(({r, g, b}, idx) => {

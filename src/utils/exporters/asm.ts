@@ -3,8 +3,7 @@ import { chunkArray } from '../../utils'
 
 import { fs } from '../electronImports'
 import { CHARSET_UPPER } from '../../redux/editor';
-import { Framebuf } from  '../../redux/types';
-import { AsmExportOptions } from './types'
+import { Framebuf, FileFormatAsm } from  '../../redux/types';
 import * as fp from '../fp'
 
 interface InitCodeParams {
@@ -181,7 +180,8 @@ function convertToAsm(lines: string[], fb: Framebuf, {mkLabel, byte}: SyntaxPara
   bytesToCommaDelimited(lines, bytes, width, byte)
 }
 
-const saveAsm = (filename: string, fbs: Framebuf[], options: AsmExportOptions) => {
+const saveAsm = (filename: string, fbs: Framebuf[], fmt: FileFormatAsm) => {
+  const options = fmt.exportOptions;
   let mkInitCode = null
   let syntaxParams: SyntaxParams;
   if (options.assembler === 'kickass') {
@@ -210,8 +210,8 @@ const saveAsm = (filename: string, fbs: Framebuf[], options: AsmExportOptions) =
   try {
     let lines: string[] = [];
     // Single screen export?
-    const selectedFb = fbs[options.selectedFramebufIndex]
-    if (options.currentScreenOnly) {
+    const selectedFb = fbs[fmt.commonExportParams.selectedFramebufIndex]
+    if (fmt.exportOptions.currentScreenOnly) {
       convertToAsm(lines, selectedFb, syntaxParams)
     } else {
       fbs.forEach((fb) => convertToAsm(lines, fb, syntaxParams))

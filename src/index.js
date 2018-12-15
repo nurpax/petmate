@@ -28,7 +28,7 @@ function dispatchExport(type) {
   // Either open an export options modal or go to export directly if the
   // output format doesn't need any configuration.
   if (formats[type.ext].exportOptions) {
-    store.dispatch(Toolbar.actions.setShowExport({show:true, type}))
+    store.dispatch(Toolbar.actions.setShowExport({show:true, fmt: type}))
   } else {
     store.dispatch(ReduxRoot.actions.fileExportAs(type, undefined))
   }

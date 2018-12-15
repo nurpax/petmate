@@ -10,6 +10,7 @@ import {
   saveBASIC,
   saveGIF
 } from './exporters'
+
 import {
   drawLine
 } from './line'
@@ -17,44 +18,68 @@ import {
 import { colorPalettes } from './palette'
 
 import { electron, fs, path } from './electronImports'
-import { FileFormat, Rgb, Font, Coord2, Framebuf, ExportOptions, RootStateThunk, Settings } from '../redux/types';
-import { FramebufWithFont } from './exporters/types';
+import {
+  FileFormat, Rgb, Font, Coord2, Framebuf, RootStateThunk, Settings,
+  FramebufWithFont,
+} from '../redux/types';
+
 const { ipcRenderer } = electron
 
-
 // TODO import VICE VPL files
+
+const defaultExportCommon = {
+  selectedFramebufIndex: 0
+}
 
 // TODO ts use FileFormat type
 export const formats: { [index: string]: FileFormat } = {
   png: {
     name: 'PNG .png',
     ext: 'png',
-    exportOptions: true
+    commonExportParams: defaultExportCommon,
+    exportOptions: {
+      alphaPixel: false,
+      doublePixels: false
+    }
   },
   c: {
     name: 'PETSCII .c',
     ext: 'c',
-    exportOptions: false
+    commonExportParams: defaultExportCommon,
   },
   prg: {
     name: 'Executable .prg',
     ext: 'prg',
-    exportOptions: false
+    commonExportParams: defaultExportCommon,
   },
   asm: {
     name: 'Assembler source .asm',
     ext: 'asm',
-    exportOptions: true
+    commonExportParams: defaultExportCommon,
+    exportOptions: {
+      currentScreenOnly: true,
+      standalone: false,
+      assembler: 'kickass'
+    }
   },
   bas: {
     name: 'BASIC listing .bas',
     ext: 'bas',
-    exportOptions: false
+    commonExportParams: defaultExportCommon,
+    exportOptions: {
+      currentScreenOnly: true,
+      standalone: true
+    }
   },
   gif: {
     name: 'GIF .gif',
     ext: 'gif',
-    exportOptions: true
+    commonExportParams: defaultExportCommon,
+    exportOptions: {
+      animMode: 'anim',
+      loopMode: 'loop',
+      delayMS: '250'
+    }
   }
 }
 
@@ -107,25 +132,23 @@ const framebufFields = (framebuf: Framebuf) => {
   }
 }
 
-export const saveFramebufs = (filename: string, framebufs: FramebufWithFont[], palette: Rgb[], options: ExportOptions) => {
-  const { selectedFramebufIndex } = options
-  const selectedFramebuf = framebufs[selectedFramebufIndex]
-  const ext = path.extname(filename)
-  if (ext === '.png') {
-    return savePNG(filename, selectedFramebuf, palette, options)
-  } else if (ext === '.gif') {
-    return saveGIF(filename, framebufs, palette, options)
-  } else if (ext === '.c') {
-    return saveMarqC(filename, framebufs, options)
-  } else if (ext === '.asm') {
-    return saveAsm(filename, framebufs, options)
-  } else if (ext === '.prg') {
-    return saveExecutablePRG(filename, selectedFramebuf, options)
-  } else if (ext === '.bas') {
-    return saveBASIC(filename, framebufs, options)
-  } else {
-    alert(`Unsupported export format ${ext}!`)
+const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWithFont[], palette: Rgb[]) => {
+  const { selectedFramebufIndex } = fmt.commonExportParams;
+  const selectedFramebuf = framebufs[selectedFramebufIndex];
+  if (fmt.ext == 'png') {
+    return savePNG(filename, selectedFramebuf, palette, fmt);
+  } else if (fmt.ext  == 'gif') {
+    return saveGIF(filename, framebufs, palette, fmt);
+  } else if (fmt.ext == 'c') {
+    return saveMarqC(filename, framebufs, fmt);
+  } else if (fmt.ext == 'asm') {
+    return saveAsm(filename, framebufs, fmt);
+  } else if (fmt.ext == 'prg') {
+    return saveExecutablePRG(filename, selectedFramebuf, fmt);
+  } else if (fmt.ext === 'bas') {
+    return saveBASIC(filename, framebufs, fmt);
   }
+  throw new Error("shouldn't happen");
 }
 
 type GetFramebufByIdFunc = (fbidx: number) => Framebuf;
@@ -264,16 +287,16 @@ export function dialogSaveAsWorkspace(
   setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename)
 }
 
-export function dialogExportFile(type: FileFormat, framebufs: FramebufWithFont[], palette: Rgb[], options: ExportOptions) {
+export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[], palette: Rgb[]) {
   const {dialog} = electron.remote
   const filters = [
-    {name: type.name, extensions: [type.ext]}
+    {name: fmt.name, extensions: [fmt.ext]}
   ]
   const filename = dialog.showSaveDialog({properties: ['openFile'], filters})
   if (filename === undefined) {
     return
   }
-  saveFramebufs(filename, framebufs, palette, options)
+  saveFramebufs(fmt, filename, framebufs, palette)
 }
 
 export function dialogImportFile(type: FileFormat, importFile: (fbs: Framebuf[]) => void) {

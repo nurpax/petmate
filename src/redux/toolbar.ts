@@ -13,6 +13,7 @@ import {
 import * as utils from '../utils'
 import * as brush from './brush'
 import { ActionsUnion, createAction, updateField, DispatchPropsFromActions } from './typeUtils'
+import { FileFormat } from './typesExport';
 
 const emptyTransform: Transform = {
   mirror: 0,
@@ -163,7 +164,7 @@ const actionCreators = {
   setMetaKey: (flag: boolean) => createAction('Toolbar/SET_META_KEY', flag),
   setShiftKey: (flag: boolean) => createAction('Toolbar/SET_SHIFT_KEY', flag),
   setShowSettings: (flag: boolean) => createAction('Toolbar/SET_SHOW_SETTINGS', flag),
-  setShowExport: (show: {show:boolean, type?:any}) => createAction('Toolbar/SET_SHOW_EXPORT', show),
+  setShowExport: (show: {show:boolean, fmt?:FileFormat}) => createAction('Toolbar/SET_SHOW_EXPORT', show),
   setSelectedPaletteRemap: (remapIdx: number) => createAction('Toolbar/SET_SELECTED_PALETTE_REMAP', remapIdx),
   setCanvasGrid: (flag: boolean) => createAction('Toolbar/SET_CANVAS_GRID', flag),
   setShortcutsActive: (flag: boolean) => createAction('Toolbar/SET_SHORTCUTS_ACTIVE', flag),

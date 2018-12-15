@@ -12,8 +12,7 @@ import {
   Framebuf,
   RootState,
   FileFormat,
-  SettingsJson,
-  ExportOptions
+  SettingsJson
 } from './types'
 import { ActionsUnion, createAction } from './typeUtils'
 import { Framebuffer } from './editor'
@@ -100,7 +99,7 @@ export const actions = {
     }
   },
 
-  fileExportAs: (type: FileFormat, options: ExportOptions): ThunkAction<void, RootState, undefined, Action> => {
+  fileExportAs: (type: FileFormat): ThunkAction<void, RootState, undefined, Action> => {
     return (_dispatch, getState) => {
       const state = getState()
       const screens = screensSelectors.getScreens(state)
@@ -120,10 +119,13 @@ export const actions = {
         }
       })
       const palette = getSettingsCurrentColorPalette(state)
-      dialogExportFile(type, framebufs, palette, {
-        ...options,
-        selectedFramebufIndex: remappedFbIndex
-      })
+      const amendedFormatOptions: FileFormat = {
+        ...type,
+        commonExportParams: {
+          selectedFramebufIndex: remappedFbIndex
+        }
+      }
+      dialogExportFile(amendedFormatOptions, framebufs, palette);
     }
   },
 

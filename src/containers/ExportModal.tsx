@@ -1,5 +1,4 @@
-import React, { Component, Fragment } from 'react'
-import PropTypes from 'prop-types'
+import React, { Component, Fragment, StatelessComponent as SFC } from 'react'
 import { connect } from 'react-redux'
 
 import Modal from '../components/Modal'
@@ -11,20 +10,28 @@ import {
   NumberInput
 } from '../components/formHelpers'
 
-import { Toolbar } from '../redux/toolbar'
-import { Settings } from '../redux/settings'
+import * as toolbar from '../redux/toolbar'
 import * as ReduxRoot from '../redux/root'
 
-import * as selectors from '../redux/selectors'
 import * as utils from '../utils'
+import { FileFormatGif, FileFormatPng, FileFormatAsm, FileFormatBas, FileFormat, RootState } from '../redux/types';
+import { bindActionCreators } from 'redux';
 
-const ModalTitle = ({children}) => <h2>{children}</h2>
-const Title3 = ({children}) => <h3>{children}</h3>
-const Title = ({children}) => <h4>{children}</h4>
+const ModalTitle: SFC<{}> = ({children}) => <h2>{children}</h2>
+const Title: SFC<{}> = ({children}) => <h4>{children}</h4>
 
-class GIFExportForm extends Component {
+interface ExportPropsBase {
+  // Set via connectFormStateTyped
+  setField: (name: string, value: string) => void;
+}
+
+interface GIFExportFormatProps extends ExportPropsBase {
+  state: FileFormatGif['exportOptions'];
+}
+
+class GIFExportForm extends Component<GIFExportFormatProps> {
   render () {
-    let fps = null
+    let fps: string|null = null
     const delayMS = this.props.state.delayMS
     if (delayMS !== '') {
       const delayInt = parseInt(this.props.state.delayMS, 10)
@@ -91,7 +98,11 @@ class GIFExportForm extends Component {
   }
 }
 
-class PNGExportForm extends Component {
+interface PNGExportFormatProps extends ExportPropsBase {
+  state: FileFormatPng['exportOptions'];
+}
+
+class PNGExportForm extends Component<PNGExportFormatProps> {
   render () {
     return (
       <Form state={this.props.state} setField={this.props.setField}>
@@ -105,7 +116,11 @@ class PNGExportForm extends Component {
   }
 }
 
-class ASMExportForm extends Component {
+interface ASMExportFormatProps extends ExportPropsBase {
+  state: FileFormatAsm['exportOptions'];
+}
+
+class ASMExportForm extends Component<ASMExportFormatProps> {
   render () {
     return (
       <Form state={this.props.state} setField={this.props.setField}>
@@ -141,11 +156,15 @@ class ASMExportForm extends Component {
   }
 }
 
-class BASICExportForm extends Component {
+interface BASICExportFormatProps extends ExportPropsBase {
+  state: FileFormatBas['exportOptions'];
+}
+
+class BASICExportForm extends Component<BASICExportFormatProps> {
   render () {
     return (
       <Form state={this.props.state} setField={this.props.setField}>
-        <Title>Assembler export options</Title>
+        <Title>BASIC export options</Title>
         <br/>
         <br/>
         <Checkbox
@@ -161,7 +180,31 @@ class BASICExportForm extends Component {
   }
 }
 
-class ExportForm extends Component {
+interface ExportModalState {
+  [key: string]: FileFormat['exportOptions'];
+  png: FileFormatPng['exportOptions'];
+  asm: FileFormatAsm['exportOptions'];
+  bas: FileFormatBas['exportOptions'];
+  gif: FileFormatGif['exportOptions'];
+}
+
+// Type to select one format branch from ExportModalState
+type State<T extends keyof ExportModalState> = {
+  state: ExportModalState[T];
+  setState: any; // TODO ts
+}
+
+export function connectFormStateTyped<T extends FileFormat['ext']>({state, setState}: State<T>, subtree: T) {
+  return connectFormState({state, setState}, subtree);
+}
+
+interface ExportFormProps {
+  ext: string | null;
+  state: ExportModalState;
+  setState: any;
+}
+
+class ExportForm extends Component<ExportFormProps> {
   render () {
     if (this.props.ext === null) {
       return null
@@ -191,13 +234,25 @@ class ExportForm extends Component {
           <GIFExportForm {...connectFormState(this.props, 'gif')} />
         )
       default:
-        console.error('unknown export format', this.props.ext)
+        throw new Error(`unknown export format ${this.props.ext}`);
     }
   }
 }
 
-class ExportModal_ extends Component {
-  state = {
+interface ExportModalProps {
+  showExport: {
+    show: boolean;
+    fmt?: FileFormat; // undefined if show=false
+  };
+};
+
+interface ExportModalDispatch {
+  Toolbar: toolbar.PropsFromDispatch;
+  fileExportAs: (fmt: FileFormat) => void;
+}
+
+class ExportModal_ extends Component<ExportModalProps & ExportModalDispatch, ExportModalState> {
+  state: ExportModalState = {
     png: {
       alphaPixel: false,
       doublePixels: false
@@ -219,17 +274,28 @@ class ExportModal_ extends Component {
   }
 
   handleOK = () => {
-    const { showExport } = this.props
-    this.props.Toolbar.setShowExport({show:false})
-    const ext = showExport.type.ext
-    this.props.fileExportAs(showExport.type, this.state[ext])
+    const { showExport } = this.props;
+    this.props.Toolbar.setShowExport({show:false});
+    const fmt = showExport.fmt!;
+    const ext = fmt.ext;
+    if (fmt.exportOptions == undefined) {
+      // We shouldn't be here if there are no export UI options
+      return;
+    }
+    const amendedFmt = {
+      ...showExport.fmt,
+      exportOptions: {
+        ...this.state[ext]
+      }
+    };
+    this.props.fileExportAs(amendedFmt as FileFormat);
   }
 
   handleCancel = () => {
     this.props.Toolbar.setShowExport({show:false})
   }
 
-  handleSetState = (cb) => {
+  handleSetState = (cb: (s: ExportModalState) => void) => {
     this.setState(prevState => {
       return cb(prevState)
     })
@@ -237,8 +303,8 @@ class ExportModal_ extends Component {
 
   render () {
     const { showExport } = this.props
-    const exportType = showExport.show ? showExport.type : null
-    const exportExt = exportType !== null ? exportType.ext : null
+    const exportType = showExport.show ? showExport.fmt : undefined
+    const exportExt = exportType !== undefined ? exportType.ext : null
     return (
       <div>
         <Modal showModal={this.props.showExport.show}>
@@ -270,15 +336,15 @@ class ExportModal_ extends Component {
 }
 
 export default connect(
-  (state) => {
+  (state: RootState) => {
     return {
       showExport: state.toolbar.showExport
     }
   },
   (dispatch) => {
     return {
-      Toolbar: Toolbar.bindDispatch(dispatch),
-      fileExportAs: (fmt, options) => dispatch(ReduxRoot.actions.fileExportAs(fmt, options))
+      Toolbar: bindActionCreators(toolbar.Toolbar.actions, dispatch),
+      fileExportAs: bindActionCreators(ReduxRoot.actions.fileExportAs, dispatch)
     }
   }
 )(ExportModal_)
