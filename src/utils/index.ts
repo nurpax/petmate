@@ -38,6 +38,7 @@ export const formats: { [index: string]: FileFormat } = {
     ext: 'png',
     commonExportParams: defaultExportCommon,
     exportOptions: {
+      borders: false,
       alphaPixel: false,
       doublePixels: false
     }
@@ -76,7 +77,8 @@ export const formats: { [index: string]: FileFormat } = {
     ext: 'gif',
     commonExportParams: defaultExportCommon,
     exportOptions: {
-      animMode: 'anim',
+      borders: false,
+      animMode: 'single',
       loopMode: 'loop',
       delayMS: '250'
     }

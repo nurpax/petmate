@@ -23,6 +23,7 @@ export interface FileFormatGif extends FileFormatBase {
     delayMS: string;
     animMode: 'single' | 'anim';
     loopMode: 'once' | 'loop' | 'pingpong';
+    borders: boolean;
   };
 }
 
@@ -31,6 +32,7 @@ export interface FileFormatPng extends FileFormatBase {
   exportOptions: {
     doublePixels: boolean;
     alphaPixel: boolean;
+    borders: boolean;
   };
 }
 

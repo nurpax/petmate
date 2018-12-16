@@ -78,6 +78,8 @@ class GIFExportForm extends Component<GIFExportFormatProps> {
       <Form state={this.props.state} setField={this.props.setField}>
         <Title>GIF export options</Title>
         <br/>
+        <Checkbox name='borders' label='Include borders' />
+        <br/>
         <label>Gif anim mode:</label>
         <br/>
         <br/>
@@ -111,6 +113,7 @@ class PNGExportForm extends Component<PNGExportFormatProps> {
         <br/>
         <Checkbox name='alphaPixel' label='Alpha pixel work-around for Twitter' />
         <Checkbox name='doublePixels' label='Double pixels' />
+        <Checkbox name='borders' label='Include borders' />
       </Form>
     )
   }
@@ -254,6 +257,7 @@ interface ExportModalDispatch {
 class ExportModal_ extends Component<ExportModalProps & ExportModalDispatch, ExportModalState> {
   state: ExportModalState = {
     png: {
+      borders: true,
       alphaPixel: false,
       doublePixels: false
     },
@@ -267,7 +271,8 @@ class ExportModal_ extends Component<ExportModalProps & ExportModalDispatch, Exp
       standalone: false
     },
     gif: {
-      animMode: 'anim',
+      borders: true,
+      animMode: 'single',
       loopMode: 'loop',
       delayMS: '250'
     }
