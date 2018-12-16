@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from 'react-dom';
+import ReactDOM from 'react-dom';
 import Root from './containers/Root';
 import './app.global.css';
 
@@ -13,28 +13,31 @@ import configureStore from './store/configureStore'
 
 // TODO prod builds
 import { electron } from './utils/electronImports'
+import { FileFormat } from './redux/types';
 
 const store = configureStore();
 // Create one screen/framebuffer so that we have a canvas to draw on
 store.dispatch(Screens.actions.newScreen())
 
-render(<Root store={store} history={undefined} />,
+// Render the application
+ReactDOM.render(
+  React.createElement(Root, { store }, null),
   document.getElementById('root')
 );
 
 loadSettings((j) => store.dispatch(settings.actions.load(j)))
 
-function dispatchExport(type) {
+function dispatchExport(fmt: FileFormat) {
   // Either open an export options modal or go to export directly if the
   // output format doesn't need any configuration.
-  if (formats[type.ext].exportOptions) {
-    store.dispatch(Toolbar.actions.setShowExport({show:true, fmt: type}))
+  if (formats[fmt.ext].exportOptions) {
+    store.dispatch(Toolbar.actions.setShowExport({show:true, fmt}))
   } else {
-    store.dispatch(ReduxRoot.actions.fileExportAs(type, undefined))
+    store.dispatch(ReduxRoot.actions.fileExportAs(fmt))
   }
 }
 
-electron.ipcRenderer.on('window-blur', (event, message) => {
+electron.ipcRenderer.on('window-blur', (_event: Event, _message: any) => {
   store.dispatch(Toolbar.actions.setShortcutsActive(false))
   store.dispatch(Toolbar.actions.clearModKeyState())
 })
@@ -49,7 +52,7 @@ window.addEventListener('blur', () => {
 })
 
 // Listen to commands from the main process
-electron.ipcRenderer.on('menu', (event, message) => {
+electron.ipcRenderer.on('menu', (_event: Event, message: string) => {
   switch (message) {
     case 'undo':
       store.dispatch(ReduxRoot.actions.undo())

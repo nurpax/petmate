@@ -12,7 +12,8 @@ import {
   Framebuf,
   RootState,
   FileFormat,
-  SettingsJson
+  SettingsJson,
+  RootStateThunk
 } from './types'
 import { ActionsUnion, createAction } from './typeUtils'
 import { Framebuffer } from './editor'
@@ -56,7 +57,7 @@ export type Actions = ActionsUnion<typeof actionCreators>
 export const actions = {
   ...actionCreators,
 
-  fileOpenWorkspace: (): ThunkAction<void, RootState, undefined, Action> => {
+  fileOpenWorkspace: (): RootStateThunk => {
     return (dispatch, _getState) => {
       const setWorkspaceFilename = (filename: string) => dispatch(Toolbar.actions.setWorkspaceFilename(filename))
       dialogLoadWorkspace(dispatch, setWorkspaceFilename)
@@ -65,7 +66,7 @@ export const actions = {
 
   fileSaveAsWorkspace: saveAsWorkspace,
 
-  fileSaveWorkspace: (): ThunkAction<void, RootState, undefined, Action> => {
+  fileSaveWorkspace: (): RootStateThunk => {
     return (dispatch, getState) => {
       const state = getState()
       const screens = screensSelectors.getScreens(state)
@@ -78,7 +79,7 @@ export const actions = {
     }
   },
 
-  fileImport: (type: FileFormat): ThunkAction<void, RootState, undefined, Action> => {
+  fileImport: (type: FileFormat): RootStateThunk => {
     return (dispatch, getState) => {
       const state = getState()
       const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state)
@@ -91,7 +92,7 @@ export const actions = {
     }
   },
 
-  fileImportAppend: (type: FileFormat): ThunkAction<void, RootState, undefined, Action> => {
+  fileImportAppend: (type: FileFormat): RootStateThunk => {
     return (dispatch, _getState) => {
       dialogImportFile(type, (framebufs: Framebuf[]) => {
         dispatch(importFramebufs(framebufs, true));
@@ -99,7 +100,7 @@ export const actions = {
     }
   },
 
-  fileExportAs: (type: FileFormat): ThunkAction<void, RootState, undefined, Action> => {
+  fileExportAs: (fmt: FileFormat): RootStateThunk => {
     return (_dispatch, getState) => {
       const state = getState()
       const screens = screensSelectors.getScreens(state)
@@ -120,7 +121,7 @@ export const actions = {
       })
       const palette = getSettingsCurrentColorPalette(state)
       const amendedFormatOptions: FileFormat = {
-        ...type,
+        ...fmt,
         commonExportParams: {
           selectedFramebufIndex: remappedFbIndex
         }
@@ -129,14 +130,14 @@ export const actions = {
     }
   },
 
-  resetState: (): ThunkAction<void, RootState, undefined, Action> => {
+  resetState: (): RootStateThunk => {
     return (dispatch, _getState) => {
       dispatch(actionCreators.resetStateAction());
       loadSettings((j: SettingsJson) => dispatch(settings.actions.load(j)))
     }
   },
 
-  undo: (): ThunkAction<void, RootState, undefined, Action> => {
+  undo: ():  RootStateThunk => {
     return (dispatch, getState) => {
       const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(getState())
       dispatch({
@@ -145,7 +146,7 @@ export const actions = {
       })
     }
   },
-  redo: (): ThunkAction<void, RootState, undefined, Action> => {
+  redo: (): RootStateThunk => {
     return (dispatch, getState) => {
       const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(getState())
       dispatch({
