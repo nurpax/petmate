@@ -51,3 +51,31 @@ export function framebufToPixels(fb: FramebufWithFont, palette: RgbPalette): Buf
   return buf
 }
 
+export function doublePixels(buf: Buffer, w: number, h: number): Buffer {
+  const dstPitch = 2*w*4
+  const dst = Buffer.alloc(2*w * 2*h * 4)
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const srcOffs = (x + y*w)*4
+      const dstOffs = (x*2*4 + 2*y*dstPitch)
+      const b = buf[srcOffs + 0]
+      const g = buf[srcOffs + 1]
+      const r = buf[srcOffs + 2]
+      const a = buf[srcOffs + 3]
+
+      for (let o = 0; o < dstPitch*2; o+=dstPitch) {
+        dst[o + dstOffs + 0] = b
+        dst[o + dstOffs + 1] = g
+        dst[o + dstOffs + 2] = r
+        dst[o + dstOffs + 3] = a
+
+        dst[o + dstOffs + 4] = b
+        dst[o + dstOffs + 5] = g
+        dst[o + dstOffs + 6] = r
+        dst[o + dstOffs + 7] = a
+      }
+    }
+  }
+  return dst
+}
+
