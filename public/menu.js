@@ -2,7 +2,8 @@
 const { app, Menu, shell, BrowserWindow } = require('electron');
 
 const importers = [
-  { label: 'PETSCII (.c)', cmd: 'import-marq-c' }
+  { label: 'PETSCII (.c)', cmd: 'import-marq-c' },
+  { label: 'PNG (.png)', cmd: 'import-png' }
 ]
 
 const exporters = [

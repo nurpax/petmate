@@ -165,6 +165,7 @@ const actionCreators = {
   setShiftKey: (flag: boolean) => createAction('Toolbar/SET_SHIFT_KEY', flag),
   setShowSettings: (flag: boolean) => createAction('Toolbar/SET_SHOW_SETTINGS', flag),
   setShowExport: (show: {show:boolean, fmt?:FileFormat}) => createAction('Toolbar/SET_SHOW_EXPORT', show),
+  setShowImport: (show: {show:boolean, fmt?:FileFormat}) => createAction('Toolbar/SET_SHOW_IMPORT', show),
   setSelectedPaletteRemap: (remapIdx: number) => createAction('Toolbar/SET_SELECTED_PALETTE_REMAP', remapIdx),
   setCanvasGrid: (flag: boolean) => createAction('Toolbar/SET_CANVAS_GRID', flag),
   setShortcutsActive: (flag: boolean) => createAction('Toolbar/SET_SHORTCUTS_ACTIVE', flag),
@@ -199,14 +200,16 @@ export class Toolbar {
           ctrlKey,
           selectedTool,
           showSettings,
-          showExport
+          showExport,
+          showImport
         } = state.toolbar
         const noMods = !shiftKey && !metaKey && !ctrlKey
         const metaOrCtrl = metaKey || ctrlKey
 
         const inModal =
           state.toolbar.showExport.show ||
-          state.toolbar.showSettings
+          state.toolbar.showImport.show ||
+          state.toolbar.showSettings;
 
         if (inModal) {
           return
@@ -267,6 +270,9 @@ export class Toolbar {
             }
             if (showExport) {
               dispatch(Toolbar.actions.setShowExport({show:false}))
+            }
+            if (showImport) {
+              dispatch(Toolbar.actions.setShowImport({show:false}))
             }
           }
         }
@@ -493,6 +499,7 @@ export class Toolbar {
       shiftKey: false,
       showSettings: false,
       showExport: { show: false },
+      showImport: { show: false },
       selectedPaletteRemap: 0,
       canvasGrid: false,
       shortcutsActive: true
@@ -605,6 +612,8 @@ export class Toolbar {
         return updateField(state, 'showSettings', action.data);
       case 'Toolbar/SET_SHOW_EXPORT':
         return updateField(state, 'showExport', action.data);
+      case 'Toolbar/SET_SHOW_IMPORT':
+        return updateField(state, 'showImport', action.data);
       case 'Toolbar/SET_SELECTED_PALETTE_REMAP':
         return updateField(state, 'selectedPaletteRemap', action.data);
       case 'Toolbar/SET_CANVAS_GRID':
