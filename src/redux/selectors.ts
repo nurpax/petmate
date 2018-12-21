@@ -25,7 +25,7 @@ export const getCurrentFramebuf = (state: RootState) => {
   return getFramebufByIndex(state, getCurrentScreenFramebufIndex(state))
 }
 
-const getFontBits = (charset: Charset) => {
+export const getFontBits = (charset: Charset) => {
   if (charset !== CHARSET_UPPER && charset !== CHARSET_LOWER) {
     console.error('unknown charset ', charset)
   }

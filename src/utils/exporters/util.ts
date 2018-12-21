@@ -1,13 +1,23 @@
 
 import { FramebufWithFont, RgbPalette } from '../../redux/types'
 
+// These match what VICE exports as a PNG.
+const BORDER_LEFT_WIDTH = 32;
+const BORDER_RIGHT_WIDTH = 32;
+const BORDER_TOP_HEIGHT = 35;
+const BORDER_BOTTOM_HEIGHT = 37;
+
 export function computeOutputImageDims(fb: FramebufWithFont, borders: boolean) {
   const { width, height } = fb;
-  const borderWidth = borders ? 32 : 0;  // 384x272 for 320x200
-  const borderHeight = borders ? 36 : 0;
-  const imgWidth = width*8 + borderWidth*2;
-  const imgHeight = height*8 + borderHeight*2;
-  return { imgWidth, imgHeight, imgXOffset: borderWidth, imgYOffset: borderHeight };
+  const borderLeftWidth = borders ? BORDER_LEFT_WIDTH : 0;  // 384x272 for 320x200
+  const borderTopHeight = borders ? BORDER_TOP_HEIGHT : 0;
+  let imgWidth = width*8;
+  let imgHeight = height*8;
+  if (borders) {
+    imgWidth  += BORDER_LEFT_WIDTH + BORDER_RIGHT_WIDTH;
+    imgHeight += BORDER_TOP_HEIGHT + BORDER_BOTTOM_HEIGHT;
+  }
+  return { imgWidth, imgHeight, imgXOffset: borderLeftWidth, imgYOffset: borderTopHeight };
 }
 
 export function framebufToPixelsIndexed(fb: FramebufWithFont, borders: boolean): Buffer  {

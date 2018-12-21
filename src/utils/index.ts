@@ -301,6 +301,27 @@ export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[],
   saveFramebufs(fmt, filename, framebufs, palette)
 }
 
+// Pop up a file select dialog for a certain file type and call the
+// loadFile callback with the file contents.
+export function dialogReadFile(type: FileFormat, loadFile: (data: Buffer) => void) {
+  const {dialog} = electron.remote
+  const filters = [
+    { name: type.name, extensions: [type.ext] }
+  ]
+  const filename = dialog.showOpenDialog({properties: ['openFile'], filters})
+  if (filename === undefined) {
+    return
+  }
+  if (filename.length === 1) {
+    const buf = fs.readFileSync(filename[0]);
+    loadFile(buf);
+  } else {
+    console.error('wtf?!')
+  }
+}
+
+// TODO could use dialogReadFile to implement this, just need to change the
+// importFile API to accept file contents.
 export function dialogImportFile(type: FileFormat, importFile: (fbs: Framebuf[]) => void) {
   const {dialog} = electron.remote
   const filters = [

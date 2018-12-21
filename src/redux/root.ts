@@ -92,6 +92,12 @@ export const actions = {
     }
   },
 
+  importFramebufsAppend: (framebufs: Framebuf[]): RootStateThunk => {
+    return (dispatch, _getState) => {
+      dispatch(importFramebufs(framebufs, true));
+    };
+  },
+
   fileImportAppend: (type: FileFormat): RootStateThunk => {
     return (dispatch, _getState) => {
       dialogImportFile(type, (framebufs: Framebuf[]) => {

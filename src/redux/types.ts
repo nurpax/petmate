@@ -61,7 +61,7 @@ export interface BrushRegion {
 
 export type Brush = any;
 
-export type PaletteName = 'petmate' | 'colodore' | 'pepto';
+export type PaletteName = 'petmate' | 'colodore' | 'pepto' | 'vice';
 
 export type EditBranch = 'saved' | 'editing';
 
@@ -106,6 +106,7 @@ export interface Toolbar {
   shiftKey: boolean;
   showSettings: boolean;
   showExport: { show: boolean, fmt?: FileFormat}; // fmt undefined only when show=false
+  showImport: { show: boolean, fmt?: FileFormat}; // fmt undefined only when show=false
   selectedPaletteRemap: number;
   canvasGrid: boolean;
   shortcutsActive: boolean;

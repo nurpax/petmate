@@ -8,6 +8,7 @@ import Toolbar from './Toolbar'
 import FramebufferTabs from './FramebufferTabs'
 import Settings from './Settings'
 import ExportModal from './ExportModal'
+import ImportModal from './ImportModal'
 import Editor from './Editor';
 import FileDrop from './FileDrop'
 
@@ -128,6 +129,7 @@ class AppView extends Component<AppViewProps> {
         </FileDrop>
         <Settings />
         <ExportModal />
+        <ImportModal />
       </Fragment>
     )
   }

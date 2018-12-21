@@ -103,6 +103,9 @@ electron.ipcRenderer.on('menu', (_event: Event, message: string) => {
     case 'import-marq-c':
       store.dispatch(ReduxRoot.actions.fileImportAppend(formats.c))
       return
+    case 'import-png':
+      store.dispatch(Toolbar.actions.setShowImport({show: true, fmt: formats.png}));
+      return
     case 'preferences':
       store.dispatch(Toolbar.actions.setShowSettings(true))
       return

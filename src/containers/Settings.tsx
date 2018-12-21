@@ -97,7 +97,8 @@ class ColorPaletteSelector extends Component<ColorPaletteSelectorProps> {
     const opts: PaletteName[] = [
       'petmate',
       'colodore',
-      'pepto'
+      'pepto',
+      'vice'
     ]
     const { selectedColorPaletteName } = this.props
     return (
