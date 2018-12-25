@@ -90,6 +90,17 @@ createWindow = () => {
     });
 };
 
+var openFilename = null;
+// macOS "click to open" or drag file on app icon handler
+app.on("open-file", (event, file) => {
+  openFilename = file;
+  // Send open command to main window
+  if (mainWindow) {
+    mainWindow.webContents.send('open-petmate-file', file);
+  }
+  event.preventDefault();
+});
+
 app.on('ready', () => {
     createWindow();
 
@@ -125,6 +136,10 @@ ipcMain.on('get-open-args', function(event) {
     let filename = null;
     if (process.platform == 'win32' && process.argv.length >= 2) {
         filename = process.argv[1];
+    } else if (process.platform == 'darwin') {
+        // Return a cached result of open-file event when the app is loading.
+        // Later open-file's will be sent directly to the main window.
+        filename = openFilename;
     }
     event.returnValue = filename;
   });

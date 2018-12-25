@@ -59,6 +59,13 @@ window.addEventListener('blur', () => {
   store.dispatch(Toolbar.actions.clearModKeyState())
 })
 
+electron.ipcRenderer.on('open-petmate-file', (_event: Event, filename: string) => {
+  // Load a .petmate file that was sent to the main process via the open-file
+  // event (macOS).  This can be either a double-click on a .petmate file in
+  // Finder or drag&drop a .petmate file on the app icon in the task bar.
+  store.dispatch(ReduxRoot.actions.openWorkspace(filename));
+});
+
 // Listen to commands from the main process
 electron.ipcRenderer.on('menu', (_event: Event, message: string) => {
   switch (message) {
