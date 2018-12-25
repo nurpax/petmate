@@ -285,9 +285,9 @@ export class Toolbar {
           if (state.toolbar.textCursorPos !== null && !metaOrCtrl) {
             // Don't match shortcuts if we're in "text tool" mode.
             const { textCursorPos, textColor } = state.toolbar
-            if (textCursorPos !== null) {
-              const c = convertAsciiToScreencode(shiftKey ? key.toUpperCase() : key)
-              if (framebufIndex !== null && c !== null) {
+            const c = convertAsciiToScreencode(shiftKey ? key.toUpperCase() : key)
+            if (framebufIndex !== null) {
+              if (c !== null) {
                 dispatch(Framebuffer.actions.setPixel({
                   ...textCursorPos,
                   screencode: c,
@@ -300,23 +300,36 @@ export class Toolbar {
                 )
                 dispatch(Toolbar.actions.setTextCursorPos(newCursorPos))
               }
-              if (key === 'ArrowLeft' || key === 'ArrowRight') {
-                dispatch(Toolbar.actions.setTextCursorPos(
-                  moveTextCursor(
-                    textCursorPos,
-                    { col: key === 'ArrowLeft' ? -1 : 1, row: 0},
-                    width, height
-                  )
-                ))
-              } else if (key === 'ArrowUp' || key === 'ArrowDown') {
-                dispatch(Toolbar.actions.setTextCursorPos(
-                  moveTextCursor(
-                    textCursorPos,
-                    { row: key === 'ArrowUp' ? -1 : 1, col: 0},
-                    width, height
-                  )
-                ))
+              if (key === 'Backspace') {
+                const newCursorPos = moveTextCursor(
+                  textCursorPos,
+                  { col: -1, row: 0 },
+                  width, height
+                )
+                dispatch(Toolbar.actions.setTextCursorPos(newCursorPos));
+                dispatch(Framebuffer.actions.setPixel({
+                  ...newCursorPos,
+                  screencode: 0x20, // space
+                  color: textColor,
+                }, null, framebufIndex));
               }
+            }
+            if (key === 'ArrowLeft' || key === 'ArrowRight') {
+              dispatch(Toolbar.actions.setTextCursorPos(
+                moveTextCursor(
+                  textCursorPos,
+                  { col: key === 'ArrowLeft' ? -1 : 1, row: 0},
+                  width, height
+                )
+              ))
+            } else if (key === 'ArrowUp' || key === 'ArrowDown') {
+              dispatch(Toolbar.actions.setTextCursorPos(
+                moveTextCursor(
+                  textCursorPos,
+                  { row: key === 'ArrowUp' ? -1 : 1, col: 0},
+                  width, height
+                )
+              ))
             }
           }
         } else if (noMods) {
