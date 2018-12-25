@@ -1,7 +1,7 @@
 
 import React, { Component, PureComponent } from 'react';
 import { connect } from 'react-redux'
-import { Dispatch, bindActionCreators } from 'redux'
+import { bindActionCreators } from 'redux'
 import { SortableContainer, SortableElement, arrayMove } from '../external/react-sortable-hoc'
 
 import classnames from 'classnames'
@@ -23,7 +23,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import styles from './FramebufferTabs.module.css'
-import { Framebuf, Rgb, Font, RootState } from '../redux/types';
+import { Framebuf, Rgb, Font, RootState, RootStateThunk } from '../redux/types';
 
 interface NameInputDispatchProps {
   Toolbar: toolbar.PropsFromDispatch;
@@ -84,10 +84,6 @@ class NameInput_ extends Component<NameInputProps & NameInputDispatchProps, Name
   }
 
   render () {
-    // Not the pattern field for the input.  Only accept screen names that
-    // most assemblers can compile.  Otherwise the names may leak into .asm
-    // export, the export succeeds, only for the user to find out much later
-    // that his exported .asm file does not even compile.
     return (
       <div className={styles.tabNameEditor}>
         <form onSubmit={this.handleSubmit}>
@@ -99,7 +95,6 @@ class NameInput_ extends Component<NameInputProps & NameInputDispatchProps, Name
             onBlur={this.handleBlur}
             onFocus={this.handleFocus}
             type='text'
-            pattern='[_a-zA-Z]+[a-zA-Z0-9_]*'
             size={14} />
         </form>
       </div>
@@ -380,17 +375,18 @@ export default connect(
     }
   },
   (dispatch) => {
+    function setFbName(name: string): RootStateThunk {
+      return (dispatch, getState) => {
+        const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(getState());
+        if (framebufIndex != null) {
+          dispatch(framebuf.actions.setName(name, framebufIndex));
+        }
+      }
+    }
     return {
       Toolbar: toolbar.Toolbar.bindDispatch(dispatch),
       Screens: bindActionCreators(screens.actions, dispatch),
-      setFramebufName: (name: string) => {
-        return (dispatch: Dispatch, getState: () => RootState) => {
-          const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(getState());
-          if (framebufIndex != null) {
-            dispatch(framebuf.actions.setName(name, framebufIndex));
-          }
-        }
-      }
+      setFramebufName: bindActionCreators(setFbName, dispatch)
     }
   }
 )(FramebufferTabs_)
