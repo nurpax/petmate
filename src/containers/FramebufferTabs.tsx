@@ -145,19 +145,19 @@ class NameEditor extends Component<NameEditorProps, NameEditorState> {
   }
 
   render () {
-    if (this.state.editing) {
-      return (
-        <NameInput
-          name={this.props.name}
-          onSubmit={this.handleSubmit}
-          onBlur={this.handleBlur}
-          onCancel={this.handleCancel}
-        />
-      )
-    }
-    return (
+    const nameElts = this.state.editing ?
+      <NameInput
+        name={this.props.name}
+        onSubmit={this.handleSubmit}
+        onBlur={this.handleBlur}
+        onCancel={this.handleCancel}
+      /> :
       <div className={styles.tabName} onClick={this.handleEditingClick}>
         {this.props.name}
+      </div>
+    return (
+      <div className={styles.tabNameContainer}>
+        {nameElts}
       </div>
     )
   }
