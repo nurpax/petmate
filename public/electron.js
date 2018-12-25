@@ -7,6 +7,7 @@ const {
     ipcMain,
     Menu
 } = require('electron');
+
 const MenuBuilder = require('./menu');
 
 if (process.platform == 'darwin') {
@@ -85,6 +86,7 @@ createWindow = () => {
         ipcMain.on('open-external-window', (event, arg) => {
             shell.openExternal(arg);
         });
+
     });
 };
 
@@ -117,3 +119,12 @@ app.on('browser-window-blur', () => {
 ipcMain.on('load-page', (event, arg) => {
     mainWindow.loadURL(arg);
 });
+
+// Windows: handler for clickking a .petmate file in Explorer to open it in Petmate
+ipcMain.on('get-open-args', function(event) {
+    let filename = null;
+    if (process.platform == 'win32' && process.argv.length >= 2) {
+        filename = process.argv[1];
+    }
+    event.returnValue = filename;
+  });

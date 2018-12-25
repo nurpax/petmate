@@ -84,6 +84,10 @@
       ],
       "description": "Petmate",
       "category": "Graphics"
+    },
+    "fileAssociations": {
+      "ext": "petmate",
+      "description": "Petmate PETSCII graphics file"
     }
   },
   "browserslist": [

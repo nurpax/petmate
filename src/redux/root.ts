@@ -21,6 +21,7 @@ import * as settings from './settings'
 import * as screensSelectors from '../redux/screensSelectors'
 import { Toolbar } from './toolbar'
 import {
+  loadWorkspaceNoDialog,
   dialogLoadWorkspace,
   dialogSaveAsWorkspace,
   dialogExportFile,
@@ -57,6 +58,15 @@ export type Actions = ActionsUnion<typeof actionCreators>
 export const actions = {
   ...actionCreators,
 
+  // Load workspace but with specific file name and no dialogs
+  openWorkspace: (filename: string): RootStateThunk => {
+    return (dispatch, _getState) => {
+      const setWorkspaceFilename = (filename: string) => dispatch(Toolbar.actions.setWorkspaceFilename(filename))
+      loadWorkspaceNoDialog(dispatch, filename, setWorkspaceFilename);
+    }
+  },
+
+  // Same as openWorkspace but pop a dialog asking for the filename
   fileOpenWorkspace: (): RootStateThunk => {
     return (dispatch, _getState) => {
       const setWorkspaceFilename = (filename: string) => dispatch(Toolbar.actions.setWorkspaceFilename(filename))

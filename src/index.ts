@@ -16,8 +16,16 @@ import { electron } from './utils/electronImports'
 import { FileFormat } from './redux/types';
 
 const store = configureStore();
-// Create one screen/framebuffer so that we have a canvas to draw on
-store.dispatch(Screens.actions.newScreen())
+
+const filename = electron.ipcRenderer.sendSync('get-open-args');
+if (filename) {
+  // Load a .petmate file that the user clicked on Explorer (Windows only path).
+  store.dispatch(ReduxRoot.actions.openWorkspace(filename));
+} else {
+  // Create one screen/framebuffer so that we have a canvas to draw on
+  store.dispatch(Screens.actions.newScreen());
+}
+
 
 // Render the application
 ReactDOM.render(
