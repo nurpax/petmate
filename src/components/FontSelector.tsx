@@ -38,7 +38,6 @@ export default class FontSelector extends PureComponent<FontSelectorProps> {
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        paddingLeft: '10px',
         fontSize: '0.8em',
         color: 'rgb(120,120,120)'
       }}>

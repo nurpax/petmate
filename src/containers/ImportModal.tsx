@@ -17,12 +17,15 @@ import { dialogReadFile, colorIndexToCssRgb, colorPalettes } from '../utils';
 
 import * as png2pet from '../utils/importers/png2petscii'
 import { DEFAULT_BACKGROUND_COLOR, DEFAULT_BORDER_COLOR } from '../redux/editor';
-import styles from './ImportModal.module.css'
 import { getSettingsCurrentColorPalette } from '../redux/settingsSelectors';
+import ColorPicker from '../components/ColorPicker';
+
+import styles from './ImportModal.module.css'
 
 const ModalTitle: SFC<{}> = ({children}) => <h2>{children}</h2>
 const Title: SFC<{}> = ({children}) => <h4>{children}</h4>
-const Error: SFC<{ msg: string }> = ({ msg }) => <div className={classnames(styles.error, styles.title)}>Error: <span className={classnames(styles.error, styles.msg)}>{msg}</span></div>
+const ErrorMsg: SFC<{ msg: string }> = ({ msg }) => <div className={classnames(styles.error, styles.title)}>Error: <span className={classnames(styles.error, styles.msg)}>{msg}</span></div>
+const Text: SFC<{}> = ({children}) => <div className={styles.text}>{children}</div>
 
 const getFontBitsMemoized = memoize(getFontBits);
 const petsciifyMemoized = memoize(petsciify);
@@ -111,11 +114,31 @@ interface ImportModalDispatch {
 interface ImportModalState {
   charset: Charset;
   png?: PNG;
+  selectedBackgroundColor?: number;
 }
 
-function toFramebuf(petscii: png2pet.Result, charset: Charset): Framebuf {
+function findMatchByBackgroundColor(
+  matches: png2pet.Match[],
+  backgroundColor: number | undefined
+) {
+  if (backgroundColor == undefined) {
+    return matches[0];
+  }
+  for (let idx in matches) {
+    if (matches[idx].backgroundColor == backgroundColor) {
+      return matches[idx];
+    }
+  }
+  throw new Error('impossible');
+}
+
+function toFramebuf(
+  petscii: png2pet.Result,
+  selectedBackgroundColor: number | undefined,
+  charset: Charset
+): Framebuf {
   const { width, height, matches, borderColor } = petscii;
-  const match = matches[0];
+  const match = findMatchByBackgroundColor(matches, selectedBackgroundColor);
   const f = petscii!;
   return {
     framebuf: convertScreencodes(width, height, match.screencodes, match.colors),
@@ -145,24 +168,29 @@ class ImportModal_ extends Component<ImportModalProps & ImportModalDispatch, Imp
 
   state: ImportModalState = {
     charset: 'upper',
+    selectedBackgroundColor: undefined
   };
 
-  resetModal = () => {
-    this.setState({ png: undefined, charset: 'upper' });
+  setPNG = (png?: PNG) => {
+    this.setState({
+      png,
+      charset: 'upper',
+      selectedBackgroundColor: undefined
+    });
   }
 
   handleOK = () => {
     this.props.Toolbar.setShowImport({show:false});
     const petscii = petsciifyMemoized(this.state.png, this.props.colorPalettes, this.state.charset);
     if (petscii != undefined && !png2pet.isError(petscii)) {
-      this.props.importFramebufsAppend([toFramebuf(petscii, this.state.charset)]);
+      this.props.importFramebufsAppend([toFramebuf(petscii, this.state.selectedBackgroundColor, this.state.charset)]);
     }
-    this.resetModal();
+    this.setPNG();
   }
 
   handleCancel = () => {
     this.props.Toolbar.setShowImport({show:false})
-    this.resetModal();
+    this.setPNG();
   }
 
   handleSetCharset = (c: Charset) => {
@@ -171,13 +199,23 @@ class ImportModal_ extends Component<ImportModalProps & ImportModalDispatch, Imp
 
   handleSelectPng = () => {
     dialogReadFile(this.props.showImport.fmt!, (data) => {
-      this.setState({ png: PNG.sync.read(Buffer.from(data)) });
+      this.setPNG(PNG.sync.read(Buffer.from(data)));
     });
+  }
+
+  handleSelectBackgroundColor = (color: number) => {
+    this.setState({selectedBackgroundColor: color});
   }
 
   render () {
     const { showImport } = this.props;
     const petscii = petsciifyMemoized(this.state.png, this.props.colorPalettes, this.state.charset);
+    const matchedBackgroundColors = petscii && !png2pet.isError(petscii) ?
+      petscii.matches.map((m) => m.backgroundColor) : [];
+    const selectedBackground = petscii && !png2pet.isError(petscii) ?
+      (this.state.selectedBackgroundColor == undefined ?
+        matchedBackgroundColors[0] : this.state.selectedBackgroundColor) :
+      0;
     return (
       <div>
         <Modal showModal={showImport.show}>
@@ -195,18 +233,30 @@ class ImportModal_ extends Component<ImportModalProps & ImportModalDispatch, Imp
                   <PngPreview
                     currentColorPalette={this.props.currentColorPalette}
                     charset={this.state.charset}
-                    {...toFramebuf(petscii, this.state.charset)}
+                    {...toFramebuf(petscii, this.state.selectedBackgroundColor, this.state.charset)}
                   />
+                  {matchedBackgroundColors.length > 1 &&
+                    <div>
+                      <Text>This image can be converted to any of the following background colors.  Pick one:</Text>
+                      <ColorPicker
+                        scale={{scaleX:1, scaleY:1}}
+                        paletteRemap={matchedBackgroundColors}
+                        colorPalette={this.props.currentColorPalette}
+                        selected={selectedBackground}
+                        twoRows={false}
+                        onSelectColor={this.handleSelectBackgroundColor}
+                      />
+                    </div>
+                  }
                 </div>}
-              {petscii && png2pet.isError(petscii) && <Error msg={petscii.error} />}
-              <br/>
+              {petscii && png2pet.isError(petscii) && <ErrorMsg msg={petscii.error} />}
               {this.state.png &&
                 <div style={{marginTop: '5px', marginBottom: '5px' }}>
                   <FontSelector
                     currentCharset={this.state.charset}
                     setCharset={this.handleSetCharset} />
                 </div>}
-              <button className='primary' onClick={this.handleSelectPng}>Choose file...</button>
+              <button className='secondary' onClick={this.handleSelectPng}>Select File...</button>
             </div>
 
             <div style={{alignSelf: 'flex-end'}}>

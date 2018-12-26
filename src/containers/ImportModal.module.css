@@ -1,3 +1,11 @@
+
+.text {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  color: var(--main-text-color);
+  font-size: 12px;
+}
+
 .error {
   font-size: 12px;
 }

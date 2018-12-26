@@ -75,11 +75,26 @@ button:hover {
 }
 
 button.primary {
-
 }
 
 button.primary:hover {
   background-color: #007CAA;
+}
+
+button.secondary {
+    background-color: rgba(0,0,0,0);
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgba(255,255,255, 0.3);
+    color: var(--main-text-color);
+    padding: 4px 4px;
+    font-size: 12px;
+}
+
+button.secondary:hover {
+    border-color: rgba(255,255,255, 0.2);
+    color: var(--main-text-color);
+    padding: 4px 4px;
 }
 
 button.cancel {
@@ -92,4 +107,10 @@ button.cancel {
 
 button.cancel:hover {
     border-color: rgba(255,255,255, 0.2);
+}
+
+/* colors */
+
+:root {
+  --main-text-color: rgb(173,173,173);
 }
