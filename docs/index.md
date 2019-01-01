@@ -53,6 +53,15 @@ Open/Save/Save As: use platform shortcuts (e.g., Save is `Ctrl+S` on Windows, `�
 
 Undo/Redo: use platform shortcuts (e.g., `⌘Z` and `⌘⇧Z` on Mac).
 
+## Importing PETSCII from PNG image files
+
+As of version 0.6.0, Petmate supports importing PETSCII from PNG images.  This import feature matches pixel data against the C64 ROM charsets (upper and lower case fonts).  There is no "fuzzy" machine vision style matching, the code doing the import is looking for a pixel perfect match.  This means images that have been scaled (double pixeled or other scale ratio) cannot currently be imported.  The PNG importer also expects the image dimensions and borders to match those of VICE:
+
+- 320x200 for borderless images
+- 384x272 for images with border (left and right border width 32 pixels, top border 35 pixels, bottom 37 pixels).
+
+Colors are matched by quantizing the input pixels into indexed color by looking at the closest mean square error against all the color palettes supported by Petmate, and picking the match that has the smallest mean square error.  If the input image contains colors that are wildly different from the Petmate prebaked palettes, some colors may come out wrong.  Please report any problems via [GitHub issues](https://github.com/nurpax/petmate/issues).
+
 ## Preferences
 
 The settings are saved in the following location:
@@ -62,6 +71,14 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.6.0 (2019-01-01)
+- Import PETSCII from PNG.  Please see above docs for limitations.  ([#92](https://github.com/nurpax/petmate/issues/92))
+- Add an "include border" in PNG and GIF export ([#109](https://github.com/nurpax/petmate/issues/109))
+- Add click-to-open a .petmate file in Windows Explorer and macOS Finder ([#48](https://github.com/nurpax/petmate/issues/48)).  Not tested on Linux so probably doesn't work there.
+- Make backspace do something reasonable in text mode ([#108](https://github.com/nurpax/petmate/issues/108))
+- Remove screen name validation pattern ([#124](https://github.com/nurpax/petmate/issues/124))
+- Port all code to TypeScript.  This was a really big change -- found and fixed some bugs but may have introduced new ones.  Please report any findings!
 
 Petmate 0.5.0 (2018-11-23)
 - Upgrade to Electron 2.0.2 to Electron 3.0.9.  This should make Petmate work on the latest Ubuntu released.
