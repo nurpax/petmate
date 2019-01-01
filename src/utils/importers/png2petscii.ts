@@ -241,7 +241,7 @@ export function png2petscii(args: Args): Err|Result  {
   }
   if (results.length == 0) {
     return {
-      error: 'Could not match to PETSCII for any background color.  Likely reason: the image is not aligned to 8x8 blocks or is resized to non-1x1 pixel size.'
+      error: 'Could not match to PETSCII for any background color.  Likely reason: the image is not in 320x200 (no border) or 384x272 (with borders) resolution or it has been scaled.  Please see documentation for more information.'
     };
   }
   return {
