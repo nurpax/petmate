@@ -23,7 +23,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import styles from './FramebufferTabs.module.css'
-import { Framebuf, Rgb, Font, RootState, RootStateThunk } from '../redux/types';
+import { Framebuf, Rgb, Font, RootState } from '../redux/types';
 
 interface NameInputDispatchProps {
   Toolbar: toolbar.PropsFromDispatch;
@@ -293,7 +293,7 @@ interface FramebufferTabsProps {
 
   getFramebufByIndex: (framebufId: number) => Framebuf | null;
   getFont: (framebuf: Framebuf) => Font;
-  setFramebufName: (name: string) => void;
+  setFramebufName: (name: string, framebufIndex: number) => void;
 }
 
 class FramebufferTabs_ extends Component<FramebufferTabsProps & FramebufferTabsDispatch> {
@@ -375,18 +375,10 @@ export default connect(
     }
   },
   (dispatch) => {
-    function setFbName(name: string): RootStateThunk {
-      return (dispatch, getState) => {
-        const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(getState());
-        if (framebufIndex != null) {
-          dispatch(framebuf.actions.setName(name, framebufIndex));
-        }
-      }
-    }
     return {
       Toolbar: toolbar.Toolbar.bindDispatch(dispatch),
       Screens: bindActionCreators(screens.actions, dispatch),
-      setFramebufName: bindActionCreators(setFbName, dispatch)
+      setFramebufName: bindActionCreators(framebuf.actions.setName, dispatch)
     }
   }
 )(FramebufferTabs_)
