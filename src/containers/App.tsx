@@ -9,13 +9,14 @@ import FramebufferTabs from './FramebufferTabs'
 import Settings from './Settings'
 import ExportModal from './ExportModal'
 import ImportModal from './ImportModal'
-import Editor from './Editor';
+//import Editor from './Editor';
 import FileDrop from './FileDrop'
 
 import * as reduxToolbar from '../redux/toolbar'
 import { loadWorkspaceNoDialog } from '../utils'
 
 import s from './App.module.css'
+import { Zoomable } from './Zoomable';
 
 interface Dims {
   width: number;
@@ -124,7 +125,7 @@ class AppView extends Component<AppViewProps> {
           </div>
           <DivSize
             className={s.editor}
-            render={(containerSize: Dims) => <Editor containerSize={containerSize} />}
+            render={(containerSize: Dims) => <Zoomable containerSize={containerSize} />}
           />
         </FileDrop>
         <Settings />
