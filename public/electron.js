@@ -131,11 +131,15 @@ ipcMain.on('load-page', (event, arg) => {
     mainWindow.loadURL(arg);
 });
 
-// Windows: handler for clickking a .petmate file in Explorer to open it in Petmate
+// Windows: handler for clicking a .petmate file in Explorer to open it in Petmate
 ipcMain.on('get-open-args', function(event) {
     let filename = null;
     if (process.platform == 'win32' && process.argv.length >= 2) {
-        filename = process.argv[1];
+        // When running 'yarn start' to start Petmate in development mode,
+        // the first argument is '.' -- ignore that.
+        if (process.argv[1] !== '.') {
+            filename = process.argv[1];
+        }
     } else if (process.platform == 'darwin') {
         // Return a cached result of open-file event when the app is loading.
         // Later open-file's will be sent directly to the main window.
