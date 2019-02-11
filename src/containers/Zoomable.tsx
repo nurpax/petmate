@@ -1,5 +1,5 @@
 
-import React, { Component, WheelEvent } from 'react';
+import React, { Component, WheelEvent, MouseEvent, PointerEvent } from 'react';
 import * as fp from '../utils/fp'
 import { colorPalettes } from '../utils/palette'
 import { getFontBits } from '../redux/selectors'
@@ -128,6 +128,7 @@ const srcWidth = 16*8;
 const srcHeight = 16*8;
 
 export class Zoomable extends Component<ZoomableProps, ZoomableState> {
+  private dragging = false;
   containerDivRef = React.createRef<HTMLDivElement>();
 
   state: ZoomableState = {
@@ -166,6 +167,34 @@ export class Zoomable extends Component<ZoomableProps, ZoomableState> {
     });
   }
 
+  handlePointerDown = (e: PointerEvent) => {
+    this.dragging = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+  handlePointerUp = (_e: MouseEvent) => {
+    this.dragging = false;
+  }
+
+  handlePointerMove = (e: MouseEvent) => {
+    if (this.dragging) {
+      const dx = e.nativeEvent.movementX;
+      const dy = e.nativeEvent.movementY;
+
+      this.setState(prevState => {
+        const invXform = invert(prevState.transform);
+        const srcDxDy = multVect3(invXform, [dx, dy, 0]);
+        return {
+          transform:
+            mult(
+              prevState.transform,
+              mkTranslate(srcDxDy[0], srcDxDy[1])
+            )
+        }
+      });
+
+    }
+  }
+
   render () {
     return (
       <div
@@ -177,6 +206,9 @@ export class Zoomable extends Component<ZoomableProps, ZoomableState> {
         }}
         ref={this.containerDivRef}
         onWheel={this.handleWheel}
+        onPointerDown={this.handlePointerDown}
+        onPointerUp={this.handlePointerUp}
+        onPointerMove={this.handlePointerMove}
       >
         <Transform transform={this.state.transform}>
           <CharGrid
