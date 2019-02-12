@@ -12,9 +12,9 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.6.0.dmg'>Petmate-0.6.0.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.6.0.exe'>Petmate Setup 0.6.0.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.6.0_amd64.deb'>petmate_0.6.0_amd64.deb</a>
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.6.1.dmg'>Petmate-0.6.1.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.6.1.exe'>Petmate Setup 0.6.1.exe</a>
+* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.6.1_amd64.deb'>petmate_0.6.1_amd64.deb</a>
 
 ## Features
 
@@ -71,6 +71,10 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.6.1 (2019-02-12)
+- Bug fix: PNG export crashed Petmate on Windows.  Fixed by upgrading Electron to version 4.0.4.
+- Bug fix: screen name editing only ever updated the currently selected screen name.  ([#128](https://github.com/nurpax/petmate/issues/128))
 
 Petmate 0.6.0 (2019-01-01)
 - Import PETSCII from PNG.  Please see above docs for limitations.  ([#92](https://github.com/nurpax/petmate/issues/92))
