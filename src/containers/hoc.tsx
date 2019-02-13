@@ -17,65 +17,6 @@ type Position = {
 }
 
 type IsActive = { isActive: boolean };
-interface CharPositionProps {
-  onActivationChanged(args: IsActive): void;
-  onCharPosChanged: (pos: Coord2|null) => void;
-}
-
-export class CharPosition extends Component<CharPositionProps> {
-
-  prevCharPos: Coord2|null = null;
-
-  constructor (props: CharPositionProps) {
-    super(props)
-    this.prevCharPos = null
-  }
-
-  toCharPos = ({position, elementDimensions}: Position): Coord2|null => {
-    if (elementDimensions === null) {
-      return null
-    }
-    const { x, y } = position
-    const { width, height } = elementDimensions
-    const col = Math.floor(x / width * 16)
-    const row = Math.floor(y / height * 16)
-    return { row, col }
-  }
-
-  // The parent component needs to know if the cursor is active (inside the
-  // child div) to conditionally render sibling components like cursor pos,
-  // char under cursor, etc.
-  handleActivationChanged = ({isActive}: {isActive: boolean})  => {
-    this.props.onActivationChanged({isActive})
-  }
-
-  // The parent component needs to know what the current charpos is inside the
-  // child div).
-  handlePositionChanged = (vals: Position)  => {
-    if (vals.elementDimensions === undefined) {
-      return
-    }
-    const { row, col } = this.toCharPos(vals)!
-    if (this.prevCharPos === null ||
-      row !== this.prevCharPos.row ||
-      col !== this.prevCharPos.col) {
-      this.props.onCharPosChanged(this.toCharPos(vals))
-      this.prevCharPos = { row, col }
-    }
-  }
-
-  render () {
-    return (
-      <ReactCursorPosition
-        onActivationChanged={this.handleActivationChanged}
-        onPositionChanged={this.handlePositionChanged}
-        shouldDecorateChildren={false}
-      >
-        {this.props.children}
-      </ReactCursorPosition>
-    )
-  }
-}
 
 // The component wrapped by withMouseCharPositionShiftLockAxis must
 // have these props in its component type.

@@ -1,9 +1,9 @@
 
-import React, { Component } from 'react';
+import React, { Component, useRef, useCallback, useState, MouseEvent, CSSProperties } from 'react';
 import { connect } from 'react-redux'
 import { Dispatch, bindActionCreators } from 'redux'
 
-import { RootState, Font, Pixel, Coord2, Rgb } from '../redux/types'
+import { RootState, Font, Pixel, Coord2, Rgb, Charset } from '../redux/types'
 import * as framebuffer from '../redux/editor'
 
 import { Toolbar } from '../redux/toolbar'
@@ -21,7 +21,6 @@ import {
   getSettingsCurrentColorPalette
 } from '../redux/settingsSelectors'
 
-import { CharPosition } from './hoc'
 import FontSelector from '../components/FontSelector'
 
 import styles from './CharSelect.module.css'
@@ -37,15 +36,145 @@ interface CharSelectProps {
   selected: Coord2 | null;
   backgroundColor: number;
   textColor: number;
-  curScreencode: number;
 }
 
-interface CharSelectState {
-  charPos: Coord2 | null;
-  isActive: boolean;
+// Char position & click hook
+function useCharPos(
+  charWidth: number,
+  charHeight: number,
+  initialCharPos: Coord2 | null
+) {
+  const ref = useRef<HTMLDivElement>(null);
+  let [isActive, setIsActive] = useState(true);
+  let [charPos, setCharPos] = useState<Coord2|null>(initialCharPos);
+  let onMouseMove = useCallback(function(event: MouseEvent) {
+    if (isActive && ref.current != null) {
+      const bbox = ref.current.getBoundingClientRect();
+      const x = Math.floor((event.clientX - bbox.left)/bbox.width * charWidth);
+      const y = Math.floor((event.clientY - bbox.top)/bbox.height * charHeight);
+      if (x >= 0 && x < charWidth && y >= 0 && y < charHeight) {
+        setCharPos({row: y, col: x});
+      } else {
+        setCharPos(null);
+      }
+    }
+  }, []);
+
+  let onMouseEnter = useCallback(function() {
+    setIsActive(true);
+  }, []);
+
+  let onMouseLeave = useCallback(function() {
+    setIsActive(false);
+    setCharPos(null);
+  }, []);
+
+  return {
+    charPos,
+    divProps: {
+      ref,
+      onMouseMove,
+      onMouseEnter,
+      onMouseLeave
+    }
+  };
 }
 
-class CharSelect extends Component<CharSelectProps, CharSelectState> {
+function CharSelectView(props: {
+  font: Font;
+  canvasScale: {
+    scaleX: number, scaleY: number
+  };
+  colorPalette: Rgb[];
+  selected: Coord2;
+  backgroundColor: string;
+  style: CSSProperties;
+
+  fb: Pixel[][];
+  onCharSelected: (pos: Coord2|null) => void;
+  setCharset: (charset: Charset) => void;
+}) {
+  const W = 16
+  const H = 16
+  const { scaleX, scaleY } = props.canvasScale;
+
+  const { charPos, divProps } = useCharPos(W, H, props.selected);
+
+  let screencode: number|null = utils.charScreencodeFromRowCol(props.font, props.selected);
+  if (charPos !== null) {
+    screencode = utils.charScreencodeFromRowCol(props.font, charPos);
+  }
+
+  let handleOnClick = useCallback(function() {
+    props.onCharSelected(charPos);
+  }, [charPos]);
+
+  return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      <div className={styles.csContainer} style={props.style}>
+        <div
+          style={{
+            imageRendering: 'pixelated',
+            transform: `scale(${scaleX}, ${scaleY})`,
+            transformOrigin: '0% 0%',
+            width: W*9,
+            height: H*9
+          }}
+          {...divProps}
+          onClick={handleOnClick}
+        >
+          <CharGrid
+            width={W}
+            height={H}
+            backgroundColor={props.backgroundColor}
+            grid={true}
+            framebuf={props.fb}
+            font={props.font}
+            colorPalette={props.colorPalette}
+          />
+          {charPos !== null ?
+            <CharPosOverlay
+              framebufWidth={W}
+              framebufHeight={H}
+              grid={true}
+              opacity={0.5}
+              charPos={charPos!}
+            />
+            : null}
+          {props.selected ?
+            <CharPosOverlay
+              framebufWidth={W}
+              framebufHeight={H}
+              grid={true}
+              opacity={1.0}
+              charPos={props.selected} />
+            : null}
+        </div>
+      </div>
+
+      <div style={{
+        display: 'flex',
+        flexDirection: 'row',
+        marginTop:'4px',
+        alignItems:'center',
+        justifyContent: 'space-between'
+      }}>
+        <CharSelectStatusbar
+          curScreencode={screencode}
+        />
+        <FontSelector
+          currentCharset={props.font.charset}
+          setCharset={props.setCharset}
+        />
+      </div>
+    </div>
+  )
+}
+
+class CharSelect extends Component<CharSelectProps> {
 
   fb: Pixel[][]|null = null;
   font: Font|null = null;
@@ -54,11 +183,6 @@ class CharSelect extends Component<CharSelectProps, CharSelectState> {
   constructor (props: CharSelectProps) {
     super(props)
     this.computeCachedFb(0)
-
-    this.state = {
-      charPos: { row:0, col: 0 },
-      isActive: false
-    }
   }
 
   computeCachedFb(textColor: number) {
@@ -75,22 +199,12 @@ class CharSelect extends Component<CharSelectProps, CharSelectState> {
     this.font = font
   }
 
-  handleClick = () => {
-    this.props.Toolbar.setCurrentChar(this.state.charPos)
-  }
-
-  handleCharPosChanged = (charPos: Coord2 | null) => {
-    this.setState({ charPos })
-  }
-
-  handleActivationChanged = (args: { isActive: boolean}) => {
-    this.setState({ isActive: args.isActive })
+  handleClick = (charPos: Coord2 | null) => {
+    this.props.Toolbar.setCurrentChar(charPos)
   }
 
   render () {
-    const W = 16
-    const H = 16
-    const { colorPalette, font } = this.props
+    const { colorPalette } = this.props
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
@@ -105,78 +219,21 @@ class CharSelect extends Component<CharSelectProps, CharSelectState> {
       this.font !== this.props.font) {
       this.computeCachedFb(this.props.textColor)
     }
-    let screencode: number|null = this.props.curScreencode
-    if (this.state.isActive) {
-      screencode = utils.charScreencodeFromRowCol(font, this.state.charPos!)
-    }
     if (!this.fb) {
       throw new Error('FB cannot be null here');
     }
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        <CharPosition
-          onCharPosChanged={this.handleCharPosChanged}
-          onActivationChanged={this.handleActivationChanged}
-        >
-          <div className={styles.csContainer} style={s}>
-            <div
-              style={{
-                imageRendering: 'pixelated',
-                transform: `scale(${scaleX}, ${scaleY})`,
-                transformOrigin: '0% 0%',
-                width: W*9,
-                height: H*9
-              }}
-              onClick={this.handleClick}
-            >
-              <CharGrid
-                width={W}
-                height={H}
-                backgroundColor={backg}
-                grid={true}
-                framebuf={this.fb}
-                font={this.props.font}
-                colorPalette={colorPalette}
-              />
-              {this.state.isActive ?
-                <CharPosOverlay
-                  framebufWidth={W}
-                  framebufHeight={H}
-                  grid={true}
-                  opacity={0.5}
-                  charPos={this.state.charPos!}
-                />
-                : null}
-              {this.props.selected ?
-                <CharPosOverlay
-                  framebufWidth={W}
-                  framebufHeight={H}
-                  grid={true}
-                  opacity={1.0}
-                  charPos={this.props.selected} />
-                : null}
-            </div>
-          </div>
-        </CharPosition>
-        <div style={{
-          display: 'flex',
-          flexDirection: 'row',
-          marginTop:'4px',
-          alignItems:'center',
-          justifyContent: 'space-between'
-        }}>
-          <CharSelectStatusbar
-            curScreencode={screencode}
-          />
-          <FontSelector
-            currentCharset={font.charset}
-            setCharset={this.props.Framebuffer.setCharset}
-          />
-        </div>
-      </div>
+      <CharSelectView
+        canvasScale={this.props.canvasScale}
+        backgroundColor={backg}
+        style={s}
+        fb={this.fb}
+        font={this.props.font}
+        colorPalette={colorPalette}
+        selected={this.props.selected!}
+        onCharSelected={this.handleClick}
+        setCharset={this.props.Framebuffer.setCharset}
+      />
     )
   }
 }
@@ -201,7 +258,6 @@ const mapStateToProps = (state: RootState) => {
     framebufIndex: screensSelectors.getCurrentScreenFramebufIndex(state),
     backgroundColor: framebuf ? framebuf.backgroundColor : framebuffer.DEFAULT_BACKGROUND_COLOR,
     selected,
-    curScreencode: utils.charScreencodeFromRowCol(font, selected),
     textColor: state.toolbar.textColor,
     font,
     colorPalette: getSettingsCurrentColorPalette(state)
