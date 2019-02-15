@@ -1,5 +1,5 @@
 
-import React, { Component, Fragment, CSSProperties } from 'react';
+import React, { Component, Fragment, CSSProperties, PointerEvent } from 'react';
 import { connect } from 'react-redux'
 
 import ColorPicker from '../components/ColorPicker'
@@ -9,8 +9,6 @@ import GridOverlay from '../components/GridOverlay'
 import { CanvasStatusbar } from '../components/Statusbar'
 
 import CharSelect from './CharSelect'
-
-import { withMouseCharPositionShiftLockAxis, DragStartFunc, AltClickFunc, DragMoveFunc, DragEndFunc } from './hoc'
 
 import * as framebuf from '../redux/editor'
 import { Framebuffer } from '../redux/editor'
@@ -167,12 +165,6 @@ class BrushOverlay extends Component<BrushOverlayProps> {
 interface FramebufferViewProps {
   undoId: number | null;
 
-  isActive: boolean;
-  charPos: Coord2;
-  onMouseDown: (e: any, dragStart: DragStartFunc, altClick: AltClickFunc) => void;
-  onMouseMove: (e: any, dragMove: DragMoveFunc) => void;
-  onMouseUp:   (e: any, dragEnd: DragEndFunc) => void;
-
   altKey: boolean;
   shiftKey: boolean;
 
@@ -194,13 +186,26 @@ interface FramebufferViewProps {
   font: Font;
 
   canvasGrid: boolean;
+
+  onCharPosChanged: (args: {isActive: boolean, charPos: Coord2}) => void;
 }
 
 interface FramebufferViewDispatch {
   Framebuffer: framebuf.PropsFromDispatch;
   Toolbar: toolbar.PropsFromDispatch;
 }
-class FramebufferView_ extends Component<FramebufferViewProps & FramebufferViewDispatch> {
+
+interface FramebufferViewState {
+  charPos: Coord2;
+  isActive: boolean;
+}
+
+class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDispatch, FramebufferViewState> {
+
+  state: FramebufferViewState = {
+    charPos: { row: -1, col: 0 },
+    isActive: false
+  }
 
   prevDragPos: Coord2|null = null;
 
@@ -313,25 +318,145 @@ class FramebufferView_ extends Component<FramebufferViewProps & FramebufferViewD
     }
   }
 
+  //---------------------------------------------------------------------
+  // Mechanics of tracking pointer drags with mouse coordinate -> canvas char pos
+  // transformation.
+
+  private ref = React.createRef<HTMLDivElement>();
+  private prevCharPos: Coord2|null = null;
+  private prevCoord: Coord2|null = null;
+  private lockStartCoord: Coord2|null = null;
+  private shiftLockAxis: 'shift'|'row'|'col'|null = null;
+  private dragging = false;
+
+  currentCharPos (e: any): Coord2{
+    if (!this.ref.current) {
+      throw new Error('impossible?');
+    }
+
+    const charWidth = this.props.framebufWidth;
+    const charHeight = this.props.framebufHeight;
+    const bbox = this.ref.current.getBoundingClientRect();
+    const x = Math.floor((e.clientX - bbox.left)/bbox.width * charWidth);
+    const y = Math.floor((e.clientY - bbox.top)/bbox.height * charHeight);
+    return { row: y, col: x };
+  }
+
+  setCharPos (isActive: boolean, charPos: Coord2) {
+    this.setState({ isActive, charPos });
+    this.props.onCharPosChanged({ isActive, charPos });
+  }
+
+  handleMouseEnter = (e: any) => {
+    const charPos = this.currentCharPos(e);
+    this.setCharPos(true, charPos);
+  }
+
+  handleMouseLeave = (e: any) => {
+    const charPos = this.currentCharPos(e);
+    this.setCharPos(false, charPos);
+  }
+
+  handlePointerDown = (e: any) => {
+    const charPos = this.currentCharPos(e);
+    this.setCharPos(true, charPos);
+
+    // alt-left click doesn't start dragging
+    if (this.props.altKey) {
+      this.dragging = false;
+      this.altClick(charPos);
+      return;
+    }
+
+    this.dragging = true
+    e.target.setPointerCapture(e.pointerId);
+    this.prevCoord = charPos
+    this.dragStart(charPos)
+
+    const lock = this.props.shiftKey
+    this.shiftLockAxis = lock ? 'shift' : null
+    if (lock) {
+      this.lockStartCoord = {
+        ...charPos
+      }
+    }
+  }
+
+  handlePointerUp = (_e: PointerEvent) => {
+    if (this.dragging) {
+      this.dragEnd()
+    }
+
+    this.dragging = false
+    this.lockStartCoord = null
+    this.shiftLockAxis = null
+  }
+
+  handlePointerMove = (e: PointerEvent) => {
+    const charPos = this.currentCharPos(e)
+    this.setCharPos(true, charPos);
+
+    if (this.prevCharPos === null ||
+      this.prevCharPos.row !== charPos.row ||
+      this.prevCharPos.col !== charPos.col) {
+      this.prevCharPos = {...charPos}
+        this.props.onCharPosChanged({isActive:this.state.isActive, charPos})
+    }
+
+    if (!this.dragging) {
+      return
+    }
+
+    // Note: prevCoord is known to be not null here as it's been set
+    // in mouse down
+    const coord = charPos;
+    if (this.prevCoord!.row !== coord.row || this.prevCoord!.col !== coord.col) {
+
+      if (this.shiftLockAxis === 'shift') {
+        if (this.prevCoord!.row === coord.row) {
+          this.shiftLockAxis = 'row'
+        } else if (this.prevCoord!.col === coord.col) {
+          this.shiftLockAxis = 'col'
+        }
+      }
+
+      if (this.shiftLockAxis !== null) {
+        let lockedCharPos = {
+          ...this.lockStartCoord!
+        }
+
+        if (this.shiftLockAxis === 'row') {
+          lockedCharPos.col = charPos.col
+        } else if (this.shiftLockAxis === 'col') {
+          lockedCharPos.row = charPos.row
+        }
+        this.dragMove(lockedCharPos)
+      } else {
+        this.dragMove(charPos)
+      }
+      this.prevCoord = charPos
+    }
+  }
+
   render () {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
     // grid.
-    const W = 40
-    const H = 25
+    const charWidth = this.props.framebufWidth;
+    const charHeight = this.props.framebufHeight;
     const backg = utils.colorIndexToCssRgb(this.props.colorPalette, this.props.backgroundColor)
     const { selectedTool } = this.props
     let overlays = null
     let screencodeHighlight: number|undefined = this.props.curScreencode
     let colorHighlight: number|undefined = this.props.textColor
     let highlightCharPos = true
-    if (this.props.isActive) {
+    if (this.state.isActive) {
       if (selectedTool === Tool.Brush) {
         highlightCharPos = false
         if (this.props.brush !== null) {
           overlays =
             <BrushOverlay
-              charPos={this.props.charPos}
+              charPos={this.state.charPos}
               framebufWidth={this.props.framebufWidth}
               framebufHeight={this.props.framebufHeight}
               backgroundColor={backg}
@@ -342,7 +467,7 @@ class FramebufferView_ extends Component<FramebufferViewProps & FramebufferViewD
         } else {
           overlays =
             <BrushSelectOverlay
-              charPos={this.props.charPos}
+              charPos={this.state.charPos}
               framebufWidth={this.props.framebufWidth}
               framebufHeight={this.props.framebufHeight}
               brushRegion={this.props.brushRegion}
@@ -357,7 +482,7 @@ class FramebufferView_ extends Component<FramebufferViewProps & FramebufferViewD
           <CharPosOverlay
             framebufWidth={this.props.framebufWidth}
             framebufHeight={this.props.framebufHeight}
-            charPos={this.props.charPos}
+            charPos={this.state.charPos}
             opacity={0.5}
           />
         if (selectedTool === Tool.Colorize) {
@@ -375,7 +500,7 @@ class FramebufferView_ extends Component<FramebufferViewProps & FramebufferViewD
     if (selectedTool === Tool.Text) {
       screencodeHighlight = undefined;
       colorHighlight = undefined;
-      const { textCursorPos, charPos, textColor } = this.props
+      const { textCursorPos, textColor } = this.props
       let textCursorOverlay = null
       if (textCursorPos !== null) {
         const color = utils.colorIndexToCssRgb(this.props.colorPalette, textColor)
@@ -391,11 +516,11 @@ class FramebufferView_ extends Component<FramebufferViewProps & FramebufferViewD
       overlays =
         <Fragment>
           {textCursorOverlay}
-          {this.props.isActive ?
+          {this.state.isActive ?
             <CharPosOverlay
               framebufWidth={this.props.framebufWidth}
               framebufHeight={this.props.framebufHeight}
-              charPos={charPos}
+              charPos={this.state.charPos}
               opacity={0.5}
             />
             :
@@ -405,8 +530,8 @@ class FramebufferView_ extends Component<FramebufferViewProps & FramebufferViewD
 
     const { scaleX, scaleY } = this.props.canvasScale
     const scale: CSSProperties = {
-      width: W*8,
-      height: H*8,
+      width: charWidth*8,
+      height: charHeight*8,
       transform: `scale(${scaleX},${scaleY})`,
       transformOrigin: '0% 0%',
       imageRendering: 'pixelated'
@@ -414,29 +539,31 @@ class FramebufferView_ extends Component<FramebufferViewProps & FramebufferViewD
     return (
       <div
         style={scale}
-        onPointerDown={(e) => this.props.onMouseDown(e, this.dragStart, this.altClick)}
-        onPointerMove={(e) => this.props.onMouseMove(e, this.dragMove)}
-        onPointerUp={(e) => this.props.onMouseUp(e, this.dragEnd)}
+        ref={this.ref}
+        onMouseEnter={this.handleMouseEnter}
+        onMouseLeave={this.handleMouseLeave}
+        onPointerDown={(e) => this.handlePointerDown(e)}
+        onPointerMove={(e) => this.handlePointerMove(e)}
+        onPointerUp={(e) => this.handlePointerUp(e)}
       >
         <CharGrid
-          width={W}
-          height={H}
+          width={charWidth}
+          height={charHeight}
           grid={false}
           backgroundColor={backg}
           framebuf={this.props.framebuf}
-          charPos={this.props.isActive && highlightCharPos ? this.props.charPos : undefined}
+          charPos={this.state.isActive && highlightCharPos ? this.state.charPos : undefined}
           curScreencode={screencodeHighlight}
           textColor={colorHighlight}
           font={this.props.font}
           colorPalette={this.props.colorPalette}
         />
         {overlays}
-        {this.props.canvasGrid ? <GridOverlay width={W} height={H} /> : null}
+        {this.props.canvasGrid ? <GridOverlay width={charWidth} height={charHeight} /> : null}
       </div>
     )
   }
 }
-const FramebufferView = withMouseCharPositionShiftLockAxis(FramebufferView_)
 
 const FramebufferCont = connect(
   (state: RootState) => {
@@ -493,21 +620,16 @@ interface EditorDispatch {
 class Editor extends Component<EditorProps & EditorDispatch> {
   state = {
     isActive: false,
-    charPos: null
+    charPos: { row: -1, col: 0 }
   }
 
   handleSetColor = (color: number) => {
     this.props.Toolbar.setCurrentColor(color)
   }
 
-  handleCharPosChange = (args: { charPos: Coord2 }) => {
+  handleCharPosChanged = (args: { isActive: boolean, charPos: Coord2 }) => {
     this.setState({
-      charPos: args.charPos
-    })
-  }
-
-  handleActivationChanged = (args: {isActive: boolean}) => {
-    this.setState({
+      charPos: args.charPos,
       isActive: args.isActive
     })
   }
@@ -558,8 +680,7 @@ class Editor extends Component<EditorProps & EditorDispatch> {
               <FramebufferCont
                 containerSize={framebufSize}
                 canvasScale={{scaleX, scaleY}}
-                onActivationChanged={this.handleActivationChanged}
-                onCharPosChange={this.handleCharPosChange} /> :
+                onCharPosChanged={this.handleCharPosChanged} /> :
               null}
           </div>
           <CanvasStatusbar

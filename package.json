@@ -30,7 +30,6 @@
     "gif-encoder": "https://github.com/nurpax/gif-encoder#indexed-inputs",
     "pngjs": "^3.3.3",
     "react": "^16.8.1",
-    "react-cursor-position": "^3.0.3",
     "react-dev-utils": "^6.1.1",
     "react-dom": "^16.8.1",
     "react-redux": "^5.1.1",
