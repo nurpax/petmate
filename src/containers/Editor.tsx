@@ -27,6 +27,7 @@ import { framebufIndexMergeProps }  from '../redux/utils'
 import * as toolbar from '../redux/toolbar'
 import { Toolbar } from '../redux/toolbar'
 import * as utils from '../utils';
+import * as matrix from '../utils/matrix';
 
 import styles from './Editor.module.css';
 import {
@@ -196,14 +197,22 @@ interface FramebufferViewDispatch {
 }
 
 interface FramebufferViewState {
+  // Scale and translation for pan/zoom
+  canvasTransform: matrix.Matrix3x3;
+  // Floor'd to int
   charPos: Coord2;
+  // Float charpos
+  fx: number;
+  fy: number;
   isActive: boolean;
 }
 
 class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDispatch, FramebufferViewState> {
 
   state: FramebufferViewState = {
+    canvasTransform: matrix.scale(1.3),
     charPos: { row: -1, col: 0 },
+    fx: -1, fy: 0,
     isActive: false
   }
 
@@ -329,7 +338,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   private shiftLockAxis: 'shift'|'row'|'col'|null = null;
   private dragging = false;
 
-  currentCharPos (e: any): Coord2{
+  currentCharPos (e: any): { charPos: Coord2, fx: number, fy: number } {
     if (!this.ref.current) {
       throw new Error('impossible?');
     }
@@ -337,29 +346,37 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     const charWidth = this.props.framebufWidth;
     const charHeight = this.props.framebufHeight;
     const bbox = this.ref.current.getBoundingClientRect();
-    const x = Math.floor((e.clientX - bbox.left)/bbox.width * charWidth);
-    const y = Math.floor((e.clientY - bbox.top)/bbox.height * charHeight);
-    return { row: y, col: x };
+    const xx = (e.clientX - bbox.left)/bbox.width * charWidth;
+    const yy = (e.clientY - bbox.top)/bbox.height * charHeight;
+
+    const invXform = matrix.invert(this.state.canvasTransform);
+    const [x, y] = matrix.multVect3(invXform, [xx, yy, 1]);
+
+    return {
+      charPos: { row: Math.floor(y), col: Math.floor(x) },
+      fx: x,
+      fy: y
+    }
   }
 
-  setCharPos (isActive: boolean, charPos: Coord2) {
-    this.setState({ isActive, charPos });
+  setCharPos (isActive: boolean, charPos: Coord2, fx: number, fy: number) {
+    this.setState({ isActive, charPos, fx, fy });
     this.props.onCharPosChanged({ isActive, charPos });
   }
 
   handleMouseEnter = (e: any) => {
-    const charPos = this.currentCharPos(e);
-    this.setCharPos(true, charPos);
+    const { charPos, fx, fy } = this.currentCharPos(e);
+    this.setCharPos(true, charPos, fx, fy);
   }
 
   handleMouseLeave = (e: any) => {
-    const charPos = this.currentCharPos(e);
-    this.setCharPos(false, charPos);
+    const { charPos, fx, fy } = this.currentCharPos(e);
+    this.setCharPos(false, charPos, fx, fy);
   }
 
   handlePointerDown = (e: any) => {
-    const charPos = this.currentCharPos(e);
-    this.setCharPos(true, charPos);
+    const { charPos, fx, fy } = this.currentCharPos(e);
+    this.setCharPos(true, charPos, fx, fy);
 
     // alt-left click doesn't start dragging
     if (this.props.altKey) {
@@ -393,8 +410,8 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   }
 
   handlePointerMove = (e: PointerEvent) => {
-    const charPos = this.currentCharPos(e)
-    this.setCharPos(true, charPos);
+    const { charPos, fx, fy } = this.currentCharPos(e)
+    this.setCharPos(true, charPos, fx, fy);
 
     if (this.prevCharPos === null ||
       this.prevCharPos.row !== charPos.row ||
@@ -528,13 +545,20 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
         </Fragment>
     }
 
-    const { scaleX, scaleY } = this.props.canvasScale
+    const { scaleX, scaleY } = this.props.canvasScale;
+    const cx = `${scaleX*100.0}%`;
+    const cy = `${scaleY*100.0}%`;
+    // TODO scaleX and Y
+    const transform = this.state.canvasTransform;
     const scale: CSSProperties = {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'flex-start',
       width: charWidth*8,
       height: charHeight*8,
-      transform: `scale(${scaleX},${scaleY})`,
-      transformOrigin: '0% 0%',
-      imageRendering: 'pixelated'
+      backgroundColor: '#351',
+      imageRendering: 'pixelated',
+      clipPath: `polygon(0% 0%, ${cx} 0%, ${cx} ${cy}, 0% ${cy})`
     }
     return (
       <div
@@ -546,20 +570,24 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
         onPointerMove={(e) => this.handlePointerMove(e)}
         onPointerUp={(e) => this.handlePointerUp(e)}
       >
-        <CharGrid
-          width={charWidth}
-          height={charHeight}
-          grid={false}
-          backgroundColor={backg}
-          framebuf={this.props.framebuf}
-          charPos={this.state.isActive && highlightCharPos ? this.state.charPos : undefined}
-          curScreencode={screencodeHighlight}
-          textColor={colorHighlight}
-          font={this.props.font}
-          colorPalette={this.props.colorPalette}
-        />
-        {overlays}
-        {this.props.canvasGrid ? <GridOverlay width={charWidth} height={charHeight} /> : null}
+        <div
+          style={{transform: matrix.toCss(transform)}}
+        >
+          <CharGrid
+            width={charWidth}
+            height={charHeight}
+            grid={false}
+            backgroundColor={backg}
+            framebuf={this.props.framebuf}
+            charPos={this.state.isActive && highlightCharPos ? this.state.charPos : undefined}
+            curScreencode={screencodeHighlight}
+            textColor={colorHighlight}
+            font={this.props.font}
+            colorPalette={this.props.colorPalette}
+          />
+          {overlays}
+          {this.props.canvasGrid ? <GridOverlay width={charWidth} height={charHeight} /> : null}
+        </div>
       </div>
     )
   }
