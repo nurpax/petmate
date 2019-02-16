@@ -86,7 +86,8 @@ export enum Tool {
   Colorize = 1,
   CharDraw = 2,
   Brush = 3,
-  Text = 4
+  Text = 4,
+  PanZoom = 5
 };
 
 export interface Toolbar {

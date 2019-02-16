@@ -1,5 +1,5 @@
 
-import React, { Component, Fragment, CSSProperties, PointerEvent } from 'react';
+import React, { Component, Fragment, CSSProperties, PointerEvent, WheelEvent } from 'react';
 import { connect } from 'react-redux'
 
 import ColorPicker from '../components/ColorPicker'
@@ -343,14 +343,14 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       throw new Error('impossible?');
     }
 
-    const charWidth = this.props.framebufWidth;
-    const charHeight = this.props.framebufHeight;
     const bbox = this.ref.current.getBoundingClientRect();
-    const xx = (e.clientX - bbox.left)/bbox.width * charWidth;
-    const yy = (e.clientY - bbox.top)/bbox.height * charHeight;
+    const xx = (e.clientX - bbox.left);
+    const yy = (e.clientY - bbox.top);
 
     const invXform = matrix.invert(this.state.canvasTransform);
-    const [x, y] = matrix.multVect3(invXform, [xx, yy, 1]);
+    let [x, y] = matrix.multVect3(invXform, [xx, yy, 1]);
+    x /= 8;
+    y /= 8;
 
     return {
       charPos: { row: Math.floor(y), col: Math.floor(x) },
@@ -375,6 +375,11 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   }
 
   handlePointerDown = (e: any) => {
+    if (this.props.selectedTool == Tool.PanZoom) {
+      this.handlePanZoomPointerDown(e);
+      return;
+    }
+
     const { charPos, fx, fy } = this.currentCharPos(e);
     this.setCharPos(true, charPos, fx, fy);
 
@@ -399,7 +404,12 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     }
   }
 
-  handlePointerUp = (_e: PointerEvent) => {
+  handlePointerUp = (e: PointerEvent) => {
+    if (this.props.selectedTool == Tool.PanZoom) {
+      this.handlePanZoomPointerUp(e);
+      return;
+    }
+
     if (this.dragging) {
       this.dragEnd()
     }
@@ -410,6 +420,11 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   }
 
   handlePointerMove = (e: PointerEvent) => {
+    if (this.props.selectedTool == Tool.PanZoom) {
+      this.handlePanZoomPointerMove(e);
+      return;
+    }
+
     const { charPos, fx, fy } = this.currentCharPos(e)
     this.setCharPos(true, charPos, fx, fy);
 
@@ -454,6 +469,74 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       this.prevCoord = charPos
     }
   }
+  //---------------------------------------------------------------------
+  // Pan/zoom mouse event handlers.  Called by the bound handlePointerDown/Move/Up
+  // functions if the pan/zoom tool is selected.
+
+  private panZoomDragging = true;
+
+  handlePanZoomPointerDown (e: any) {
+    this.panZoomDragging = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+
+  handlePanZoomPointerUp (_e: any) {
+    this.panZoomDragging = false;
+  }
+
+  handlePanZoomPointerMove (e: any) {
+    if (this.panZoomDragging) {
+      const dx = e.nativeEvent.movementX;
+      const dy = e.nativeEvent.movementY;
+
+      this.setState(prevState => {
+        const invXform = matrix.invert(prevState.canvasTransform);
+        const srcDxDy = matrix.multVect3(invXform, [dx, dy, 0]);
+        return {
+          canvasTransform:
+            matrix.mult(
+              prevState.canvasTransform,
+              matrix.translate(srcDxDy[0], srcDxDy[1])
+            )
+        }
+      });
+    }
+  }
+
+  handleWheel = (e: WheelEvent) => {
+    if (this.props.selectedTool != Tool.PanZoom) {
+      return;
+    }
+    if (!this.ref.current) {
+      return;
+    }
+
+    const scaleDelta = 1 - (e.deltaY / 150.0);
+
+    const bbox = this.ref.current.getBoundingClientRect();
+    const mouseX = (e.nativeEvent.clientX - bbox.left);
+    const mouseY = (e.nativeEvent.clientY - bbox.top);
+
+    this.setState(prevState => {
+      // Transform screen [0,w/h] coordinates into char pixel coordinates
+      const invXform = matrix.invert(prevState.canvasTransform);
+      const srcPos = matrix.multVect3(invXform, [mouseX, mouseY, 1]);
+      return {
+        canvasTransform:
+          matrix.mult(
+            prevState.canvasTransform,
+            matrix.mult(
+              matrix.translate(srcPos[0], srcPos[1]),
+              matrix.mult(matrix.scale(scaleDelta),
+                matrix.translate(-srcPos[0], -srcPos[1])
+              ),
+            )
+          )
+      }
+    });
+  }
+
+
 
   render () {
     // Editor needs to specify a fixed width/height because the contents use
@@ -511,6 +594,10 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
         if (this.props.altKey) {
           highlightCharPos = false;
         }
+      } else {
+        highlightCharPos = false;
+        screencodeHighlight = undefined;
+        colorHighlight = undefined;
       }
     }
 
@@ -546,17 +633,16 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     }
 
     const { scaleX, scaleY } = this.props.canvasScale;
-    const cx = `${scaleX*100.0}%`;
-    const cy = `${scaleY*100.0}%`;
+    const cx = '100%';
+    const cy = '100%';
     // TODO scaleX and Y
     const transform = this.state.canvasTransform;
     const scale: CSSProperties = {
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'flex-start',
-      width: charWidth*8,
-      height: charHeight*8,
-      backgroundColor: '#351',
+      width: charWidth*8*scaleX,
+      height: charHeight*8*scaleY,
       imageRendering: 'pixelated',
       clipPath: `polygon(0% 0%, ${cx} 0%, ${cx} ${cy}, 0% ${cy})`
     }
@@ -564,6 +650,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       <div
         style={scale}
         ref={this.ref}
+        onWheel={this.handleWheel}
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
         onPointerDown={(e) => this.handlePointerDown(e)}
