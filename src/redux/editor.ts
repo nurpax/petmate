@@ -178,8 +178,8 @@ function mapPixels(fb: Framebuf, mapFn: (fb: Framebuf) => Pixel[][]) {
 
 export function fbReducer(state: Framebuf = {
   framebuf: emptyFramebuf(),
-  width: 40,
-  height: 25,
+  width: FB_WIDTH,
+  height: FB_HEIGHT,
   backgroundColor: DEFAULT_BACKGROUND_COLOR,
   borderColor: DEFAULT_BORDER_COLOR,
   charset: CHARSET_UPPER,

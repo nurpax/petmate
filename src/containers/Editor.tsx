@@ -170,7 +170,6 @@ interface FramebufferViewProps {
   shiftKey: boolean;
 
   textCursorPos: Coord2;
-  canvasScale: { scaleX: number, scaleY: number };
 
   framebuf: Pixel[][];
   framebufWidth: number;
@@ -189,6 +188,11 @@ interface FramebufferViewProps {
   canvasGrid: boolean;
 
   onCharPosChanged: (args: {isActive: boolean, charPos: Coord2}) => void;
+
+  framebufLayout: {
+    width: number, height: number,
+    pixelScale: number
+  };
 }
 
 interface FramebufferViewDispatch {
@@ -210,7 +214,7 @@ interface FramebufferViewState {
 class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDispatch, FramebufferViewState> {
 
   state: FramebufferViewState = {
-    canvasTransform: matrix.scale(1.3),
+    canvasTransform: matrix.scale(this.props.framebufLayout.pixelScale),
     charPos: { row: -1, col: 0 },
     fx: -1, fy: 0,
     isActive: false
@@ -536,8 +540,6 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     });
   }
 
-
-
   render () {
     // Editor needs to specify a fixed width/height because the contents use
     // relative/absolute positioning and thus seem to break out of the CSS
@@ -632,7 +634,6 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
         </Fragment>
     }
 
-    const { scaleX, scaleY } = this.props.canvasScale;
     const cx = '100%';
     const cy = '100%';
     // TODO scaleX and Y
@@ -641,8 +642,8 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'flex-start',
-      width: charWidth*8*scaleX,
-      height: charHeight*8*scaleY,
+      width: `${this.props.framebufLayout.width}px`,
+      height: `${this.props.framebufLayout.height}px`,
       imageRendering: 'pixelated',
       clipPath: `polygon(0% 0%, ${cx} 0%, ${cx} ${cy}, 0% ${cy})`
     }
@@ -677,6 +678,22 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
         </div>
       </div>
     )
+  }
+}
+
+function computeFramebufLayout(args: {
+  containerSize: { width: number, height: number },
+  framebufSize: { charWidth: number, charHeight: number }
+}) {
+  const { charWidth, charHeight } = args.framebufSize;
+  const maxWidth = 515;
+  const canvasWidth = charWidth * 8;
+  const canvasHeight = charHeight * 8;
+  const ws = maxWidth / canvasWidth;
+  return {
+    width: canvasWidth * ws,
+    height: canvasHeight * ws,
+    pixelScale: ws
   }
 }
 
@@ -750,39 +767,30 @@ class Editor extends Component<EditorProps & EditorDispatch> {
   }
 
   render() {
-    if (this.props.framebuf === null) {
+    if (this.props.framebuf === null || this.props.containerSize == null) {
       return null
     }
     const { colorPalette } = this.props
     const borderColor =
       utils.colorIndexToCssRgb(colorPalette, this.props.framebuf.borderColor)
 
-    let scaleX = 1
-    if (this.props.containerSize !== null) {
-      scaleX = this.props.containerSize.width/515.0
-    }
-    if (this.props.integerScale) {
-      // TOOD this depends on the desktop resolution.  On macOS this produces
-      // reasonable resoluts in the 1.5x scale case.  If we don't
-      // floor(x*2)/2, there will be fewer scale steps when resizing the
-      // window.  This feels a bit confusing.
-      scaleX = Math.floor(scaleX*2)
-      scaleX /= 2
-    }
-    const scaleY = scaleX
-    const { width: charW, height: charH } = this.props.framebuf
-    const fbWidth = Math.floor(charW*8 * scaleX)
-    const fbHeight = Math.floor(charH*8 * scaleY)
-    const framebufSize = {
-      width: `${fbWidth}px`,
-      height: `${fbHeight}px`,
-    }
+    const framebufSize = computeFramebufLayout({
+      containerSize: this.props.containerSize,
+      framebufSize: {
+        charWidth: this.props.framebuf.width,
+        charHeight: this.props.framebuf.height
+      }
+    });
+
     const framebufStyle = {
-      ...framebufSize,
+      width: `${framebufSize.width}px`,
+      height: `${framebufSize.height}px`,
       borderColor: borderColor,
       borderStyle: 'solid',
-      borderWidth: `${scaleX*16}px`
-    }
+      borderWidth: `${16}px` // TODO scale border width
+    };
+    const scaleX = framebufSize.pixelScale;
+    const scaleY = scaleX;
     return (
       <div
         className={styles.editorLayoutContainer}
@@ -793,8 +801,7 @@ class Editor extends Component<EditorProps & EditorDispatch> {
             style={framebufStyle}>
             {this.props.framebuf ?
               <FramebufferCont
-                containerSize={framebufSize}
-                canvasScale={{scaleX, scaleY}}
+                framebufLayout={framebufSize}
                 onCharPosChanged={this.handleCharPosChanged} /> :
               null}
           </div>
