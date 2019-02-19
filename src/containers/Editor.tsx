@@ -205,9 +205,6 @@ interface FramebufferViewState {
   canvasTransform: matrix.Matrix3x3;
   // Floor'd to int
   charPos: Coord2;
-  // Float charpos
-  fx: number;
-  fy: number;
   isActive: boolean;
 }
 
@@ -216,7 +213,6 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   state: FramebufferViewState = {
     canvasTransform: matrix.scale(this.props.framebufLayout.pixelScale),
     charPos: { row: -1, col: 0 },
-    fx: -1, fy: 0,
     isActive: false
   }
 
@@ -342,7 +338,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   private shiftLockAxis: 'shift'|'row'|'col'|null = null;
   private dragging = false;
 
-  currentCharPos (e: any): { charPos: Coord2, fx: number, fy: number } {
+  currentCharPos (e: any): { charPos: Coord2 } {
     if (!this.ref.current) {
       throw new Error('impossible?');
     }
@@ -357,25 +353,23 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     y /= 8;
 
     return {
-      charPos: { row: Math.floor(y), col: Math.floor(x) },
-      fx: x,
-      fy: y
+      charPos: { row: Math.floor(y), col: Math.floor(x) }
     }
   }
 
-  setCharPos (isActive: boolean, charPos: Coord2, fx: number, fy: number) {
-    this.setState({ isActive, charPos, fx, fy });
+  setCharPos (isActive: boolean, charPos: Coord2) {
+    this.setState({ isActive, charPos });
     this.props.onCharPosChanged({ isActive, charPos });
   }
 
   handleMouseEnter = (e: any) => {
-    const { charPos, fx, fy } = this.currentCharPos(e);
-    this.setCharPos(true, charPos, fx, fy);
+    const { charPos } = this.currentCharPos(e);
+    this.setCharPos(true, charPos);
   }
 
   handleMouseLeave = (e: any) => {
-    const { charPos, fx, fy } = this.currentCharPos(e);
-    this.setCharPos(false, charPos, fx, fy);
+    const { charPos } = this.currentCharPos(e);
+    this.setCharPos(false, charPos);
   }
 
   handlePointerDown = (e: any) => {
@@ -384,8 +378,8 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       return;
     }
 
-    const { charPos, fx, fy } = this.currentCharPos(e);
-    this.setCharPos(true, charPos, fx, fy);
+    const { charPos } = this.currentCharPos(e);
+    this.setCharPos(true, charPos);
 
     // alt-left click doesn't start dragging
     if (this.props.altKey) {
@@ -429,8 +423,8 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       return;
     }
 
-    const { charPos, fx, fy } = this.currentCharPos(e)
-    this.setCharPos(true, charPos, fx, fy);
+    const { charPos } = this.currentCharPos(e)
+    this.setCharPos(true, charPos);
 
     if (this.prevCharPos === null ||
       this.prevCharPos.row !== charPos.row ||
@@ -789,7 +783,7 @@ class Editor extends Component<EditorProps & EditorDispatch> {
       borderStyle: 'solid',
       borderWidth: `${16}px` // TODO scale border width
     };
-    const scaleX = framebufSize.pixelScale;
+    const scaleX = 1.8;
     const scaleY = scaleX;
     return (
       <div
