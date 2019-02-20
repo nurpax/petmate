@@ -1,6 +1,7 @@
 
 import React, { Component, Fragment, CSSProperties, PointerEvent, WheelEvent } from 'react';
 import { connect } from 'react-redux'
+import classNames from 'classnames'
 
 import ColorPicker from '../components/ColorPicker'
 import CharGrid from '../components/CharGrid'
@@ -22,7 +23,6 @@ import {
 
 
 import { framebufIndexMergeProps }  from '../redux/utils'
-
 
 import * as toolbar from '../redux/toolbar'
 import { Toolbar } from '../redux/toolbar'
@@ -738,6 +738,7 @@ interface EditorProps {
   textColor: number;
   colorPalette: Rgb[];
   paletteRemap: number[];
+  selectedTool: Tool;
 
   integerScale: boolean;
   containerSize: { width: number, height: number };
@@ -789,13 +790,15 @@ class Editor extends Component<EditorProps & EditorDispatch> {
     };
     const scaleX = 1.8;
     const scaleY = scaleX;
+    const fbContainerClass =
+      classNames(styles.fbContainer, this.props.selectedTool == Tool.PanZoom ? styles.panzoom : null);
     return (
       <div
         className={styles.editorLayoutContainer}
       >
         <div>
           <div
-            className={styles.fbContainer}
+            className={fbContainerClass}
             style={framebufStyle}>
             {this.props.framebuf ?
               <FramebufferCont
@@ -833,6 +836,7 @@ export default connect(
     return {
       framebuf,
       textColor: state.toolbar.textColor,
+      selectedTool: state.toolbar.selectedTool,
       paletteRemap: getSettingsPaletteRemap(state),
       colorPalette: getSettingsCurrentColorPalette(state),
       integerScale: getSettingsIntegerScale(state)

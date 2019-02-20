@@ -7,3 +7,7 @@
 .fbContainer {
   cursor: default;
 }
+
+.fbContainer.panzoom {
+  cursor: grab;
+}

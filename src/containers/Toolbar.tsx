@@ -22,7 +22,7 @@ import { Tool, Rgb, RootState } from '../redux/types';
 import { withHoverFade } from './hoc'
 
 import {
-  faBrush, faPencilAlt, faFont, faUndo, faRedo, faBroom, faCog
+  faBrush, faPencilAlt, faFont, faUndo, faRedo, faBroom, faCog, faArrowsAlt
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -289,6 +289,11 @@ class ToolbarView extends Component<
         tool: Tool.Text,
         iconName: faFont,
         tooltip: 'Text'
+      }),
+      mkTool({
+        tool: Tool.PanZoom,
+        iconName: faArrowsAlt,
+        tooltip: 'Pan/zoom'
       })
     ]
     return (
