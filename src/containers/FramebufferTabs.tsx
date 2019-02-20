@@ -163,15 +163,15 @@ class NameEditor extends Component<NameEditorProps, NameEditorState> {
   }
 }
 
-function computeContainerSize(fb: Framebuf, maxWidth: number, _maxHeight: number) {
+function computeContainerSize(fb: Framebuf, maxHeight: number) {
   const pixWidth = fb.width * 8;
   const pixHeight = fb.height * 8;
   // TODO if height is bigger than maxHeight, need to scale differently
   // to fit the box.
-  const s = maxWidth / pixWidth;
+  const s = maxHeight / pixHeight;
   return {
-    divWidth: maxWidth,
-    divHeight: pixHeight * s,
+    divWidth: pixWidth * s,
+    divHeight: maxHeight,
     scaleX: s,
     scaleY: s
   }
@@ -222,11 +222,10 @@ class FramebufTab extends PureComponent<FramebufTabProps> {
     const colorPalette = this.props.colorPalette
     const backg = utils.colorIndexToCssRgb(colorPalette, backgroundColor)
     const bord = utils.colorIndexToCssRgb(colorPalette, borderColor)
-    const maxWidth = 40*2*1.5;
     const maxHeight = 25*2*1.5;
     const {
       divWidth, divHeight, scaleX, scaleY
-    } = computeContainerSize(this.props.framebuf, maxWidth, maxHeight);
+    } = computeContainerSize(this.props.framebuf, maxHeight);
     const s = {
       width: divWidth,
       height: divHeight,
