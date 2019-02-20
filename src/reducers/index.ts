@@ -35,8 +35,11 @@ const rootReducerTop = (
       screens.reducer(state.screens, screens.actions.addScreen(fbidx, insertAfterIndex))
     const newScreens2 =
       screens.reducer(newScreens, screens.actions.setCurrentScreenIndex(insertAfterIndex+1))
+    const newToolbar =
+      toolbar.Toolbar.reducer(state.toolbar, toolbar.Toolbar.actions.setFramebufUIState(fbidx, undefined));
     return {
       ...state,
+      toolbar: newToolbar,
       framebufList: newFramebufs,
       screens: newScreens2
     }

@@ -8,7 +8,7 @@ import {
   charOrderUpper,
   charOrderLower } from '../utils'
 
-import { RootState, Charset, Font, Framebuf, Coord2, Transform, Brush } from './types'
+import { RootState, Charset, Font, Framebuf, Coord2, Transform, Brush, FramebufUIState } from './types'
 import { mirrorBrush, findTransformedChar } from './brush'
 import { CHARSET_UPPER, CHARSET_LOWER } from './editor'
 
@@ -80,4 +80,8 @@ export const getCharRowColWithTransform = (rowcol: Coord2, font: Font, transform
 const transformBrushMemoized = memoize(mirrorBrush)
 export const transformBrush = (brush: Brush, transform: Transform, font: Font) => {
   return transformBrushMemoized(brush, transform, font)
+}
+
+export const getFramebufUIState = (state: RootState, framebufIndex: number): FramebufUIState|undefined => {
+  return state.toolbar.framebufUIState[framebufIndex];
 }

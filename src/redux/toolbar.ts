@@ -3,7 +3,7 @@ import { bindActionCreators, Dispatch } from 'redux'
 
 import { Framebuffer } from './editor'
 import * as Screens from './screens'
-import { Toolbar as IToolbar, Transform, RootStateThunk, Coord2, Pixel, BrushRegion, Font, Brush, Tool, Angle360 } from './types'
+import { Toolbar as IToolbar, Transform, RootStateThunk, Coord2, Pixel, BrushRegion, Font, Brush, Tool, Angle360, FramebufUIState } from './types'
 
 import * as selectors from './selectors'
 import * as screensSelectors from '../redux/screensSelectors'
@@ -14,6 +14,11 @@ import * as utils from '../utils'
 import * as brush from './brush'
 import { ActionsUnion, createAction, updateField, DispatchPropsFromActions } from './typeUtils'
 import { FileFormat } from './typesExport';
+import * as matrix from '../utils/matrix';
+
+const defaultFramebufUIState = {
+  canvasTransform: matrix.ident()
+};
 
 const emptyTransform: Transform = {
   mirror: 0,
@@ -121,6 +126,7 @@ const NEXT_COLOR = 'Toolbar/NEXT_COLOR'
 const INVERT_CHAR = 'Toolbar/INVERT_CHAR'
 const CLEAR_MOD_KEY_STATE = 'Toolbar/CLEAR_MOD_KEY_STATE'
 const INC_UNDO_ID = 'Toolbar/INC_UNDO_ID'
+const SET_FRAMEBUF_UI_STATE = 'Toolbar/SET_FRAMEBUF_UI_STATE'
 
 function captureBrush(framebuf: Pixel[][], brushRegion: BrushRegion) {
   const { min, max } = utils.sortRegion(brushRegion)
@@ -152,6 +158,8 @@ const actionCreators = {
   rotateBrush: () => createAction(ROTATE_BRUSH),
   mirrorChar: (axis: number) => createAction(MIRROR_CHAR, axis),
   rotateChar: () => createAction(ROTATE_CHAR),
+
+  setFramebufUIState: (framebufIndex: number, uiState?: FramebufUIState) => createAction(SET_FRAMEBUF_UI_STATE, { framebufIndex, uiState }),
 
   setTextColor: (c: number) => createAction('Toolbar/SET_TEXT_COLOR', c),
   setTextCursorPos: (pos: Coord2|null) => createAction('Toolbar/SET_TEXT_CURSOR_POS', pos),
@@ -496,6 +504,12 @@ export class Toolbar {
       });
     },
 
+    setCurrentFramebufUIState: (uiState: FramebufUIState): RootStateThunk => {
+      return dispatchForCurrentFramebuf((dispatch, framebufIndex) => {
+        dispatch(Toolbar.actions.setFramebufUIState(framebufIndex, uiState));
+      });
+    },
+
   }
 
   static reducer(state: IToolbar = {
@@ -518,7 +532,8 @@ export class Toolbar {
       showImport: { show: false },
       selectedPaletteRemap: 0,
       canvasGrid: false,
-      shortcutsActive: true
+      shortcutsActive: true,
+      framebufUIState: {}
     }, action: Actions) {
     switch (action.type) {
       case RESET_BRUSH:
@@ -576,6 +591,15 @@ export class Toolbar {
           ...state,
           undoId: state.undoId+1
         }
+      case SET_FRAMEBUF_UI_STATE: {
+        return {
+          ...state,
+          framebufUIState: {
+            ...state.framebufUIState,
+            [action.data.framebufIndex]: action.data.uiState || defaultFramebufUIState
+          }
+        }
+      }
       case MIRROR_BRUSH:
         return {
           ...state,

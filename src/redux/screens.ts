@@ -15,6 +15,8 @@ import {
   DEFAULT_BORDER_COLOR
 } from './editor'
 
+import { Toolbar } from './toolbar';
+
 import {
   RootState,
   Screens
@@ -76,7 +78,8 @@ function cloneScreen(index: number): ThunkAction<void, RootState, undefined, Act
       dispatch(Framebuffer.actions.copyFramebuf({
         ...framebuf,
         name: makeScreenName(newFramebufIdx)
-      }, newFramebufIdx))
+      }, newFramebufIdx));
+      dispatch(Toolbar.actions.setFramebufUIState(newFramebufIdx, selectors.getFramebufUIState(state, fbidx)));
     })
   }
 }

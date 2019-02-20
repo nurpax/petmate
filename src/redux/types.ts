@@ -3,6 +3,7 @@ import { StateWithHistory } from 'redux-undo'
 import { Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
 import { FileFormat } from './typesExport';
+import { Matrix3x3 } from '../utils/matrix';
 
 export type Charset = 'upper' | 'lower';
 
@@ -90,6 +91,11 @@ export enum Tool {
   PanZoom = 5
 };
 
+// Per screen UI state
+export interface FramebufUIState {
+  canvasTransform: Matrix3x3;
+};
+
 export interface Toolbar {
   brush: Brush | null;
   brushRegion: BrushRegion | null;
@@ -111,6 +117,8 @@ export interface Toolbar {
   selectedPaletteRemap: number;
   canvasGrid: boolean;
   shortcutsActive: boolean;
+
+  framebufUIState: {[framebufIndex: number]: FramebufUIState};
 }
 
 export type UndoableFramebuf = StateWithHistory<Framebuf>;

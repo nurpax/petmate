@@ -38,7 +38,7 @@ import {
   Brush,
   Font,
   Tool,
-  Pixel, Framebuf
+  Pixel, Framebuf, FramebufUIState
 } from '../redux/types'
 
 const brushOverlayStyleBase: CSSProperties = {
@@ -177,6 +177,8 @@ interface FramebufferViewProps {
   selectedTool: Tool;
   brush: Brush | null;
   brushRegion: BrushRegion | null;
+  // Scale and translation for pan/zoom
+  framebufUIState: FramebufUIState;
 
   backgroundColor: number;
   textColor: number;
@@ -201,8 +203,6 @@ interface FramebufferViewDispatch {
 }
 
 interface FramebufferViewState {
-  // Scale and translation for pan/zoom
-  canvasTransform: matrix.Matrix3x3;
   // Floor'd to int
   charPos: Coord2;
   isActive: boolean;
@@ -211,7 +211,6 @@ interface FramebufferViewState {
 class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDispatch, FramebufferViewState> {
 
   state: FramebufferViewState = {
-    canvasTransform: matrix.scale(1.0),
     charPos: { row: -1, col: 0 },
     isActive: false
   }
@@ -347,7 +346,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     const xx = (e.clientX - bbox.left) / this.props.framebufLayout.pixelScale;
     const yy = (e.clientY - bbox.top) / this.props.framebufLayout.pixelScale;
 
-    const invXform = matrix.invert(this.state.canvasTransform);
+    const invXform = matrix.invert(this.props.framebufUIState.canvasTransform);
     let [x, y] = matrix.multVect3(invXform, [xx, yy, 1]);
     x /= 8;
     y /= 8;
@@ -487,16 +486,19 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       const dx = e.nativeEvent.movementX / this.props.framebufLayout.pixelScale;
       const dy = e.nativeEvent.movementY / this.props.framebufLayout.pixelScale;
 
-      this.setState(prevState => {
-        const invXform = matrix.invert(prevState.canvasTransform);
-        const srcDxDy = matrix.multVect3(invXform, [dx, dy, 0]);
-        return {
-          canvasTransform:
-            matrix.mult(
-              prevState.canvasTransform,
-              matrix.translate(srcDxDy[0], srcDxDy[1])
-            )
-        }
+      const prevUIState = this.props.framebufUIState;
+      const prevTransform = prevUIState.canvasTransform;
+
+      const invXform = matrix.invert(prevTransform);
+      const srcDxDy = matrix.multVect3(invXform, [dx, dy, 0]);
+
+      this.props.Toolbar.setCurrentFramebufUIState({
+        ...prevUIState,
+        canvasTransform:
+          matrix.mult(
+            prevTransform,
+            matrix.translate(srcDxDy[0], srcDxDy[1])
+          )
       });
     }
   }
@@ -515,23 +517,24 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     const mouseX = (e.nativeEvent.clientX - bbox.left) / this.props.framebufLayout.pixelScale;
     const mouseY = (e.nativeEvent.clientY - bbox.top) / this.props.framebufLayout.pixelScale;
 
-    this.setState(prevState => {
-      // Transform screen [0,w/h] coordinates into char pixel coordinates
-      const invXform = matrix.invert(prevState.canvasTransform);
-      const srcPos = matrix.multVect3(invXform, [mouseX, mouseY, 1]);
-      return {
-        canvasTransform:
+    const prevUIState = this.props.framebufUIState;
+
+    const invXform = matrix.invert(prevUIState.canvasTransform);
+    const srcPos = matrix.multVect3(invXform, [mouseX, mouseY, 1]);
+
+    this.props.Toolbar.setCurrentFramebufUIState({
+      ...prevUIState,
+      canvasTransform:
+        matrix.mult(
+          prevUIState.canvasTransform,
           matrix.mult(
-            prevState.canvasTransform,
-            matrix.mult(
-              matrix.translate(srcPos[0], srcPos[1]),
-              matrix.mult(matrix.scale(scaleDelta),
-                matrix.translate(-srcPos[0], -srcPos[1])
-              ),
-            )
+            matrix.translate(srcPos[0], srcPos[1]),
+            matrix.mult(matrix.scale(scaleDelta),
+              matrix.translate(-srcPos[0], -srcPos[1])
+            ),
           )
-      }
-    });
+        )
+    })
   }
 
   render () {
@@ -631,7 +634,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     const cx = '100%';
     const cy = '100%';
     // TODO scaleX and Y
-    const transform = this.state.canvasTransform;
+    const transform = this.props.framebufUIState.canvasTransform;
     const scale: CSSProperties = {
       display: 'flex',
       flexDirection: 'row',
@@ -639,7 +642,9 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       width: `${this.props.framebufLayout.width}px`,
       height: `${this.props.framebufLayout.height}px`,
       imageRendering: 'pixelated',
-      clipPath: `polygon(0% 0%, ${cx} 0%, ${cx} ${cy}, 0% ${cy})`
+      clipPath: `polygon(0% 0%, ${cx} 0%, ${cx} ${cy}, 0% ${cy})`,
+      overflowX: 'hidden',
+      overflowY: 'hidden'
     }
     return (
       <div
@@ -699,6 +704,7 @@ const FramebufferCont = connect(
   (state: RootState) => {
     const selected = state.toolbar.selectedChar
     const charTransform = state.toolbar.charTransform
+    const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state);
     const framebuf = selectors.getCurrentFramebuf(state)!
     if (framebuf == null) {
       throw new Error('cannot render FramebufferCont with a null framebuf, see Editor checks.')
@@ -721,7 +727,8 @@ const FramebufferCont = connect(
       altKey: state.toolbar.altKey,
       font,
       colorPalette: getSettingsCurrentColorPalette(state),
-      canvasGrid: state.toolbar.canvasGrid
+      canvasGrid: state.toolbar.canvasGrid,
+      framebufUIState: selectors.getFramebufUIState(state, framebufIndex!)
     }
   },
   dispatch => {
