@@ -211,7 +211,7 @@ interface FramebufferViewState {
 class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDispatch, FramebufferViewState> {
 
   state: FramebufferViewState = {
-    canvasTransform: matrix.scale(this.props.framebufLayout.pixelScale),
+    canvasTransform: matrix.scale(1.0),
     charPos: { row: -1, col: 0 },
     isActive: false
   }
@@ -344,8 +344,8 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     }
 
     const bbox = this.ref.current.getBoundingClientRect();
-    const xx = (e.clientX - bbox.left);
-    const yy = (e.clientY - bbox.top);
+    const xx = (e.clientX - bbox.left) / this.props.framebufLayout.pixelScale;
+    const yy = (e.clientY - bbox.top) / this.props.framebufLayout.pixelScale;
 
     const invXform = matrix.invert(this.state.canvasTransform);
     let [x, y] = matrix.multVect3(invXform, [xx, yy, 1]);
@@ -484,8 +484,8 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
 
   handlePanZoomPointerMove (e: any) {
     if (this.panZoomDragging) {
-      const dx = e.nativeEvent.movementX;
-      const dy = e.nativeEvent.movementY;
+      const dx = e.nativeEvent.movementX / this.props.framebufLayout.pixelScale;
+      const dy = e.nativeEvent.movementY / this.props.framebufLayout.pixelScale;
 
       this.setState(prevState => {
         const invXform = matrix.invert(prevState.canvasTransform);
@@ -512,8 +512,8 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     const scaleDelta = 1 - (e.deltaY / 150.0);
 
     const bbox = this.ref.current.getBoundingClientRect();
-    const mouseX = (e.nativeEvent.clientX - bbox.left);
-    const mouseY = (e.nativeEvent.clientY - bbox.top);
+    const mouseX = (e.nativeEvent.clientX - bbox.left) / this.props.framebufLayout.pixelScale;
+    const mouseY = (e.nativeEvent.clientY - bbox.top) / this.props.framebufLayout.pixelScale;
 
     this.setState(prevState => {
       // Transform screen [0,w/h] coordinates into char pixel coordinates
@@ -653,7 +653,11 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
         onPointerUp={(e) => this.handlePointerUp(e)}
       >
         <div
-          style={{transform: matrix.toCss(transform)}}
+          style={{transform: matrix.toCss(
+            matrix.mult(
+              matrix.scale(this.props.framebufLayout.pixelScale),
+              transform
+            ))}}
         >
           <CharGrid
             width={charWidth}
