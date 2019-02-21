@@ -690,14 +690,23 @@ function computeFramebufLayout(args: {
 }) {
   const { charWidth, charHeight } = args.framebufSize;
   const maxWidth = 515;
+  const maxHeight = 400;
   const canvasWidth = charWidth * 8;
   const canvasHeight = charHeight * 8;
+  if (canvasHeight > canvasWidth) {
+    const ws = maxHeight / canvasHeight;
+    return {
+      width: canvasWidth * ws,
+      height: canvasHeight * ws,
+      pixelScale: ws
+    }
+  }
   const ws = maxWidth / canvasWidth;
   return {
     width: canvasWidth * ws,
     height: canvasHeight * ws,
     pixelScale: ws
-  }
+  };
 }
 
 const FramebufferCont = connect(
