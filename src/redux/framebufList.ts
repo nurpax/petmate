@@ -15,7 +15,7 @@ const ADD_FRAMEBUF = 'ADD_FRAMEBUF'
 const REMOVE_FRAMEBUF = 'REMOVE_FRAMEBUF'
 
 const actionCreators = {
-  addFramebuf: () => createAction(ADD_FRAMEBUF),
+  addFramebuf: (dims: { width: number, height: number}) => createAction(ADD_FRAMEBUF, dims),
   removeFramebuf: (index: number) => createAction(REMOVE_FRAMEBUF, index)
 };
 
@@ -29,8 +29,9 @@ function framebufListReducer(reducer: UndoableFbReducer) {
   return function (state: UndoableFramebuf[] = [], action: Actions|framebuffer.Actions): UndoableFramebuf[] {
     switch (action.type) {
     case ADD_FRAMEBUF:
-      const dummyAction: framebuffer.Actions = action as any;
-      return state.concat(reducer(undefined, dummyAction));
+      // Add a new framebuf with desired width/height
+      const setDims = framebuffer.actions.setDims(action.data, -1);
+      return state.concat(reducer(undefined, setDims));
     case REMOVE_FRAMEBUF: {
       return fp.arrayRemoveAt(state, action.data);
     }

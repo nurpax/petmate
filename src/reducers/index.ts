@@ -24,7 +24,7 @@ const rootReducerTop = (
   }
   if (action.type === screens.ADD_SCREEN_AND_FRAMEBUF) {
     const newFramebufs =
-      framebufList.reducer(state.framebufList, framebufList.actions.addFramebuf())
+      framebufList.reducer(state.framebufList, framebufList.actions.addFramebuf(state.toolbar.newScreenSize));
     const fbs = newFramebufs
     const fbidx = fbs.length-1
     let insertAfterIndex = action.data;

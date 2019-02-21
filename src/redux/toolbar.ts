@@ -3,7 +3,7 @@ import { bindActionCreators, Dispatch } from 'redux'
 
 import { Framebuffer } from './editor'
 import * as Screens from './screens'
-import { Toolbar as IToolbar, Transform, RootStateThunk, Coord2, Pixel, BrushRegion, Font, Brush, Tool, Angle360, FramebufUIState } from './types'
+import { Toolbar as IToolbar, Transform, RootStateThunk, Coord2, Pixel, BrushRegion, Font, Brush, Tool, Angle360, FramebufUIState, DEFAULT_FB_WIDTH, DEFAULT_FB_HEIGHT } from './types'
 
 import * as selectors from './selectors'
 import * as screensSelectors from '../redux/screensSelectors'
@@ -533,6 +533,7 @@ export class Toolbar {
       selectedPaletteRemap: 0,
       canvasGrid: false,
       shortcutsActive: true,
+      newScreenSize: { width: DEFAULT_FB_WIDTH, height: DEFAULT_FB_HEIGHT },
       framebufUIState: {}
     }, action: Actions) {
     switch (action.type) {

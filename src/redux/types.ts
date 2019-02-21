@@ -5,6 +5,9 @@ import { ThunkAction } from 'redux-thunk'
 import { FileFormat } from './typesExport';
 import { Matrix3x3 } from '../utils/matrix';
 
+export const DEFAULT_FB_WIDTH = 40;
+export const DEFAULT_FB_HEIGHT = 25;
+
 export type Charset = 'upper' | 'lower';
 
 export interface Coord2 {
@@ -117,6 +120,8 @@ export interface Toolbar {
   selectedPaletteRemap: number;
   canvasGrid: boolean;
   shortcutsActive: boolean;
+
+  newScreenSize: { width: number, height: number };
 
   framebufUIState: {[framebufIndex: number]: FramebufUIState};
 }
