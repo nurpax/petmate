@@ -100,3 +100,11 @@
   outline-width: 1px;
   outline-color: rgba(255,32,32,0.6);
 }
+
+/*---------------------------------------------------------------*/
+.screenDimContainer {
+  position: relative;
+  top: 0px;
+  left: 0px;
+  font-size: 12px;
+}

@@ -1,5 +1,5 @@
 
-import React, { Component, PureComponent } from 'react';
+import React, { Component, PureComponent, useState, useCallback } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { SortableContainer, SortableElement, arrayMove } from '../external/react-sortable-hoc'
@@ -297,6 +297,115 @@ const SortableTabList = SortableContainer((props: {children: any}) => {
   )
 })
 
+type ScreenDimsProps = {
+  dims: {
+    width: number,
+    height: number
+  };
+  Toolbar: toolbar.PropsFromDispatch;
+};
+
+type ScreenDimsEditProps = {
+  stopEditing: () => void;
+};
+
+function ScreenDimsEdit (props: ScreenDimsProps & ScreenDimsEditProps) {
+  const { width, height } = props.dims;
+  const [dimsText, setDimsText] = useState(`${width}x${height}`);
+
+  const handleBlur = useCallback(() => {
+    props.stopEditing();
+  }, []);
+
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    props.stopEditing();
+    const numsRe = /^([0-9]+)x([0-9]+)/;
+    const matches = numsRe.exec(dimsText);
+    if (matches) {
+      props.Toolbar.setNewScreenSize({
+        width: parseInt(matches[1]),
+        height: parseInt(matches[2])
+      })
+    }
+  }, [dimsText]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setDimsText(e.target.value);
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      props.stopEditing();
+    }
+  }, []);
+
+  const handleFocus = useCallback((e: React.FormEvent<HTMLInputElement>) => {
+    let target = e.target as HTMLInputElement;
+    props.Toolbar.setShortcutsActive(false);
+    target.select();
+  }, []);
+
+  return (
+    <div className={styles.tabNameEditor}>
+      <form
+        onSubmit={handleSubmit}
+      >
+        <input
+          autoFocus
+          type='text'
+          pattern='[0-9]+x[0-9]+'
+          title='Specify screen width x height (e.g., 40x25)'
+          value={dimsText}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          onChange={handleChange}
+        />
+      </form>
+    </div>
+  );
+}
+
+function ScreenDims (props: ScreenDimsProps) {
+  const [editing, setEditing] = useState(false);
+  const stopEditing = useCallback(() => {
+    setEditing(false);
+    props.Toolbar.setShortcutsActive(true);
+  }, []);
+  return (
+    <div
+      className={styles.screenDimContainer}
+      onClick={() => setEditing(true)}
+    >
+      {editing ?
+        <ScreenDimsEdit
+          {...props}
+          stopEditing={stopEditing}
+        /> : `${props.dims.width}x${props.dims.height}`}
+    </div>
+  );
+}
+
+function NewTabButton (props: {
+  dims: { width: number, height: number },
+  onClick: () => void,
+  Toolbar: toolbar.PropsFromDispatch
+}) {
+  // onClick is not in FontAwesomeIcon props and don't know how to pass
+  // it otherwise.
+  const typingWorkaround = { onClick: props.onClick };
+  return (
+    <div className={classnames(styles.tab, styles.newScreen)}>
+      <FontAwesomeIcon {...typingWorkaround} icon={faPlus} />
+      <ScreenDims
+        dims={props.dims}
+        Toolbar={props.Toolbar}
+      />
+    </div>
+  )
+}
+
 interface FramebufferTabsDispatch {
   Screens: screens.PropsFromDispatch;
   Toolbar: toolbar.PropsFromDispatch;
@@ -306,6 +415,7 @@ interface FramebufferTabsProps {
   screens: number[];
   activeScreen: number;
   colorPalette: Rgb[];
+  newScreenSize: { width: number, height: number };
 
   getFramebufByIndex: (framebufId: number) => Framebuf | null;
   getFont: (framebuf: Framebuf) => Font;
@@ -359,9 +469,6 @@ class FramebufferTabs_ extends Component<FramebufferTabsProps & FramebufferTabsD
         />
       )
     })
-    // onClick is not in FontAwesomeIcon props and don't know how to pass
-    // it otherwise.
-    const typingWorkaround = { onClick: this.handleNewTab };
     return (
       <div className={styles.tabHeadings}>
         <SortableTabList
@@ -371,9 +478,11 @@ class FramebufferTabs_ extends Component<FramebufferTabsProps & FramebufferTabsD
           onSortEnd={this.onSortEnd}
         >
           {lis}
-          <div className={classnames(styles.tab, styles.newScreen)}>
-            <FontAwesomeIcon {...typingWorkaround} icon={faPlus} />
-          </div>
+          <NewTabButton
+            dims={this.props.newScreenSize}
+            Toolbar={this.props.Toolbar}
+            onClick={this.handleNewTab}
+          />
         </SortableTabList>
       </div>
     )
@@ -383,6 +492,7 @@ class FramebufferTabs_ extends Component<FramebufferTabsProps & FramebufferTabsD
 export default connect(
   (state: RootState) => {
     return {
+      newScreenSize: state.toolbar.newScreenSize,
       activeScreen: screensSelectors.getCurrentScreenIndex(state),
       screens: screensSelectors.getScreens(state),
       getFramebufByIndex: (idx: number) => selectors.getFramebufByIndex(state, idx),

@@ -177,6 +177,7 @@ const actionCreators = {
   setSelectedPaletteRemap: (remapIdx: number) => createAction('Toolbar/SET_SELECTED_PALETTE_REMAP', remapIdx),
   setCanvasGrid: (flag: boolean) => createAction('Toolbar/SET_CANVAS_GRID', flag),
   setShortcutsActive: (flag: boolean) => createAction('Toolbar/SET_SHORTCUTS_ACTIVE', flag),
+  setNewScreenSize: (dims: { width: number, height: number }) => createAction('Toolbar/SET_NEW_SCREEN_SIZE', dims)
 };
 
 export type Actions = ActionsUnion<typeof actionCreators>;
@@ -661,6 +662,8 @@ export class Toolbar {
         return updateField(state, 'canvasGrid', action.data);
       case 'Toolbar/SET_SHORTCUTS_ACTIVE':
         return updateField(state, 'shortcutsActive', action.data);
+      case 'Toolbar/SET_NEW_SCREEN_SIZE':
+        return updateField(state, 'newScreenSize', action.data);
       default:
         return state;
     }
