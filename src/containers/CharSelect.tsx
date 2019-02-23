@@ -58,7 +58,7 @@ function useCharPos(
         setCharPos(null);
       }
     }
-  }, []);
+  }, [ref, charWidth, charHeight, setCharPos]);
 
   let onMouseEnter = useCallback(function() {
     setIsActive(true);
