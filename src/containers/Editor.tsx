@@ -539,7 +539,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     const invXform = matrix.invert(prevUIState.canvasTransform);
     const srcPos = matrix.multVect3(invXform, [mouseX, mouseY, 1]);
 
-    const xform =
+    let xform =
       matrix.mult(
         prevUIState.canvasTransform,
         matrix.mult(
@@ -547,6 +547,16 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
           matrix.scale(scaleDelta)
         )
       )
+
+    // Clamp scale to 1.0
+    if (xform.v[0][0] < 1.0 || xform.v[1][1] < 1.0) {
+      const invScale = matrix.scale(1.0 / xform.v[0][0]);
+      xform = matrix.mult(xform, invScale);
+      // scale is roughly 1.0 now but let's force float values
+      // to exact 1.0
+      xform.v[0][0] = 1.0;
+      xform.v[1][1] = 1.0;
+    }
 
     this.clampToWindow(xform);
 
