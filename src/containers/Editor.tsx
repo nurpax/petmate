@@ -481,6 +481,20 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     this.panZoomDragging = false;
   }
 
+  // Mutable dst
+  clampToWindow (xform: matrix.Matrix3x3) {
+    // Clamp translation so that the canvas doesn't go out of the window
+    let tx = xform.v[0][2];
+    let ty = xform.v[1][2];
+    tx = Math.min(tx, 0);
+    ty = Math.min(ty, 0);
+    const [swidth, sheight] = matrix.multVect3(xform, [this.props.framebufWidth*8, this.props.framebufHeight*8, 0]);
+    tx = Math.max(tx, -(swidth - this.props.framebufWidth*8));
+    ty = Math.max(ty, -(sheight - this.props.framebufHeight*8));
+    xform.v[0][2] = tx;
+    xform.v[1][2] = ty;
+  }
+
   handlePanZoomPointerMove (e: any) {
     if (this.panZoomDragging) {
       const dx = e.nativeEvent.movementX / this.props.framebufLayout.pixelScale;
@@ -492,13 +506,16 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       const invXform = matrix.invert(prevTransform);
       const srcDxDy = matrix.multVect3(invXform, [dx, dy, 0]);
 
+      const xform =
+        matrix.mult(
+          prevTransform,
+          matrix.translate(srcDxDy[0], srcDxDy[1])
+        );
+      this.clampToWindow(xform);
+
       this.props.Toolbar.setCurrentFramebufUIState({
         ...prevUIState,
-        canvasTransform:
-          matrix.mult(
-            prevTransform,
-            matrix.translate(srcDxDy[0], srcDxDy[1])
-          )
+        canvasTransform: xform
       });
     }
   }
@@ -522,18 +539,20 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     const invXform = matrix.invert(prevUIState.canvasTransform);
     const srcPos = matrix.multVect3(invXform, [mouseX, mouseY, 1]);
 
+    const xform =
+      matrix.mult(
+        prevUIState.canvasTransform,
+        matrix.mult(
+          matrix.translate(srcPos[0]-scaleDelta*srcPos[0], srcPos[1]-scaleDelta*srcPos[1]),
+          matrix.scale(scaleDelta)
+        )
+      )
+
+    this.clampToWindow(xform);
+
     this.props.Toolbar.setCurrentFramebufUIState({
       ...prevUIState,
-      canvasTransform:
-        matrix.mult(
-          prevUIState.canvasTransform,
-          matrix.mult(
-            matrix.translate(srcPos[0], srcPos[1]),
-            matrix.mult(matrix.scale(scaleDelta),
-              matrix.translate(-srcPos[0], -srcPos[1])
-            ),
-          )
-        )
+      canvasTransform: xform
     })
   }
 
