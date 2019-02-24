@@ -520,6 +520,18 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     }
   }
 
+  // Reset canvas scale transform to identity on double click.
+  handleDoubleClick = () => {
+    if (this.props.selectedTool != Tool.PanZoom) {
+      return;
+    }
+    const prevUIState = this.props.framebufUIState;
+    this.props.Toolbar.setCurrentFramebufUIState({
+      ...prevUIState,
+      canvasTransform: matrix.ident()
+    })
+  }
+
   handleWheel = (e: WheelEvent) => {
     if (this.props.selectedTool != Tool.PanZoom) {
       return;
@@ -527,8 +539,13 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     if (!this.ref.current) {
       return;
     }
-
-    const scaleDelta = 1 - (e.deltaY / 150.0);
+    if (e.deltaY == 0) {
+      return;
+    }
+    const wheelScale = 200.0;
+    const delta = Math.min(Math.abs(e.deltaY), wheelScale);
+    const scaleDelta = e.deltaY < 0 ?
+      1.0/(1 - (delta / (wheelScale+1))) : (1 - (delta / (wheelScale+1)));
 
     const bbox = this.ref.current.getBoundingClientRect();
     const mouseX = (e.nativeEvent.clientX - bbox.left) / this.props.framebufLayout.pixelScale;
@@ -680,6 +697,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
         style={scale}
         ref={this.ref}
         onWheel={this.handleWheel}
+        onDoubleClick={this.handleDoubleClick}
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
         onPointerDown={(e) => this.handlePointerDown(e)}
