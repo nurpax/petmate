@@ -264,7 +264,7 @@ export class Toolbar {
             } else if (key === 't' || key === '5') {
               dispatch(Toolbar.actions.setSelectedTool(Tool.Text))
               return
-            } else if (key === 'm' || key === '6') {
+            } else if (key === 'z' || key === '6') {
               dispatch(Toolbar.actions.setSelectedTool(Tool.PanZoom))
               return
             } else if (key === 'g') {
