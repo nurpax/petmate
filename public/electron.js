@@ -8,6 +8,8 @@ const {
     Menu
 } = require('electron');
 
+app.disableHardwareAcceleration()
+
 const MenuBuilder = require('./menu');
 
 if (process.platform == 'darwin') {
