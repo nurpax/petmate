@@ -735,25 +735,32 @@ function computeFramebufLayout(args: {
   containerSize: { width: number, height: number },
   framebufSize: { charWidth: number, charHeight: number }
 }) {
+  const bottomPad = 60;
+  const rightPad = 320;
   const { charWidth, charHeight } = args.framebufSize;
-  const maxWidth = 515;
-  const maxHeight = 400;
+  const maxWidth = args.containerSize.width - rightPad;
+  const maxHeight = args.containerSize.height - bottomPad;
+
   const canvasWidth = charWidth * 8;
   const canvasHeight = charHeight * 8;
-  if (canvasHeight > canvasWidth) {
-    const ws = maxHeight / canvasHeight;
-    return {
-      width: canvasWidth * ws,
-      height: canvasHeight * ws,
-      pixelScale: ws
-    }
+
+  let ws =  maxWidth / canvasWidth;
+  let divWidth = canvasWidth * ws;
+  let divHeight = canvasHeight * ws;
+
+  // If height is now larger than what we can fit in vertically, scale further
+  if (divHeight > maxHeight) {
+    const s = maxHeight  / divHeight;
+    divWidth *= s;
+    divHeight *= s;
+    ws *= s;
   }
-  const ws = maxWidth / canvasWidth;
+
   return {
-    width: canvasWidth * ws,
-    height: canvasHeight * ws,
+    width: divWidth,
+    height: divHeight,
     pixelScale: ws
-  };
+  }
 }
 
 const FramebufferCont = connect(
