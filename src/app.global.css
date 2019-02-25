@@ -1,4 +1,13 @@
 
+:root {
+  --input-hover-outline-color: rgba(64,64,64,255);
+  --input-hover-outline-width: 1px;
+
+  --main-text-color: rgb(173,173,173);
+  --main-text-lighter-color: rgb(190,190,190);
+  --main-text-darker-color: rgb(130,130,130);
+}
+
 body {
   position: relative;
   color: white;
@@ -107,10 +116,4 @@ button.cancel {
 
 button.cancel:hover {
     border-color: rgba(255,255,255, 0.2);
-}
-
-/* colors */
-
-:root {
-  --main-text-color: rgb(173,173,173);
 }

@@ -382,7 +382,8 @@ function ScreenDims (props: ScreenDimsProps) {
         <ScreenDimsEdit
           {...props}
           stopEditing={stopEditing}
-        /> : `${props.dims.width}x${props.dims.height}`}
+        /> :
+        <div className={styles.screenDimText}>{props.dims.width}x{props.dims.height}</div>}
     </div>
   );
 }

@@ -8,8 +8,8 @@ const FixedWidthCoord = (props: { axis: string, number: number|string|null }) =>
   const { axis, number } = props;
   return (
     <div style={{display: 'flex', flexDirection:'row'}}>
-      <div style={{width: '15px', color:'rgb(120,120,120)'}}>{axis}:</div>
-      <div style={{width: '25px', color:'rgb(173,173,173)'}}>{number}</div>
+      <div style={{width: '15px', color:'var(--main-text-darker-color)'}}>{axis}:</div>
+      <div style={{width: '25px', color:'var(--main-text-color)'}}>{number}</div>
     </div>
   )
 }
