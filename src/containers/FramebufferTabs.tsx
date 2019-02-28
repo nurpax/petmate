@@ -323,10 +323,9 @@ function ScreenDimsEdit (props: ScreenDimsProps & ScreenDimsEditProps) {
     const numsRe = /^([0-9]+)x([0-9]+)/;
     const matches = numsRe.exec(dimsText);
     if (matches) {
-      props.Toolbar.setNewScreenSize({
-        width: parseInt(matches[1]),
-        height: parseInt(matches[2])
-      })
+      const width = Math.max(1, Math.min(1024, parseInt(matches[1])));
+      const height = Math.max(1, Math.min(1024, parseInt(matches[2])));
+      props.Toolbar.setNewScreenSize({ width, height });
     }
   }, [dimsText]);
 
