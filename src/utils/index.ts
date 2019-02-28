@@ -258,10 +258,11 @@ export function dialogLoadWorkspace(
   setWorkspaceFilename: (fname: string) => void
 ) {
   const {dialog} = electron.remote
+  const window = electron.remote.getCurrentWindow();
   const filters = [
     {name: 'Petmate workspace', extensions: ['petmate']},
   ]
-  const filename = dialog.showOpenDialog({properties: ['openFile'], filters})
+  const filename = dialog.showOpenDialog(window, {properties: ['openFile'], filters})
   if (filename === undefined) {
     return
   }
@@ -278,10 +279,11 @@ export function dialogSaveAsWorkspace(
   setWorkspaceFilename: (fname: string) => void
 ) {
   const {dialog} = electron.remote
+  const window = electron.remote.getCurrentWindow();
   const filters = [
     {name: 'Petmate workspace file', extensions: ['petmate']},
   ]
-  const filename = dialog.showSaveDialog({properties: ['openFile'], filters})
+  const filename = dialog.showSaveDialog(window, {properties: ['openFile'], filters})
   if (filename === undefined) {
     return
   }
@@ -291,10 +293,11 @@ export function dialogSaveAsWorkspace(
 
 export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[], palette: Rgb[]) {
   const {dialog} = electron.remote
+  const window = electron.remote.getCurrentWindow();
   const filters = [
     {name: fmt.name, extensions: [fmt.ext]}
   ]
-  const filename = dialog.showSaveDialog({properties: ['openFile'], filters})
+  const filename = dialog.showSaveDialog(window, {properties: ['openFile'], filters})
   if (filename === undefined) {
     return
   }
@@ -305,10 +308,11 @@ export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[],
 // loadFile callback with the file contents.
 export function dialogReadFile(type: FileFormat, loadFile: (data: Buffer) => void) {
   const {dialog} = electron.remote
+  const window = electron.remote.getCurrentWindow();
   const filters = [
     { name: type.name, extensions: [type.ext] }
   ]
-  const filename = dialog.showOpenDialog({properties: ['openFile'], filters})
+  const filename = dialog.showOpenDialog(window, {properties: ['openFile'], filters})
   if (filename === undefined) {
     return
   }
@@ -324,10 +328,11 @@ export function dialogReadFile(type: FileFormat, loadFile: (data: Buffer) => voi
 // importFile API to accept file contents.
 export function dialogImportFile(type: FileFormat, importFile: (fbs: Framebuf[]) => void) {
   const {dialog} = electron.remote
+  const window = electron.remote.getCurrentWindow();
   const filters = [
     { name: type.name, extensions: [type.ext] }
   ]
-  const filename = dialog.showOpenDialog({properties: ['openFile'], filters})
+  const filename = dialog.showOpenDialog(window, {properties: ['openFile'], filters})
   if (filename === undefined) {
     return
   }
