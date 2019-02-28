@@ -1,5 +1,5 @@
 
-import React, { Component, PureComponent, useState, useCallback } from 'react';
+import React, { Component, PureComponent, useState, useCallback, CSSProperties } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { SortableContainer, SortableElement, arrayMove } from '../external/react-sortable-hoc'
@@ -233,11 +233,12 @@ class FramebufTab extends PureComponent<FramebufTabProps> {
       borderStyle: 'solid',
       borderWidth: '5px',
       borderColor: bord
-    }
-    const scaleStyle = {
+    };
+    const scaleStyle: CSSProperties = {
       transform: `scale(${scaleX}, ${scaleY})`,
-      transformOrigin: '0% 0%'
-    }
+      transformOrigin: '0% 0%',
+      imageRendering: 'pixelated'
+    };
 
     const menuItems = [
       {
@@ -248,7 +249,7 @@ class FramebufTab extends PureComponent<FramebufTabProps> {
         label: "Remove",
         click: this.handleMenuRemove
       }
-    ]
+    ];
 
     return (
       <div style={{
