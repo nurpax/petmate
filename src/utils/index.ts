@@ -169,6 +169,7 @@ export const saveWorkspace = (filename: string, screens: number[], getFramebufBy
   })
   try {
     fs.writeFileSync(filename, content, 'utf-8');
+    electron.remote.app.addRecentDocument(filename);
   }
   catch(e) {
     alert(`Failed to save file '${filename}'!`)
@@ -180,6 +181,7 @@ export const loadWorkspace = (filename: string, dispatch: (thunk: RootStateThunk
     const content = fs.readFileSync(filename, 'utf-8')
     const c = JSON.parse(content)
     dispatch(workspace.load(c));
+    electron.remote.app.addRecentDocument(filename);
   }
   catch(e) {
     console.error(e)
