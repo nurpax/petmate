@@ -2,6 +2,7 @@
 const { app, Menu, shell, BrowserWindow } = require('electron');
 
 const importers = [
+  { label: 'D64 disk image (.d64)', cmd: 'import-d64' },
   { label: 'PETSCII (.c)', cmd: 'import-marq-c' },
   { label: 'PNG (.png)', cmd: 'import-png' }
 ]

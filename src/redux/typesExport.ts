@@ -40,6 +40,10 @@ export interface FileFormatC extends FileFormatBase {
   ext: 'c';
 }
 
+export interface FileFormatD64 extends FileFormatBase {
+  ext: 'd64';
+}
+
 export interface FileFormatPrg extends FileFormatBase {
   ext: 'prg';
 }
@@ -54,6 +58,7 @@ export interface FileFormatBas extends FileFormatBase {
 
 export type FileFormat =
     FileFormatAsm
+  | FileFormatD64
   | FileFormatGif
   | FileFormatPng
   | FileFormatC

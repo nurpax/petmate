@@ -115,6 +115,9 @@ electron.ipcRenderer.on('menu', (_event: Event, message: string) => {
     case 'export-gif':
       dispatchExport(formats.gif)
       return
+    case 'import-d64':
+      store.dispatch(ReduxRoot.actions.fileImportAppend(formats.d64))
+      return
     case 'import-marq-c':
       store.dispatch(ReduxRoot.actions.fileImportAppend(formats.c))
       return

@@ -1,7 +1,7 @@
 
 import * as workspace from '../redux/workspace'
 
-import { loadMarqCFramebuf } from './importers'
+import { loadMarqCFramebuf, loadD64Framebuf } from './importers'
 import {
   savePNG,
   saveMarqC,
@@ -46,6 +46,11 @@ export const formats: { [index: string]: FileFormat } = {
   c: {
     name: 'PETSCII .c',
     ext: 'c',
+    commonExportParams: defaultExportCommon,
+  },
+  d64: {
+    name: 'D64 disk image .d64',
+    ext: 'd64',
     commonExportParams: defaultExportCommon,
   },
   prg: {
@@ -193,6 +198,11 @@ export const loadFramebuf = (filename: string, importFile: (fbs: Framebuf[]) => 
   const ext = path.extname(filename)
   if (ext === '.c') {
     return loadMarqCFramebuf(filename, importFile)
+  } else if (ext === '.d64') {
+    const fb = loadD64Framebuf(filename);
+    if (fb !== undefined) {
+      return importFile([fb]);
+    }
   } else {
     console.error('this shouldn not happen');
   }
