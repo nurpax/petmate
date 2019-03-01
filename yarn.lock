@@ -2157,9 +2157,9 @@ bytes@3.0.0:
   integrity sha1-0ygVQE1olpn4Wk6k+odV3ROpYEg=
 
 c1541@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/c1541/-/c1541-0.1.0.tgz#66da1db8b2f06f315f20deb394cbfe08305bb283"
-  integrity sha512-Ab024UwQlrT4UGEWHKVGNVIxwtxAQwsP/t+tePulLMWG5rFACcKbTkK2AkbAd7Nr7Nnf4IJNYiUZvDrNdKfU7A==
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/c1541/-/c1541-0.1.1.tgz#07b025250580c4eb99781a48a45decfce8be11ef"
+  integrity sha512-YVT0lk1s6+qcDUL0AQ30s4Sa5Xk0dQGtLZ1itMzzVfpNEqnGy5TW+P5qn1QjfYImYjBYUnu2mbccBkotjAb8cQ==
 
 cacache@^10.0.4:
   version "10.0.4"
