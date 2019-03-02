@@ -82,7 +82,10 @@ export const transformBrush = (brush: Brush, transform: Transform, font: Font) =
   return transformBrushMemoized(brush, transform, font)
 }
 
-export const getFramebufUIState = (state: RootState, framebufIndex: number): FramebufUIState|undefined => {
+export const getFramebufUIState = (state: RootState, framebufIndex: number|null): FramebufUIState|undefined => {
+  if (framebufIndex == null) {
+    return undefined;
+  }
   return state.toolbar.framebufUIState[framebufIndex];
 }
 

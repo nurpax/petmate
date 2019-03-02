@@ -482,17 +482,21 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   }
 
   // Mutable dst
-  clampToWindow (xform: matrix.Matrix3x3) {
+  clampToWindow (xform: matrix.Matrix3x3): matrix.Matrix3x3 {
+    const xf = matrix.copy(xform);
     // Clamp translation so that the canvas doesn't go out of the window
-    let tx = xform.v[0][2];
-    let ty = xform.v[1][2];
+    let tx = xf.v[0][2];
+    let ty = xf.v[1][2];
     tx = Math.min(tx, 0);
     ty = Math.min(ty, 0);
+    const xx = this.props.framebufLayout.width / this.props.framebufLayout.pixelScale;
+    const yy = this.props.framebufLayout.height / this.props.framebufLayout.pixelScale;
     const [swidth, sheight] = matrix.multVect3(xform, [this.props.framebufWidth*8, this.props.framebufHeight*8, 0]);
-    tx = Math.max(tx, -(swidth - this.props.framebufWidth*8));
-    ty = Math.max(ty, -(sheight - this.props.framebufHeight*8));
-    xform.v[0][2] = tx;
-    xform.v[1][2] = ty;
+    tx = Math.max(tx, -(swidth - xx));
+    ty = Math.max(ty, -(sheight - yy));
+    xf.v[0][2] = tx;
+    xf.v[1][2] = ty;
+    return xf;
   }
 
   handlePanZoomPointerMove (e: any) {
@@ -511,11 +515,9 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
           prevTransform,
           matrix.translate(srcDxDy[0], srcDxDy[1])
         );
-      this.clampToWindow(xform);
-
       this.props.Toolbar.setCurrentFramebufUIState({
         ...prevUIState,
-        canvasTransform: xform
+        canvasTransform: this.clampToWindow(xform)
       });
     }
   }
@@ -575,11 +577,9 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       xform.v[1][1] = 1.0;
     }
 
-    this.clampToWindow(xform);
-
     this.props.Toolbar.setCurrentFramebufUIState({
       ...prevUIState,
-      canvasTransform: xform
+      canvasTransform: this.clampToWindow(xform)
     })
   }
 
@@ -692,6 +692,15 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       overflowX: 'hidden',
       overflowY: 'hidden'
     }
+    const canvasContainerStyle: CSSProperties = {
+      transform: matrix.toCss(
+        matrix.mult(
+          matrix.scale(this.props.framebufLayout.pixelScale),
+            this.clampToWindow(transform)
+        )
+      )
+    };
+
     return (
       <div
         style={scale}
@@ -704,13 +713,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
         onPointerMove={(e) => this.handlePointerMove(e)}
         onPointerUp={(e) => this.handlePointerUp(e)}
       >
-        <div
-          style={{transform: matrix.toCss(
-            matrix.mult(
-              matrix.scale(this.props.framebufLayout.pixelScale),
-              transform
-            ))}}
-        >
+        <div style={canvasContainerStyle}>
           <CharGrid
             width={charWidth}
             height={charHeight}
@@ -733,7 +736,8 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
 
 function computeFramebufLayout(args: {
   containerSize: { width: number, height: number },
-  framebufSize: { charWidth: number, charHeight: number }
+  framebufSize: { charWidth: number, charHeight: number },
+  canvasFit: FramebufUIState['canvasFit']
 }) {
   const bottomPad = 60;
   const rightPad = 320;
@@ -748,12 +752,19 @@ function computeFramebufLayout(args: {
   let divWidth = canvasWidth * ws;
   let divHeight = canvasHeight * ws;
 
-  // If height is now larger than what we can fit in vertically, scale further
-  if (divHeight > maxHeight) {
-    const s = maxHeight  / divHeight;
-    divWidth *= s;
-    divHeight *= s;
-    ws *= s;
+  const fitWidth = args.canvasFit == 'fitWidth';
+  if (fitWidth) {
+    if (divHeight > maxHeight) {
+      divHeight = maxHeight;
+    }
+  } else {
+    // If height is now larger than what we can fit in vertically, scale further
+    if (divHeight > maxHeight) {
+      const s = maxHeight  / divHeight;
+      divWidth *= s;
+      divHeight *= s;
+      ws *= s;
+    }
   }
 
   return {
@@ -767,14 +778,14 @@ const FramebufferCont = connect(
   (state: RootState) => {
     const selected = state.toolbar.selectedChar
     const charTransform = state.toolbar.charTransform
-    const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state);
     const framebuf = selectors.getCurrentFramebuf(state)!
     if (framebuf == null) {
       throw new Error('cannot render FramebufferCont with a null framebuf, see Editor checks.')
     }
+    const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state);
     const font = selectors.getCurrentFramebufFont(state)
     return {
-      framebufIndex: screensSelectors.getCurrentScreenFramebufIndex(state),
+      framebufIndex,
       framebuf: framebuf.framebuf,
       framebufWidth: framebuf.width,
       framebufHeight: framebuf.height,
@@ -790,8 +801,7 @@ const FramebufferCont = connect(
       altKey: state.toolbar.altKey,
       font,
       colorPalette: getSettingsCurrentColorPalette(state),
-      canvasGrid: state.toolbar.canvasGrid,
-      framebufUIState: selectors.getFramebufUIState(state, framebufIndex!)
+      canvasGrid: state.toolbar.canvasGrid
     }
   },
   dispatch => {
@@ -805,6 +815,7 @@ const FramebufferCont = connect(
 
 interface EditorProps {
   framebuf: Framebuf | null;
+  framebufUIState: FramebufUIState | undefined;
   textColor: number;
   colorPalette: Rgb[];
   paletteRemap: number[];
@@ -836,7 +847,9 @@ class Editor extends Component<EditorProps & EditorDispatch> {
   }
 
   render() {
-    if (this.props.framebuf === null || this.props.containerSize == null) {
+    if (this.props.framebuf === null
+      || this.props.containerSize == null
+      || !this.props.framebufUIState) {
       return null
     }
     const { colorPalette } = this.props
@@ -848,7 +861,8 @@ class Editor extends Component<EditorProps & EditorDispatch> {
       framebufSize: {
         charWidth: this.props.framebuf.width,
         charHeight: this.props.framebuf.height
-      }
+      },
+      canvasFit: this.props.framebufUIState.canvasFit
     });
 
     const framebufStyle = {
@@ -873,6 +887,7 @@ class Editor extends Component<EditorProps & EditorDispatch> {
             {this.props.framebuf ?
               <FramebufferCont
                 framebufLayout={framebufSize}
+                framebufUIState={this.props.framebufUIState}
                 onCharPosChanged={this.handleCharPosChanged} /> :
               null}
           </div>
@@ -882,7 +897,7 @@ class Editor extends Component<EditorProps & EditorDispatch> {
             charPos={this.state.charPos}
           />
         </div>
-        <div style={{marginLeft: '8px'}}>
+        <div style={{marginLeft: '8px', marginRight: '16px'}}>
           <div style={{marginBottom: '10px'}}>
             <ColorPicker
               selected={this.props.textColor}
@@ -903,13 +918,15 @@ class Editor extends Component<EditorProps & EditorDispatch> {
 export default connect(
   (state: RootState) => {
     const framebuf = selectors.getCurrentFramebuf(state)
+    const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state);
     return {
       framebuf,
       textColor: state.toolbar.textColor,
       selectedTool: state.toolbar.selectedTool,
       paletteRemap: getSettingsPaletteRemap(state),
       colorPalette: getSettingsCurrentColorPalette(state),
-      integerScale: getSettingsIntegerScale(state)
+      integerScale: getSettingsIntegerScale(state),
+      framebufUIState: selectors.getFramebufUIState(state, framebufIndex)
     }
   },
   dispatch => {

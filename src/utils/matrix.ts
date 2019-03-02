@@ -1,5 +1,9 @@
 export type Vec3 = [number, number, number];
 
+function copyVec3(v: Vec3): Vec3 {
+  return [...v] as Vec3;
+}
+
 export interface Matrix3x3 {
   v: [Vec3, Vec3, Vec3];
 }
@@ -18,6 +22,13 @@ export function dot(a: Vec3, b: Vec3): number {
 
 export function multVect3(a: Matrix3x3, v: Vec3) {
   return [dot(r(a, 0), v), dot(r(a, 1), v), dot(r(a, 2), v)];
+}
+
+// Deep copy a matrix
+export function copy(m: Matrix3x3): Matrix3x3 {
+  return {
+    v: [copyVec3(m.v[0]), copyVec3(m.v[1]), copyVec3(m.v[2])]
+  }
 }
 
 export function ident(): Matrix3x3 {

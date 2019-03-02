@@ -16,8 +16,9 @@ import { ActionsUnion, createAction, updateField, DispatchPropsFromActions } fro
 import { FileFormat } from './typesExport';
 import * as matrix from '../utils/matrix';
 
-const defaultFramebufUIState = {
-  canvasTransform: matrix.ident()
+const defaultFramebufUIState: FramebufUIState = {
+  canvasTransform: matrix.ident(),
+  canvasFit: 'fitWidth'
 };
 
 const emptyTransform: Transform = {

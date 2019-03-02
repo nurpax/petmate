@@ -79,18 +79,21 @@
   animation-timing-function: ease-in;
 }
 
-.brushMenuContainer {
-  position: absolute;
-  top: 0px;
-  left: 54px;
-  z-index: 1;
-  background-color: rgba(0, 0, 0, 0.7);
+
+.canvasFitSelectButton {
+  margin-top: 3px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 2px;
+  padding-right: 2px;
+  color: var(--main-text-color);
+  cursor: default;
 }
 
-.brushButton {
-  padding-left: 8px;
-  padding-right: 8px;
+.canvasFitSelectButton:hover {
+  color: rgb(255,255,255);
 }
+
 
 @keyframes fadeout {
     0% {

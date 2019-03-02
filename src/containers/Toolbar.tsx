@@ -1,7 +1,7 @@
 
 import React, { Component, Fragment, PureComponent, StatelessComponent as SFC } from 'react';
 import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
+import { bindActionCreators, Dispatch } from 'redux'
 import classnames from 'classnames'
 import { ActionCreators } from 'redux-undo';
 
@@ -17,7 +17,7 @@ import * as screensSelectors from '../redux/screensSelectors'
 import { getSettingsPaletteRemap, getSettingsCurrentColorPalette } from '../redux/settingsSelectors'
 import * as Root from '../redux/root'
 import { framebufIndexMergeProps } from '../redux/utils'
-import { Tool, Rgb, RootState } from '../redux/types';
+import { Tool, Rgb, RootState, FramebufUIState } from '../redux/types';
 
 import { withHoverFade } from './hoc'
 
@@ -181,6 +181,58 @@ const renderCharSubIcon: SFC<{}> = () => {
   )
 }
 
+interface CanvasFitSubMenuProps {
+  fit: FramebufUIState['canvasFit'];
+  setFit: (fit: FramebufUIState['canvasFit']) => void;
+};
+
+interface SelectButtonProps extends CanvasFitSubMenuProps {
+  name: FramebufUIState['canvasFit'];
+  children: {};
+}
+
+const SelectButton: SFC<SelectButtonProps> = (props: SelectButtonProps) => {
+  const { name, fit, setFit, children } = props;
+  return (
+    <div
+      className={styles.canvasFitSelectButton} style={{
+        borderStyle: 'solid',
+        borderWidth: '1px',
+        borderColor: name === fit ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.0)'
+      }}
+      onClick={() => setFit(name)}
+    >
+      {children}
+    </div>
+  )
+}
+
+class CanvasFitSubMenu extends PureComponent<CanvasFitSubMenuProps> {
+  render () {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        fontSize: '0.7em',
+        color: 'rgb(120,120,120)'
+      }}>
+        <SelectButton
+          name='fitWidth'
+          fit={this.props.fit}
+          setFit={this.props.setFit}>
+          W
+        </SelectButton>
+        <SelectButton
+          name='fitWidthHeight'
+          fit={this.props.fit}
+          setFit={this.props.setFit}>
+          WxH
+        </SelectButton>
+      </div>
+    )
+  }
+}
+
 interface ToolbarSelectorProps {
   framebufIndex: number | null;
   selectedTool: Tool;
@@ -188,11 +240,13 @@ interface ToolbarSelectorProps {
   borderColor: number | null;
   paletteRemap: number[];
   colorPalette: Rgb[];
+  canvasFit: FramebufUIState['canvasFit'];
 }
 
 interface ToolbarViewProps extends ToolbarSelectorProps {
   readonly Framebuffer: framebuf.PropsFromDispatch;
   readonly Toolbar: toolbar.PropsFromDispatch;
+  setFramebufCanvasFit: (fit: FramebufUIState['canvasFit']) => void;
   // Undoable dispatchers
   undo: () => void;
   redo: () => void;
@@ -202,7 +256,6 @@ interface ToolbarViewState {
   readonly pickerActive: {
     border: boolean;
     background: boolean;
-    brush: boolean;
   };
 }
 
@@ -213,12 +266,11 @@ class ToolbarView extends Component<
   state = {
     pickerActive: {
       border: false,
-      background: false,
-      brush: false
+      background: false
     }
   }
 
-  setPickerActive = (pickerId: 'border'|'background'|'brush', val: boolean) => {
+  setPickerActive = (pickerId: 'border'|'background'|'canvasFit', val: boolean) => {
     this.setState(prevState => {
       return {
         pickerActive: {
@@ -308,6 +360,12 @@ class ToolbarView extends Component<
           onIconClick={this.props.Toolbar.clearCanvas}
           iconName={faBroom} tooltip='Clear canvas'/>
         {tools}
+
+        <CanvasFitSubMenu
+            fit={this.props.canvasFit}
+            setFit={this.props.setFramebufCanvasFit}
+         />
+
         <FbColorPicker
           pickerId='border'
           containerClassName={styles.tooltip}
@@ -354,23 +412,43 @@ const undoActions = {
   }
 }
 const mapDispatchToProps = (dispatch: any) => {
+  function setCanvasFit(canvasFit: FramebufUIState['canvasFit']) {
+    return (dispatch: Dispatch, getState: any) => {
+      const state = getState();
+      const fbIndex = screensSelectors.getCurrentScreenFramebufIndex(state)!;
+      const prevState = selectors.getFramebufUIState(getState(), fbIndex);
+      dispatch(Toolbar.actions.setFramebufUIState(fbIndex, {
+        ...prevState!,
+        canvasFit
+      }))
+    }
+  }
   return {
     ...bindActionCreators(undoActions, dispatch),
     ...bindActionCreators(Root.actions, dispatch),
     Toolbar:     Toolbar.bindDispatch(dispatch),
-    Framebuffer: Framebuffer.bindDispatch(dispatch)
+    Framebuffer: Framebuffer.bindDispatch(dispatch),
+    setFramebufCanvasFit: (f: FramebufUIState['canvasFit']) => dispatch(setCanvasFit(f))
   }
 }
 
 const mapStateToProps = (state: RootState): ToolbarSelectorProps => {
-  const framebuf = selectors.getCurrentFramebuf(state)
+  const framebuf = selectors.getCurrentFramebuf(state);
+  const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state);
+  let canvasFit: FramebufUIState['canvasFit'] = 'fitWidth';
+  if (framebufIndex !== null) {
+    const uis = selectors.getFramebufUIState(state, framebufIndex);
+    canvasFit = uis!.canvasFit;
+  }
   return {
-    framebufIndex:   screensSelectors.getCurrentScreenFramebufIndex(state),
+    framebufIndex,
     backgroundColor: fp.maybe(framebuf, null, fb => fb.backgroundColor),
     borderColor:     fp.maybe(framebuf, null, fb => fb.borderColor),
     selectedTool:    state.toolbar.selectedTool,
     paletteRemap:    getSettingsPaletteRemap(state),
-    colorPalette:    getSettingsCurrentColorPalette(state)
+    colorPalette:    getSettingsCurrentColorPalette(state),
+    canvasFit
+
   }
 }
 export default connect(
