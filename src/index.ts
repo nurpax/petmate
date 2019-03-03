@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import Root from './containers/Root';
 import './app.global.css';
 
-import { formats, loadSettings } from './utils'
+import { formats, loadSettings, promptProceedWithUnsavedChanges } from './utils'
 import * as Screens from './redux/screens'
 import * as settings  from './redux/settings'
 import { Toolbar } from './redux/toolbar'
@@ -13,7 +13,7 @@ import configureStore from './store/configureStore'
 
 // TODO prod builds
 import { electron } from './utils/electronImports'
-import { FileFormat } from './redux/types';
+import { FileFormat, RootState } from './redux/types';
 
 const store = configureStore();
 
@@ -24,6 +24,7 @@ if (filename) {
 } else {
   // Create one screen/framebuffer so that we have a canvas to draw on
   store.dispatch(Screens.actions.newScreen());
+  store.dispatch(ReduxRoot.actions.updateLastSavedSnapshot());
 }
 
 
@@ -76,17 +77,16 @@ electron.ipcRenderer.on('menu', (_event: Event, message: string) => {
       store.dispatch(ReduxRoot.actions.redo())
       return
     case 'new':
-      const { dialog } = electron.remote
-      if (dialog.showMessageBox({
-        type: 'question',
-        buttons: ['Reset', 'Cancel'],
-        cancelId: 1,
-        message: 'Reset workspace?',
-        detail: 'This will empty your workspace.  This cannot be undone.'
-      }) === 0) {
-        store.dispatch(ReduxRoot.actions.resetState())
-        store.dispatch(Screens.actions.newScreen())
-      }
+      store.dispatch((dispatch: any, getState: () => RootState) => {
+        if (promptProceedWithUnsavedChanges(getState(), {
+          title: 'Reset',
+          detail: 'This will empty your workspace.  This cannot be undone.'
+        })) {
+          dispatch(ReduxRoot.actions.resetState())
+          dispatch(Screens.actions.newScreen())
+          dispatch(ReduxRoot.actions.updateLastSavedSnapshot());
+        }
+      });
       return
     case 'open':
       store.dispatch(ReduxRoot.actions.fileOpenWorkspace())

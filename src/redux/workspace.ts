@@ -50,6 +50,7 @@ export function load(workspace: Workspace): ThunkAction<void, RootState, undefin
       })
     })
     dispatch(rscreens.actions.setCurrentScreenIndex(0))
+    dispatch(Root.actions.updateLastSavedSnapshot());
   }
 }
 

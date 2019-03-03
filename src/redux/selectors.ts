@@ -85,3 +85,29 @@ export const transformBrush = (brush: Brush, transform: Transform, font: Font) =
 export const getFramebufUIState = (state: RootState, framebufIndex: number): FramebufUIState|undefined => {
   return state.toolbar.framebufUIState[framebufIndex];
 }
+
+// Are there any unsaved changes in the workspace?
+export function anyUnsavedChanges (state: RootState): boolean {
+  if (state.lastSavedSnapshot.screenList !== state.screens.list) {
+    return true;
+  }
+  const lastSavedFbs = state.lastSavedSnapshot.framebufs;
+  for (let i = 0; i < lastSavedFbs.length; i++) {
+    if (lastSavedFbs[i] !== state.framebufList[i].present) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Are there any unsaved changes in a particular framebuf?
+export function anyUnsavedChangesInFramebuf (state: RootState, fbIndex: number): boolean {
+  const lastSavedFbs = state.lastSavedSnapshot.framebufs;
+  if (fbIndex < lastSavedFbs.length) {
+    return lastSavedFbs[fbIndex] !== state.framebufList[fbIndex].present
+  }
+  // FB didn't exist on last save, so interpret it as changed.
+  // This sort of gives false positives for newly added screens
+  // that haven't been touched yet but didn't exist on last save.
+  return true;
+}

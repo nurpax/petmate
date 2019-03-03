@@ -128,6 +128,11 @@ export interface Toolbar {
 
 export type UndoableFramebuf = StateWithHistory<Framebuf>;
 
+export type LastSavedState = {
+  screenList: Screens['list'];
+  framebufs: Framebuf[];
+};
+
 export interface RootState {
   settings: {
     saved: Settings;
@@ -136,6 +141,7 @@ export interface RootState {
   toolbar: Toolbar; // TODO
   screens: Screens;
   framebufList: UndoableFramebuf[];
+  lastSavedSnapshot: LastSavedState;
 };
 
 export type RootStateThunk = ThunkAction<void, RootState, undefined, Action>;

@@ -105,8 +105,7 @@ class AppView extends Component<AppViewProps> {
 
   handleLoadPetmate = (filename: string) => {
     const { dispatch } = this.props;
-    const setWorkspaceFilename = (filename: string) => this.props.Toolbar.setWorkspaceFilename(filename);
-    loadWorkspaceNoDialog(dispatch, filename, setWorkspaceFilename);
+    loadWorkspaceNoDialog(dispatch, filename);
   }
 
   render() {

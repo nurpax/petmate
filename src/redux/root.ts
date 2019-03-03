@@ -18,22 +18,27 @@ import {
 import { ActionsUnion, createAction } from './typeUtils'
 import { Framebuffer } from './editor'
 import * as settings from './settings'
+import * as workspace from './workspace'
 import * as screensSelectors from '../redux/screensSelectors'
 import { Toolbar } from './toolbar'
 import {
-  loadWorkspaceNoDialog,
   dialogLoadWorkspace,
   dialogSaveAsWorkspace,
   dialogExportFile,
   dialogImportFile,
   saveWorkspace,
-  loadSettings
+  loadSettings,
+  promptProceedWithUnsavedChanges,
+  setWorkspaceFilenameWithTitle
 } from '../utils'
 
 import { importFramebufs } from './workspace'
 
+import { fs, electron } from '../utils/electronImports'
+
 export const RESET_STATE = 'RESET_STATE'
 export const LOAD_WORKSPACE = 'LOAD_WORKSPACE'
+export const UPDATE_LAST_SAVED_SNAPSHOT = 'UPDATE_LAST_SAVED_SNAPSHOT'
 
 function saveAsWorkspace(): ThunkAction<void, RootState, undefined, Action> {
   return (dispatch, getState) => {
@@ -45,11 +50,15 @@ function saveAsWorkspace(): ThunkAction<void, RootState, undefined, Action> {
       getFramebufByIndex,
       (filename: string) => dispatch(Toolbar.actions.setWorkspaceFilename(filename))
     )
+    dispatch(actionCreators.updateLastSavedSnapshot())
   }
 }
 
 export const actionCreators = {
   loadWorkspace: (data: any) => createAction(LOAD_WORKSPACE, data),
+  // Snapshot current framebuf and screens state for "ask for unsaved changed"
+  // dialog when loading or resetting Petmate workspace.
+  updateLastSavedSnapshot: () => createAction(UPDATE_LAST_SAVED_SNAPSHOT),
   resetStateAction: () => createAction(RESET_STATE)
 };
 
@@ -60,17 +69,33 @@ export const actions = {
 
   // Load workspace but with specific file name and no dialogs
   openWorkspace: (filename: string): RootStateThunk => {
-    return (dispatch, _getState) => {
-      const setWorkspaceFilename = (filename: string) => dispatch(Toolbar.actions.setWorkspaceFilename(filename))
-      loadWorkspaceNoDialog(dispatch, filename, setWorkspaceFilename);
+    return (dispatch, getState) => {
+      if (promptProceedWithUnsavedChanges(getState(), {
+        title: 'Continue',
+        detail: 'Proceed with loading a Petmate workspace?  This cannot be undone.'
+      })) {
+        try {
+          const content = fs.readFileSync(filename, 'utf-8')
+          const c = JSON.parse(content);
+          dispatch(workspace.load(c));
+          setWorkspaceFilenameWithTitle(
+            () => dispatch(Toolbar.actions.setWorkspaceFilename(filename)),
+            filename
+          );
+          electron.remote.app.addRecentDocument(filename);
+        } catch(e) {
+          console.error(e)
+          alert(`Failed to load workspace '${filename}'!`)
+        }
+      }
     }
   },
+
 
   // Same as openWorkspace but pop a dialog asking for the filename
   fileOpenWorkspace: (): RootStateThunk => {
     return (dispatch, _getState) => {
-      const setWorkspaceFilename = (filename: string) => dispatch(Toolbar.actions.setWorkspaceFilename(filename))
-      dialogLoadWorkspace(dispatch, setWorkspaceFilename)
+      dialogLoadWorkspace(dispatch);
     }
   },
 
@@ -85,7 +110,8 @@ export const actions = {
       if (filename === null) {
         return dispatch(saveAsWorkspace())
       }
-      saveWorkspace(filename, screens, getFramebufByIndex)
+      saveWorkspace(filename, screens, getFramebufByIndex);
+      dispatch(actionCreators.updateLastSavedSnapshot());
     }
   },
 

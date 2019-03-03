@@ -1,6 +1,4 @@
 
-import * as workspace from '../redux/workspace'
-
 import { loadMarqCFramebuf, loadD64Framebuf } from './importers'
 import {
   savePNG,
@@ -19,9 +17,13 @@ import { colorPalettes } from './palette'
 
 import { electron, fs, path } from './electronImports'
 import {
-  FileFormat, Rgb, Font, Coord2, Framebuf, RootStateThunk, Settings,
+  FileFormat, Rgb, Font, Coord2, Framebuf, Settings,
   FramebufWithFont,
+  RootState,
 } from '../redux/types';
+
+import * as ReduxRoot from '../redux/root';
+import * as selectors from '../redux/selectors';
 
 const { ipcRenderer } = electron
 
@@ -181,19 +183,6 @@ export const saveWorkspace = (filename: string, screens: number[], getFramebufBy
   }
 }
 
-export const loadWorkspace = (filename: string, dispatch: (thunk: RootStateThunk) => void) => {
-  try {
-    const content = fs.readFileSync(filename, 'utf-8')
-    const c = JSON.parse(content)
-    dispatch(workspace.load(c));
-    electron.remote.app.addRecentDocument(filename);
-  }
-  catch(e) {
-    console.error(e)
-    alert(`Failed to load workspace '${filename}'!`)
-  }
-}
-
 export const loadFramebuf = (filename: string, importFile: (fbs: Framebuf[]) => void) => {
   const ext = path.extname(filename)
   if (ext === '.c') {
@@ -250,7 +239,7 @@ export const systemFontData = loadAppFile('assets/system-charset.bin')
 export const systemFontDataLower = loadAppFile('assets/system-charset-lower.bin')
 export const executablePrgTemplate = loadAppFile('assets/template.prg')
 
-function setWorkspaceFilenameWithTitle(setWorkspaceFilename: (fname: string) => void, filename: string) {
+export function setWorkspaceFilenameWithTitle(setWorkspaceFilename: (fname: string) => void, filename: string) {
   setWorkspaceFilename(filename)
   ipcRenderer.send('set-title', `Petmate - ${filename}`)
 }
@@ -258,16 +247,13 @@ function setWorkspaceFilenameWithTitle(setWorkspaceFilename: (fname: string) => 
 type StoreDispatch = any;
 export function loadWorkspaceNoDialog(
   dispatch: StoreDispatch,
-  filename: string,
-  setWorkspaceFilename: (fname: string) => void
+  filename: string
 ) {
-  loadWorkspace(filename, dispatch)
-  setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename)
+  dispatch(ReduxRoot.actions.openWorkspace(filename));
 }
 
 export function dialogLoadWorkspace(
-  dispatch: StoreDispatch,
-  setWorkspaceFilename: (fname: string) => void
+  dispatch: StoreDispatch
 ) {
   const {dialog} = electron.remote
   const window = electron.remote.getCurrentWindow();
@@ -279,7 +265,7 @@ export function dialogLoadWorkspace(
     return
   }
   if (filename.length === 1) {
-    loadWorkspaceNoDialog(dispatch, filename[0], setWorkspaceFilename);
+    loadWorkspaceNoDialog(dispatch, filename[0]);
   } else {
     console.error('wtf?!')
   }
@@ -362,6 +348,40 @@ export function loadSettings(dispatchSettingsLoad: (json: Settings) => void) {
     const j = JSON.parse(c)
     dispatchSettingsLoad(j)
   }
+}
+
+// Ask for confirmation to proceed if the workspace contains unsaved changes
+//
+// Returns: true if it's ok to continue, false otherwise.
+export function promptProceedWithUnsavedChanges(state: RootState, msg: { title: string, detail: string }) {
+  if (selectors.anyUnsavedChanges(state)) {
+    const { dialog } = electron.remote;
+    return dialog.showMessageBox({
+      type: 'question',
+      buttons: [msg.title, 'Cancel'],
+      cancelId: 1,
+      message: 'Workspace contains unsaved changes.',
+      detail: msg.detail
+    }) === 0;
+  }
+  return true;
+}
+
+// Ask for confirmation to proceed if the workspace contains unsaved changes
+//
+// Returns: true if it's ok to continue, false otherwise.
+export function promptProceedWithUnsavedChangesInFramebuf(state: RootState, fbIndex: number, msg: { title: string, detail: string }) {
+  if (selectors.anyUnsavedChangesInFramebuf(state, fbIndex)) {
+    const { dialog } = electron.remote;
+    return dialog.showMessageBox({
+      type: 'question',
+      buttons: [msg.title, 'Cancel'],
+      cancelId: 1,
+      message: 'Screen contains unsaved changes.',
+      detail: msg.detail
+    }) === 0;
+  }
+  return true;
 }
 
 export { drawLine, colorPalettes }

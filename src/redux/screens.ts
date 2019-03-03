@@ -26,6 +26,7 @@ import { ActionsUnion, createAction, DispatchPropsFromActions } from './typeUtil
 import { makeScreenName } from './utils'
 
 import * as fp from '../utils/fp'
+import { promptProceedWithUnsavedChangesInFramebuf } from '../utils';
 
 export const ADD_SCREEN_AND_FRAMEBUF = 'ADD_SCREEN_AND_FRAMEBUF'
 
@@ -55,10 +56,15 @@ function removeScreen(index: number): ThunkAction<void, RootState, undefined, Ac
     const numScreens = getScreens(state).length
     if (numScreens <= 1) {
       // Don't allow deletion of the last framebuffer
-      return
+      return;
     }
-    dispatch(actions.setCurrentScreenIndex(index === numScreens - 1 ? numScreens - 2 : index))
-    dispatch(actions.removeScreenAction(index));
+    if (promptProceedWithUnsavedChangesInFramebuf(state, state.screens.list[index], {
+      title: 'Remove',
+      detail: 'Removing the screen cannot be undone.'
+    })) {
+      dispatch(actions.setCurrentScreenIndex(index === numScreens - 1 ? numScreens - 2 : index))
+      dispatch(actions.removeScreenAction(index));
+    }
   }
 }
 
