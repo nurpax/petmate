@@ -19,6 +19,7 @@ if (process.platform == 'darwin') {
 
 const path = require('path');
 
+let appClosing = false;
 let mainWindow;
 
 createWindow = () => {
@@ -84,12 +85,20 @@ createWindow = () => {
 
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
-
         ipcMain.on('open-external-window', (event, arg) => {
             shell.openExternal(arg);
         });
-
     });
+
+    // Prevent main window close.  Ask renderer if it's OK to quit,
+    // if it is, it will send back a 'closed' event where we will actually
+    // quit Petmate.
+    mainWindow.on('close', (e) => {
+      if (!appClosing) {
+        e.preventDefault();
+        mainWindow.webContents.send('prompt-unsaved');
+      }
+    })
 };
 
 var openFilename = null;
@@ -131,6 +140,13 @@ app.on('browser-window-blur', () => {
 
 ipcMain.on('load-page', (event, arg) => {
     mainWindow.loadURL(arg);
+});
+
+
+// See comments in mainWindow.on('close')
+ipcMain.on('closed', (event, arg) => {
+  appClosing = true;
+  app.quit();
 });
 
 // Windows: handler for clicking a .petmate file in Explorer to open it in Petmate

@@ -60,6 +60,16 @@ window.addEventListener('blur', () => {
   store.dispatch(Toolbar.actions.clearModKeyState())
 })
 
+electron.ipcRenderer.on('prompt-unsaved', () => {
+  if (promptProceedWithUnsavedChanges(store.getState(), {
+    title: 'Quit',
+    detail: 'Your changes will be lost if you don\'t save them.'
+  })) {
+    // OK to close now, ask the main process to quit:
+    electron.ipcRenderer.send('closed');
+  }
+});
+
 electron.ipcRenderer.on('open-petmate-file', (_event: Event, filename: string) => {
   // Load a .petmate file that was sent to the main process via the open-file
   // event (macOS).  This can be either a double-click on a .petmate file in
