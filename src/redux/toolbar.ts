@@ -172,6 +172,7 @@ const actionCreators = {
   setCtrlKey: (flag: boolean) => createAction('Toolbar/SET_CTRL_KEY', flag),
   setMetaKey: (flag: boolean) => createAction('Toolbar/SET_META_KEY', flag),
   setShiftKey: (flag: boolean) => createAction('Toolbar/SET_SHIFT_KEY', flag),
+  setSpacebarKey: (flag: boolean) => createAction('Toolbar/SET_SPACEBAR_KEY', flag),
   setShowSettings: (flag: boolean) => createAction('Toolbar/SET_SHOW_SETTINGS', flag),
   setShowExport: (show: {show:boolean, fmt?:FileFormat}) => createAction('Toolbar/SET_SHOW_EXPORT', show),
   setShowImport: (show: {show:boolean, fmt?:FileFormat}) => createAction('Toolbar/SET_SHOW_IMPORT', show),
@@ -387,6 +388,8 @@ export class Toolbar {
           dispatch(Toolbar.actions.setCtrlKey(true))
         } else if (key === 'Alt') {
           dispatch(Toolbar.actions.setAltKey(true))
+        } else if (key === ' ') {
+          dispatch(Toolbar.actions.setSpacebarKey(true))
         }
 
         if (metaOrCtrl) {
@@ -420,6 +423,8 @@ export class Toolbar {
           dispatch(Toolbar.actions.setCtrlKey(false))
         } else if (key === 'Alt') {
           dispatch(Toolbar.actions.setAltKey(false))
+        } else if (key === ' ') {
+          dispatch(Toolbar.actions.setSpacebarKey(false))
         }
       }
     },
@@ -531,6 +536,7 @@ export class Toolbar {
       ctrlKey: false,
       metaKey: false,
       shiftKey: false,
+      spacebarKey: false,
       showSettings: false,
       showExport: { show: false },
       showImport: { show: false },
@@ -653,6 +659,8 @@ export class Toolbar {
         return updateField(state, 'metaKey', action.data);
       case 'Toolbar/SET_SHIFT_KEY':
         return updateField(state, 'shiftKey', action.data);
+      case 'Toolbar/SET_SPACEBAR_KEY':
+        return updateField(state, 'spacebarKey', action.data);
       case 'Toolbar/SET_SHOW_SETTINGS':
         return updateField(state, 'showSettings', action.data);
       case 'Toolbar/SET_SHOW_EXPORT':

@@ -168,6 +168,7 @@ interface FramebufferViewProps {
 
   altKey: boolean;
   shiftKey: boolean;
+  spacebarKey: boolean;
 
   textCursorPos: Coord2;
 
@@ -372,10 +373,12 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   }
 
   handlePointerDown = (e: any) => {
-    if (this.props.selectedTool == Tool.PanZoom) {
+    if (this.props.selectedTool == Tool.PanZoom ||
+      (this.props.selectedTool !== Tool.Text && this.props.spacebarKey)) {
       this.handlePanZoomPointerDown(e);
       return;
     }
+
 
     const { charPos } = this.currentCharPos(e);
     this.setCharPos(true, charPos);
@@ -402,7 +405,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   }
 
   handlePointerUp = (e: PointerEvent) => {
-    if (this.props.selectedTool == Tool.PanZoom) {
+    if (this.props.selectedTool == Tool.PanZoom || this.panZoomDragging) {
       this.handlePanZoomPointerUp(e);
       return;
     }
@@ -417,7 +420,8 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   }
 
   handlePointerMove = (e: PointerEvent) => {
-    if (this.props.selectedTool == Tool.PanZoom) {
+    if (this.props.selectedTool == Tool.PanZoom ||
+      (this.props.selectedTool !== Tool.Text && this.props.spacebarKey)) {
       this.handlePanZoomPointerMove(e);
       return;
     }
@@ -535,9 +539,11 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   }
 
   handleWheel = (e: WheelEvent) => {
-    if (this.props.selectedTool != Tool.PanZoom) {
+    if (!(this.props.selectedTool == Tool.PanZoom ||
+        (this.props.selectedTool !== Tool.Text && this.props.altKey))) {
       return;
     }
+
     if (!this.ref.current) {
       return;
     }
@@ -799,6 +805,7 @@ const FramebufferCont = connect(
       textCursorPos: state.toolbar.textCursorPos,
       shiftKey: state.toolbar.shiftKey,
       altKey: state.toolbar.altKey,
+      spacebarKey: state.toolbar.spacebarKey,
       font,
       colorPalette: getSettingsCurrentColorPalette(state),
       canvasGrid: state.toolbar.canvasGrid

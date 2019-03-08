@@ -115,6 +115,7 @@ export interface Toolbar {
   ctrlKey: boolean;
   metaKey: boolean;
   shiftKey: boolean;
+  spacebarKey: boolean;
   showSettings: boolean;
   showExport: { show: boolean, fmt?: FileFormat}; // fmt undefined only when show=false
   showImport: { show: boolean, fmt?: FileFormat}; // fmt undefined only when show=false
