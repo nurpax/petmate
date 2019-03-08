@@ -18,20 +18,23 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Features
 
-- Commodore 64 standard character mode graphics with the uppercase system ROM character set
+- Commodore 64 standard character mode graphics with the upper/lower case system ROM character sets
 - Drawing operations: draw character, colorize a character, select brush, draw with brush
 - Undo/redo stack
 - Multiple screens (each with their own undo stack)
 - Save/load workspace as a .petmate file (.petmate is the native file format for this editor)
 - Export and import other common PETSCII file formats:
-  - Bitmap .png (export)
+  - Bitmap .png (import, export)
   - PETSCII .c format (import, export)
   - Executable .prg (export)
   - Assembler .asm (export for KickAssembler, 64tass and ACME)
+  - Dir art .d64 (import)
 
-This project is work-in-progress.  You can view [github issues](https://github.com/nurpax/petmate/issues) for upcoming features/fixes.
+You can view [github issues](https://github.com/nurpax/petmate/issues) for upcoming features/fixes.
 
 ## Keyboard shortcuts
+
+General:
 
 - `ESC`: Reset brush selection
 - `a`, `s`, `d`, `w`: Move left/down/right/up in the character selector
@@ -39,8 +42,8 @@ This project is work-in-progress.  You can view [github issues](https://github.c
 - `f`: Select the inverted version of the currently selected char.
 - `h`, `v`: Flip brush horizontally/vertically
 - `r`: Rotate current brush or character counterclockwise
-- `x`, `c`, `3`, `b`: Select tool (draw/colorize/char-only draw/brush)
-- `1`, `2`, `3`, `4`, `5`: Select tool (draw/colorize/char-only draw/brush/text)
+- `x`, `c`, `3`, `b`, `z`: Select tool (draw/colorize/char-only draw/brush/pan+zoom)
+- `1`, `2`, `3`, `4`, `5`, `6`: Select tool (draw/colorize/char-only draw/brush/text/pan+zoom)
 - `g`: Toggle grid
 - `Alt-Left Click`: Select character and color under cursor
 - `Start drawing while holding SHIFT`: Lock vertical or horizontal movement for drawing straight lines
@@ -48,6 +51,13 @@ This project is work-in-progress.  You can view [github issues](https://github.c
 - `Left/right arrows`: Move to previous/next screen
 - `Alt-left/right/up/down`: Shift the whole screen left/right/up/down
 - `⌘T/Ctrl-T`: Add a new screen.
+
+Pan/zoom (new in Petmate 0.7):
+- When in pan/zoom mode: `mousedrag` to pan the PETSCII canvas
+- When in pan/zoom mode: `Alt-mousewheel` to zoom in/out
+- When in pan/zoom mode: `doubleclick` to reset zoom/pan position.
+- `Spacebar-mousedrag`: Pan the PETSCII canvas (if zoomed in) in all modes except text input mode
+- `Alt-mousewheel`: Zoom in/out in all modes except text input mode
 
 Open/Save/Save As: use platform shortcuts (e.g., Save is `Ctrl+S` on Windows, `⌘S` on Mac).
 
@@ -118,6 +128,16 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.7.0 (TBD) -- unreleased
+- Arbitrary sized PETSCII canvas (edit the 40x25 text below the new screen + button and hit +) ([#20](https://github.com/nurpax/petmate/issues/20))
+- Pan/zoom the PETSCII canvas
+- Prompt for cancel/quit if unsaved changes when closing the main window or quitting. ([#33](https://github.com/nurpax/petmate/issues/33))
+- Support importing Dir art from .d64 files.
+- Register recently opened/saved .petmate to the OS to make recently edited .petmate files show up on macOS Dock or Windows JumpList. ([#133](https://github.com/nurpax/petmate/issues/133))
+- Make open/save dialogs modal ([#136](https://github.com/nurpax/petmate/issues/136))
+- Display decimal value of a char in addition to hex. ([#141](https://github.com/nurpax/petmate/issues/141))
+- Bug fix: disable GPU rendering.  This caused slowdown with larger than 40x25 canvases and forced bilinear filtering instead of nearest-neighbor for scaled canvas.
 
 Petmate 0.6.1 (2019-02-12)
 - Bug fix: PNG export crashed Petmate on Windows.  Fixed by upgrading Electron to version 4.0.4.
