@@ -4,14 +4,22 @@ import PropTypes from 'prop-types'
 
 import { Framebuf, Coord2 } from '../redux/types'
 
-const FixedWidthCoord = (props: { axis: string, number: number|string|null }) => {
-  const { axis, number } = props;
+const FixedWidthCoord = (props: {
+  axis: string,
+  number: number|string|null,
+  numberPixelWidth?: number
+}) => {
+  const { axis, number, numberPixelWidth = 25 } = props;
   return (
     <div style={{display: 'flex', flexDirection:'row'}}>
       <div style={{width: '15px', color:'var(--main-text-darker-color)'}}>{axis}:</div>
-      <div style={{width: '25px', color:'var(--main-text-color)'}}>{number}</div>
+      <div style={{width: `${numberPixelWidth}px`, color:'var(--main-text-color)'}}>{number}</div>
     </div>
   )
+}
+
+function formatScreencode(num: number | null) {
+  return num !== null ? `$${num.toString(16).toUpperCase()}/${num}` : null
 }
 
 interface CharSelectStatusbarProps {
@@ -21,12 +29,13 @@ interface CharSelectStatusbarProps {
 export class CharSelectStatusbar extends PureComponent<CharSelectStatusbarProps> {
   render () {
     const { curScreencode } = this.props
-    const screencodeStr = curScreencode !== null ?
-      curScreencode.toString(16).toUpperCase() :
-      null
     return (
       <div style={{fontSize: '0.8em', display: 'flex', flexDirection:'row'}}>
-        <FixedWidthCoord axis='C' number={`$${screencodeStr}`} />
+        <FixedWidthCoord
+          axis='C'
+          number={formatScreencode(curScreencode)}
+          numberPixelWidth={40}
+        />
       </div>
     )
   }
@@ -59,7 +68,7 @@ export class CanvasStatusbar extends PureComponent<CanvasStatusbarProps> {
       <div style={{paddingTop: '4px', fontSize: '0.8em', display: 'flex', flexDirection:'row'}}>
         <FixedWidthCoord axis='X' number={cp !== null ? cp.col : null} />
         <FixedWidthCoord axis='Y' number={cp !== null ? cp.row : null} />
-        <FixedWidthCoord axis='C' number={cc !== null ? `$${cc.toString(16).toUpperCase()}` : null} />
+        <FixedWidthCoord axis='C' number={formatScreencode(cc)} numberPixelWidth={40} />
       </div>
     )
   }
