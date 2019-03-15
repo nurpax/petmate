@@ -53,6 +53,53 @@ Open/Save/Save As: use platform shortcuts (e.g., Save is `Ctrl+S` on Windows, `�
 
 Undo/Redo: use platform shortcuts (e.g., `⌘Z` and `⌘⇧Z` on Mac).
 
+## Using Petmate to edit Dir Art
+
+Petmate 0.7.0 has experimental support for editing directory art in C64 .d64 disk image files.
+
+The process of making directory art with Petmate is as follows:
+
+1. Create a 16xN screen in Petmate.  (Or alternatively, load in a .d64 that already contains several directory entries.)
+2. Export the 16xN screen as a .json file.
+3. Use [c1541js](https://www.npmjs.com/package/c1541) to patch your art into a .d64 file.
+
+A command line example for step #3:
+
+Let's say you have a .d64 file called `demo1.d64` and your dir art is exported into a file called `dirart.json`.  Run the following command:
+
+```
+# Patch in dirart using demo1.d64 as the source and write
+# the result into demo1-result.d64:
+
+c1541js --json dirart.json demo1.d64 demo1-result.d64
+```
+
+At the time of writing (2019-03-16), Petmate doesn't validate that the contents of your dir art make sense as directory entries.  It will just write whatever screencodes you used in your Petmate screen.  The special character control codes will be shown more prominently in future Petmate versions.
+
+## Processing PETSCII content
+
+Petmate 0.7 adds a new .json export format.  It is intended to stay unchanged across Petmate versions and its intended to be easy to consume by content processing scripts written in say Python or JavaScript.
+
+The structure of Petmate's .json export format is pretty simple:
+
+```
+{
+    "version": 1,
+    "framebufs": [
+        {
+            "width": 16,
+            "height": 14,
+            "backgroundColor": 6,
+            "borderColor": 14,
+            "charset": "upper",
+            "name": "screen_003",
+            "screencodes": [ ... ],   # a flat array of width*height screencodes
+            "colors": [ ... ],        # a flat array of width*height colors
+        }
+    ]
+}
+```
+
 ## Importing PETSCII from PNG image files
 
 As of version 0.6.0, Petmate supports importing PETSCII from PNG images.  This import feature matches pixel data against the C64 ROM charsets (upper and lower case fonts).  There is no "fuzzy" machine vision style matching, the code doing the import is looking for a pixel perfect match.  This means images that have been scaled (double pixeled or other scale ratio) cannot currently be imported.  The PNG importer also expects the image dimensions and borders to match those of VICE:
