@@ -16,7 +16,16 @@ interface InitCodeParams {
 interface SyntaxParams {
   byte: string;
   mkLabel: (lbl: string) => string;
+  mkLineComment: (text: string) => string;
 }
+
+const binaryFormatHelp = [
+  'PETSCII memory layout (example for a 40x25 screen)',
+  'byte  0         = border color',
+  'byte  1         = background color',
+  'bytes 2-1001    = screencodes',
+  'bytes 1002-2001 = color'
+];
 
 const initCodeKickAss = ({
   charsetBits,
@@ -188,18 +197,21 @@ const saveAsm = (filename: string, fbs: Framebuf[], fmt: FileFormatAsm) => {
     mkInitCode = initCodeKickAss
     syntaxParams = {
       mkLabel: lbl => `${lbl}:`,
+      mkLineComment: text => `// ${text}`,
       byte: '.byte'
     }
   } else if (options.assembler === 'c64tass') {
     mkInitCode = initCode64tassOrACME(c64tassStartSequence)
     syntaxParams = {
       mkLabel: lbl => lbl,
+      mkLineComment: text => `; ${text}`,
       byte: '.byte'
     }
   } else if (options.assembler === 'acme') {
     mkInitCode = initCode64tassOrACME(ACMEStartSequence)
     syntaxParams = {
       mkLabel: lbl => lbl,
+      mkLineComment: text => `; ${text}`,
       byte: '!byte'
     }
   } else {
@@ -225,9 +237,10 @@ const saveAsm = (filename: string, fbs: Framebuf[], fmt: FileFormatAsm) => {
       label: maybeLabelName(selectedFb.name)
     }
     const init = options.standalone ? mkInitCode(initCodeOptions) : ''
+    const formatDocs = binaryFormatHelp.map(syntaxParams.mkLineComment).join('\n');
     fs.writeFileSync(
       filename,
-      init + '\n' + lines.join('\n') + '\n', null
+      init + '\n\n' + formatDocs + '\n' + lines.join('\n') + '\n', null
     )
   }
   catch(e) {
