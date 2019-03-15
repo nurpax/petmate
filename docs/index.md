@@ -12,9 +12,9 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.6.1.dmg'>Petmate-0.6.1.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.6.1.exe'>Petmate Setup 0.6.1.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.6.1_amd64.deb'>petmate_0.6.1_amd64.deb</a>
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.7.0.dmg'>Petmate-0.7.0.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.7.0.exe'>Petmate Setup 0.7.0.exe</a>
+* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.7.0_amd64.deb'>petmate_0.7.0_amd64.deb</a>
 
 ## Features
 
@@ -65,13 +65,13 @@ Undo/Redo: use platform shortcuts (e.g., `⌘Z` and `⌘⇧Z` on Mac).
 
 ## Using Petmate to edit Dir Art
 
-Petmate 0.7.0 has experimental support for editing directory art in C64 .d64 disk image files.
+Petmate 0.7.0 adds experimental support for editing directory art in C64 .d64 disk image files.
 
 The process of making directory art with Petmate is as follows:
 
 1. Create a 16xN screen in Petmate.  (Or alternatively, load in a .d64 that already contains several directory entries.)
 2. Export the 16xN screen as a .json file.
-3. Use [c1541js](https://www.npmjs.com/package/c1541) to patch your art into a .d64 file.
+3. Use [c1541js](https://www.npmjs.com/package/c1541) to patch your art into a .d64 file.  The .d64 file must contain an appropriate amount of directory entries, you can use f.ex. VICE's `c1541` tool to author such .d64 files.
 
 A command line example for step #3:
 
@@ -129,12 +129,14 @@ The settings are saved in the following location:
 
 ## Release history
 
-Petmate 0.7.0 (TBD) -- unreleased
+Petmate 0.7.0 (2019-03-16)
 - Arbitrary sized PETSCII canvas (edit the 40x25 text below the new screen + button and hit +) ([#20](https://github.com/nurpax/petmate/issues/20))
 - Pan/zoom the PETSCII canvas
+- A new .json export format intended to be easy to consume by content processing scripts.
 - Prompt for cancel/quit if unsaved changes when closing the main window or quitting. ([#33](https://github.com/nurpax/petmate/issues/33))
 - Support importing Dir art from .d64 files.
 - Register recently opened/saved .petmate to the OS to make recently edited .petmate files show up on macOS Dock or Windows JumpList. ([#133](https://github.com/nurpax/petmate/issues/133))
+- Add comments in exported .asm files that explain the exported PETSCII memory layout ([#143](https://github.com/nurpax/petmate/issues/143))
 - Make open/save dialogs modal ([#136](https://github.com/nurpax/petmate/issues/136))
 - Display decimal value of a char in addition to hex. ([#141](https://github.com/nurpax/petmate/issues/141))
 - Bug fix: disable GPU rendering.  This caused slowdown with larger than 40x25 canvases and forced bilinear filtering instead of nearest-neighbor for scaled canvas.
