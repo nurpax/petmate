@@ -163,7 +163,12 @@ const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWit
 type GetFramebufByIdFunc = (fbidx: number) => Framebuf;
 
 const WORKSPACE_VERSION = 1
-export const saveWorkspace = (filename: string, screens: number[], getFramebufById: GetFramebufByIdFunc) => {
+export function saveWorkspace (
+  filename: string,
+  screens: number[],
+  getFramebufById: GetFramebufByIdFunc,
+  updateLastSavedSnapshot: () => void
+) {
   const content = JSON.stringify({
     version: WORKSPACE_VERSION,
     // Renumber screen indices to 0,1,2,..,N and drop unused framebufs
@@ -176,6 +181,7 @@ export const saveWorkspace = (filename: string, screens: number[], getFramebufBy
   })
   try {
     fs.writeFileSync(filename, content, 'utf-8');
+    updateLastSavedSnapshot();
     electron.remote.app.addRecentDocument(filename);
   }
   catch(e) {
@@ -274,19 +280,20 @@ export function dialogLoadWorkspace(
 export function dialogSaveAsWorkspace(
   screens: number[],
   getFramebufByIndex: (fbidx: number) => Framebuf,
-  setWorkspaceFilename: (fname: string) => void
+  setWorkspaceFilename: (fname: string) => void,
+  updateLastSavedSnapshot: () => void
 ) {
-  const {dialog} = electron.remote
+  const {dialog} = electron.remote;
   const window = electron.remote.getCurrentWindow();
   const filters = [
     {name: 'Petmate workspace file', extensions: ['petmate']},
-  ]
-  const filename = dialog.showSaveDialog(window, {properties: ['openFile'], filters})
+  ];
+  const filename = dialog.showSaveDialog(window, {properties: ['openFile'], filters});
   if (filename === undefined) {
-    return
+    return;
   }
-  saveWorkspace(filename, screens, getFramebufByIndex)
-  setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename)
+  saveWorkspace(filename, screens, getFramebufByIndex, updateLastSavedSnapshot);
+  setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename);
 }
 
 export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[], palette: Rgb[]) {

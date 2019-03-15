@@ -48,9 +48,9 @@ function saveAsWorkspace(): ThunkAction<void, RootState, undefined, Action> {
     dialogSaveAsWorkspace(
       screens,
       getFramebufByIndex,
-      (filename: string) => dispatch(Toolbar.actions.setWorkspaceFilename(filename))
-    )
-    dispatch(actionCreators.updateLastSavedSnapshot())
+      (filename: string) => dispatch(Toolbar.actions.setWorkspaceFilename(filename)),
+      () => dispatch(actionCreators.updateLastSavedSnapshot())
+    );
   }
 }
 
@@ -110,8 +110,12 @@ export const actions = {
       if (filename === null) {
         return dispatch(saveAsWorkspace())
       }
-      saveWorkspace(filename, screens, getFramebufByIndex);
-      dispatch(actionCreators.updateLastSavedSnapshot());
+      saveWorkspace(
+        filename,
+        screens,
+        getFramebufByIndex,
+        () => dispatch(actionCreators.updateLastSavedSnapshot())
+      );
     }
   },
 
