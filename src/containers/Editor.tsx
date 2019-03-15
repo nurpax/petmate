@@ -379,7 +379,6 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       return;
     }
 
-
     const { charPos } = this.currentCharPos(e);
     this.setCharPos(true, charPos);
 
@@ -474,7 +473,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   // Pan/zoom mouse event handlers.  Called by the bound handlePointerDown/Move/Up
   // functions if the pan/zoom tool is selected.
 
-  private panZoomDragging = true;
+  private panZoomDragging = false;
 
   handlePanZoomPointerDown (e: any) {
     this.panZoomDragging = true;
