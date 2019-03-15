@@ -6,7 +6,8 @@ import {
   saveExecutablePRG,
   saveAsm,
   saveBASIC,
-  saveGIF
+  saveGIF,
+  saveJSON
 } from './exporters'
 
 import {
@@ -89,7 +90,15 @@ export const formats: { [index: string]: FileFormat } = {
       loopMode: 'loop',
       delayMS: '250'
     }
-  }
+  },
+  json: {
+    name: 'JSON .json',
+    ext: 'json',
+    commonExportParams: defaultExportCommon,
+    exportOptions: {
+      currentScreenOnly: true
+    }
+  },
 }
 
 export function rgbToCssRgb(o: Rgb) {
@@ -156,6 +165,8 @@ const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWit
     return saveExecutablePRG(filename, selectedFramebuf, fmt);
   } else if (fmt.ext === 'bas') {
     return saveBASIC(filename, framebufs, fmt);
+  } else if (fmt.ext === 'json') {
+    return saveJSON(filename, framebufs, fmt);
   }
   throw new Error("shouldn't happen");
 }

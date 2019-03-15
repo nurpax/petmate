@@ -12,6 +12,7 @@ const exporters = [
   { label: 'BASIC (.bas)', cmd: 'export-basic' },
   { label: 'Executable (.prg)', cmd: 'export-prg' },
   { label: 'GIF (.gif)', cmd: 'export-gif' },
+  { label: 'JSON (.json)', cmd: 'export-json' },
   { label: 'PETSCII (.c)', cmd: 'export-marq-c' },
   { label: 'PNG (.png)', cmd: 'export-png' }
 ]

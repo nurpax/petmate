@@ -14,7 +14,7 @@ import * as toolbar from '../redux/toolbar'
 import * as ReduxRoot from '../redux/root'
 
 import * as utils from '../utils'
-import { FileFormatGif, FileFormatPng, FileFormatAsm, FileFormatBas, FileFormat, RootState } from '../redux/types';
+import { FileFormatGif, FileFormatPng, FileFormatAsm, FileFormatBas, FileFormatJson, FileFormat, RootState } from '../redux/types';
 import { bindActionCreators } from 'redux';
 
 const ModalTitle: SFC<{}> = ({children}) => <h2>{children}</h2>
@@ -183,12 +183,33 @@ class BASICExportForm extends Component<BASICExportFormatProps> {
   }
 }
 
+interface JsonExportFormatProps extends ExportPropsBase {
+  state: FileFormatJson['exportOptions'];
+}
+
+class JsonExportForm extends Component<JsonExportFormatProps> {
+  render () {
+    return (
+      <Form state={this.props.state} setField={this.props.setField}>
+        <Title>JSON export options</Title>
+        <br/>
+        <br/>
+        <Checkbox
+          name='currentScreenOnly'
+          label='Current screen only'
+        />
+      </Form>
+    )
+  }
+}
+
 interface ExportModalState {
   [key: string]: FileFormat['exportOptions'];
   png: FileFormatPng['exportOptions'];
   asm: FileFormatAsm['exportOptions'];
   bas: FileFormatBas['exportOptions'];
   gif: FileFormatGif['exportOptions'];
+  json: FileFormatJson['exportOptions'];
 }
 
 // Type to select one format branch from ExportModalState
@@ -236,6 +257,10 @@ class ExportForm extends Component<ExportFormProps> {
         return (
           <GIFExportForm {...connectFormState(this.props, 'gif')} />
         )
+      case 'json':
+        return (
+          <JsonExportForm {...connectFormState(this.props, 'json')} />
+        )
       default:
         throw new Error(`unknown export format ${this.props.ext}`);
     }
@@ -275,7 +300,10 @@ class ExportModal_ extends Component<ExportModalProps & ExportModalDispatch, Exp
       animMode: 'single',
       loopMode: 'loop',
       delayMS: '250'
-    }
+    },
+    json: {
+      currentScreenOnly: true
+    },
   }
 
   handleOK = () => {

@@ -56,6 +56,13 @@ export interface FileFormatBas extends FileFormatBase {
   };
 }
 
+export interface FileFormatJson extends FileFormatBase {
+  ext: 'json';
+  exportOptions: {
+    currentScreenOnly: boolean;
+  };
+}
+
 export type FileFormat =
     FileFormatAsm
   | FileFormatD64
@@ -64,3 +71,4 @@ export type FileFormat =
   | FileFormatC
   | FileFormatPrg
   | FileFormatBas
+  | FileFormatJson

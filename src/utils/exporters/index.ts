@@ -8,6 +8,7 @@ import { saveAsm } from './asm'
 import { saveBASIC } from './basic'
 import { saveGIF } from './gif'
 import { savePNG } from './png'
+import { saveJSON } from './json'
 
 import { fs } from '../electronImports'
 
@@ -133,6 +134,7 @@ export {
   saveExecutablePRG,
   saveAsm,
   saveBASIC,
-  saveGIF
+  saveGIF,
+  saveJSON
 }
 
