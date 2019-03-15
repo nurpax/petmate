@@ -12,7 +12,7 @@ const FixedWidthCoord = (props: {
   const { axis, number, numberPixelWidth = 25 } = props;
   return (
     <div style={{display: 'flex', flexDirection:'row'}}>
-      <div style={{width: '15px', color:'var(--main-text-darker-color)'}}>{axis}:</div>
+      <div style={{color:'var(--main-text-darker-color)'}}>{axis}:</div>
       <div style={{width: `${numberPixelWidth}px`, color:'var(--main-text-color)'}}>{number}</div>
     </div>
   )
@@ -64,11 +64,13 @@ export class CanvasStatusbar extends PureComponent<CanvasStatusbarProps> {
             cc = framebuf.framebuf[cp.row][cp.col].code;
       }
     }
+    const widthHeight = `${framebuf.width}x${framebuf.height}`
     return (
       <div style={{paddingTop: '4px', fontSize: '0.8em', display: 'flex', flexDirection:'row'}}>
         <FixedWidthCoord axis='X' number={cp !== null ? cp.col : null} />
         <FixedWidthCoord axis='Y' number={cp !== null ? cp.row : null} />
-        <FixedWidthCoord axis='C' number={formatScreencode(cc)} numberPixelWidth={40} />
+        <FixedWidthCoord axis='C' number={formatScreencode(cc)} numberPixelWidth={60} />
+        <FixedWidthCoord axis='Size' number={widthHeight} numberPixelWidth={40} />
       </div>
     )
   }
