@@ -9,6 +9,7 @@ import { saveBASIC } from './basic'
 import { saveGIF } from './gif'
 import { savePNG } from './png'
 import { saveJSON } from './json'
+import { saveSEQ } from './seq'
 
 import { fs } from '../electronImports'
 
@@ -135,6 +136,7 @@ export {
   saveAsm,
   saveBASIC,
   saveGIF,
-  saveJSON
+  saveJSON,
+  saveSEQ
 }
 

@@ -110,6 +110,9 @@ electron.ipcRenderer.on('menu', (_event: Event, message: string) => {
     case 'export-png':
       dispatchExport(formats.png)
       return
+    case 'export-seq':
+      dispatchExport(formats.seq)
+      return
     case 'export-marq-c':
       dispatchExport(formats.c)
       return

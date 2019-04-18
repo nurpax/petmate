@@ -7,7 +7,8 @@ import {
   saveAsm,
   saveBASIC,
   saveGIF,
-  saveJSON
+  saveJSON,
+  saveSEQ
 } from './exporters'
 
 import {
@@ -45,6 +46,11 @@ export const formats: { [index: string]: FileFormat } = {
       alphaPixel: false,
       doublePixels: false
     }
+  },
+  seq: {
+    name: 'PETSCII .seq',
+    ext: 'seq',
+    commonExportParams: defaultExportCommon,
   },
   c: {
     name: 'PETSCII .c',
@@ -155,6 +161,8 @@ const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWit
   const selectedFramebuf = framebufs[selectedFramebufIndex];
   if (fmt.ext == 'png') {
     return savePNG(filename, selectedFramebuf, palette, fmt);
+  } else if (fmt.ext == 'seq') {
+    return saveSEQ(filename, selectedFramebuf, fmt);
   } else if (fmt.ext  == 'gif') {
     return saveGIF(filename, framebufs, palette, fmt);
   } else if (fmt.ext == 'c') {
