@@ -26,7 +26,7 @@
      plus sign. */
   margin-top: auto;
   margin-bottom: auto;
-  padding-bottom: 18px;
+  padding-bottom: 6px;
   padding-left: 20px;
   padding-right: 20px;
   color: rgb(173,173,173);
@@ -37,57 +37,98 @@
   color: rgb(255,255,255);
 }
 
+.tabNameContainer {
+  width:97%;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
 .tabName {
   font-size: 12px;
-  width:97%;
   height: 14px;
   margin-top: 6px;
-  padding-left: 2px;
-  padding-right: 2px;
-  color: rgb(120, 120, 120);
+  color: var(--main-text-darker-color);
   outline: solid;
-  outline-width: 1px;
+  outline-width: var(--input-hover-outline-width);
   outline-color: rgba(255,0,0,0);
+
+  padding-left:2px;
+  padding-right:2px;
 }
 
 .tabName:hover {
   outline: solid;
-  outline-width: 1px;
-  outline-color: rgba(64,64,64,255);
+  outline-width: var(--input-hover-outline-width);
+  outline-color: var(--input-hover-outline-color);
 }
 
 .tabNameEditor {
   font-size: 12px;
   width: 100%;
   height: 14px;
-  margin-top: 5px;
-  color: rgb(120, 120, 120);
+  margin-top: 6px;
+  color: var(--main-text-darker-color);
 }
 
 .tabNameEditor input[type=text] {
   font-size: 12px;
   width: 100%;
   box-sizing: border-box;
-  background-color: #333;
-  color: rgb(170,170,170);
+  background-color: #252525;
+  color: var(--main-text-lighter-color);
   border-style: none;
   padding: 0px;
+
+  padding-left:2px;
+  padding-right:2px;
+}
+
+.tabNameEditor input[type=text]::selection {
+  background: #89a;
 }
 
 .tabNameEditor input[type=text]:focus {
   outline: solid;
-  outline-width: 1px;
+  outline-width: var(--input-hover-outline-width);
   outline-color: rgba(0,0,0,0);
 }
 
 .tabNameEditor input[type=text]:valid {
   outline: solid;
-  outline-width: 1px;
+  outline-width: var(--input-hover-outline-width);
   outline-color: rgba(0,0,0,0);
 }
 
 .tabNameEditor input[type=text]:invalid {
   outline: solid;
-  outline-width: 1px;
+  outline-width: var(--input-hover-outline-width);
   outline-color: rgba(255,32,32,0.6);
+}
+
+/*---------------------------------------------------------------*/
+.screenDimContainer {
+  position: relative;
+  top: 0px;
+  left: -3px;
+  font-size: 12px;
+  width: 60px;
+}
+
+.screenDimText {
+  outline: solid;
+  outline-width: var(--input-hover-outline-width);
+  outline-color: rgba(255,0,0,0);
+
+  height: 14px;
+  margin-top: 6px;
+  color: var(--main-text-darker-color);
+  padding-left:2px;
+  padding-right:2px;
+}
+
+.screenDimText:hover {
+  outline-color: var(--input-hover-outline-color);
+}
+
+.screenDimContainer .tabNameEditor input[type=text] {
 }

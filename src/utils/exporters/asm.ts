@@ -3,8 +3,7 @@ import { chunkArray } from '../../utils'
 
 import { fs } from '../electronImports'
 import { CHARSET_UPPER } from '../../redux/editor';
-import { Framebuf } from  '../../redux/types';
-import { AsmExportOptions } from './types'
+import { Framebuf, FileFormatAsm } from  '../../redux/types';
 import * as fp from '../fp'
 
 interface InitCodeParams {
@@ -17,7 +16,16 @@ interface InitCodeParams {
 interface SyntaxParams {
   byte: string;
   mkLabel: (lbl: string) => string;
+  mkLineComment: (text: string) => string;
 }
+
+const binaryFormatHelp = [
+  'PETSCII memory layout (example for a 40x25 screen)',
+  'byte  0         = border color',
+  'byte  1         = background color',
+  'bytes 2-1001    = screencodes',
+  'bytes 1002-2001 = color'
+];
 
 const initCodeKickAss = ({
   charsetBits,
@@ -181,25 +189,29 @@ function convertToAsm(lines: string[], fb: Framebuf, {mkLabel, byte}: SyntaxPara
   bytesToCommaDelimited(lines, bytes, width, byte)
 }
 
-const saveAsm = (filename: string, fbs: Framebuf[], options: AsmExportOptions) => {
+const saveAsm = (filename: string, fbs: Framebuf[], fmt: FileFormatAsm) => {
+  const options = fmt.exportOptions;
   let mkInitCode = null
   let syntaxParams: SyntaxParams;
   if (options.assembler === 'kickass') {
     mkInitCode = initCodeKickAss
     syntaxParams = {
       mkLabel: lbl => `${lbl}:`,
+      mkLineComment: text => `// ${text}`,
       byte: '.byte'
     }
   } else if (options.assembler === 'c64tass') {
     mkInitCode = initCode64tassOrACME(c64tassStartSequence)
     syntaxParams = {
       mkLabel: lbl => lbl,
+      mkLineComment: text => `; ${text}`,
       byte: '.byte'
     }
   } else if (options.assembler === 'acme') {
     mkInitCode = initCode64tassOrACME(ACMEStartSequence)
     syntaxParams = {
       mkLabel: lbl => lbl,
+      mkLineComment: text => `; ${text}`,
       byte: '!byte'
     }
   } else {
@@ -210,8 +222,8 @@ const saveAsm = (filename: string, fbs: Framebuf[], options: AsmExportOptions) =
   try {
     let lines: string[] = [];
     // Single screen export?
-    const selectedFb = fbs[options.selectedFramebufIndex]
-    if (options.currentScreenOnly) {
+    const selectedFb = fbs[fmt.commonExportParams.selectedFramebufIndex]
+    if (fmt.exportOptions.currentScreenOnly) {
       convertToAsm(lines, selectedFb, syntaxParams)
     } else {
       fbs.forEach((fb) => convertToAsm(lines, fb, syntaxParams))
@@ -225,9 +237,10 @@ const saveAsm = (filename: string, fbs: Framebuf[], options: AsmExportOptions) =
       label: maybeLabelName(selectedFb.name)
     }
     const init = options.standalone ? mkInitCode(initCodeOptions) : ''
+    const formatDocs = binaryFormatHelp.map(syntaxParams.mkLineComment).join('\n');
     fs.writeFileSync(
       filename,
-      init + '\n' + lines.join('\n') + '\n', null
+      init + '\n\n' + formatDocs + '\n' + lines.join('\n') + '\n', null
     )
   }
   catch(e) {

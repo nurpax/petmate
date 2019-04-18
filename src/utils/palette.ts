@@ -1,5 +1,5 @@
 
-import { Rgb } from '../redux/types'
+import { Rgb, PaletteName } from '../redux/types'
 
 const palette: Rgb[] = [
   {r:0x00, g:0x00, b:0x00},
@@ -46,8 +46,16 @@ const pepto = [
   "#6c6c6c","#9dd28a","#6d5fb0","#959595"
 ];
 
-export const colorPalettes = {
+const vice = [
+  "#000000","#ffffff","#b96a54","#acf3fe",
+  "#be73f8","#9ae35b","#695af1","#fffd84",
+  "#c5913c","#8c7817","#f3ab98","#818181",
+  "#b6b6b6","#dcfea3","#b1a0fc","#e0e0e0"
+];
+
+export const colorPalettes: {[k in PaletteName]: Rgb[]} = {
   'petmate': palette,
   'colodore': colodore.map(hexToRgb),
-  'pepto': pepto.map(hexToRgb)
+  'pepto': pepto.map(hexToRgb),
+  'vice': vice.map(hexToRgb)
 };

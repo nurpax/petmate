@@ -3,8 +3,7 @@ import { chunkArray } from '../../utils'
 
 import { fs } from '../electronImports'
 import { CHARSET_UPPER } from '../../redux/editor';
-import { Framebuf } from  '../../redux/types';
-import { ExportOptions } from  './types';
+import { Framebuf, FileFormatBas } from  '../../redux/types';
 
 interface InitCodeParams {
   borderColor: number;
@@ -51,7 +50,8 @@ function convertToBASIC(lines: string[], fb: Framebuf) {
   bytesToCommaDelimited(lines, bytes)
 }
 
-const saveBASIC = (filename: string, fbs: Framebuf[], options: ExportOptions) => {
+const saveBASIC = (filename: string, fbs: Framebuf[], fmt: FileFormatBas) => {
+  const options = fmt.commonExportParams;
   try {
     let lines: string[] = []
     // Single screen export

@@ -2,7 +2,9 @@
 const { app, Menu, shell, BrowserWindow } = require('electron');
 
 const importers = [
-  { label: 'PETSCII (.c)', cmd: 'import-marq-c' }
+  { label: 'D64 disk image (.d64)', cmd: 'import-d64' },
+  { label: 'PETSCII (.c)', cmd: 'import-marq-c' },
+  { label: 'PNG (.png)', cmd: 'import-png' }
 ]
 
 const exporters = [
@@ -10,6 +12,7 @@ const exporters = [
   { label: 'BASIC (.bas)', cmd: 'export-basic' },
   { label: 'Executable (.prg)', cmd: 'export-prg' },
   { label: 'GIF (.gif)', cmd: 'export-gif' },
+  { label: 'JSON (.json)', cmd: 'export-json' },
   { label: 'PETSCII (.c)', cmd: 'export-marq-c' },
   { label: 'PNG (.png)', cmd: 'export-png' }
 ]
@@ -352,7 +355,7 @@ module.exports = class MenuBuilder {
       {
         label: '&View',
         submenu:
-          process.env.NODE_ENV === 'development'
+          !app.isPackaged
             ? [
                 {
                   label: '&Reload',

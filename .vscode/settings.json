@@ -12,8 +12,10 @@
     "node_modules": true,
     "npm-debug.log.*": true,
     "test/**/__snapshots__": true,
+    "build/*":true,
     "yarn.lock": true
   },
   "editor.tabSize": 2,
-  "files.trimTrailingWhitespace": true
+  "files.trimTrailingWhitespace": true,
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

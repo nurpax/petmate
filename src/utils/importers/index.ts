@@ -1,5 +1,5 @@
 
-import { framebufFromJson } from '../workspace'
+import { framebufFromJson } from '../../redux/workspace'
 import { chunkArray } from '../../utils'
 
 import { fs } from '../electronImports'
@@ -116,3 +116,5 @@ export function loadMarqCFramebuf(filename: string, importFile: ImportDispatch) 
     console.error(e)
   }
 }
+
+export { loadD64Framebuf } from './d64'

@@ -1,34 +1,35 @@
 
-import { framebufToPixelsIndexed } from './util'
+import { framebufToPixelsIndexed, computeOutputImageDims } from './util'
 
 import { fs } from '../electronImports'
-import { FramebufWithFont } from  './types';
-import { RgbPalette } from  '../../redux/types';
-import { GifExportOptions } from  './types';
+import { FramebufWithFont, RgbPalette, FileFormatGif } from  '../../redux/types';
 
 type GifEncoder = any;
 const GifEncoder: GifEncoder = require('gif-encoder');
 
-const exportGIF = (encoder: GifEncoder, fb: FramebufWithFont) => {
-  const pixels = framebufToPixelsIndexed(fb)
-  encoder.addFrame(pixels)
-}
-
-export const saveGIF = (filename: string, fbs: FramebufWithFont[], palette: RgbPalette, options: GifExportOptions) => {
+export function saveGIF(filename: string, fbs: FramebufWithFont[], palette: RgbPalette, fmt: FileFormatGif): void {
+  const options = fmt.exportOptions;
   try {
-    const selectedFb = fbs[options.selectedFramebufIndex]
+    const selectedFb = fbs[fmt.commonExportParams.selectedFramebufIndex]
 
     const gifPalette = Array(16*3).fill(0)
     palette.forEach(({r, g, b}, idx) => {
       gifPalette[idx*3 + 0] = r
       gifPalette[idx*3 + 1] = g
       gifPalette[idx*3 + 2] = b
-    })
+    });
 
-    let encoder = new GifEncoder(selectedFb.width*8, selectedFb.height*8, {
+    const { imgWidth, imgHeight } = computeOutputImageDims(selectedFb, options.borders);
+
+    let encoder = new GifEncoder(imgWidth, imgHeight, {
       palette: gifPalette,
       highWaterMark:1024*256
     })
+
+    function exportGIF(fb: FramebufWithFont) {
+      const pixels = framebufToPixelsIndexed(fb, options.borders)
+      encoder.addFrame(pixels)
+    }
 
     encoder.setQuality(20)
     const delayMS = options.delayMS
@@ -54,15 +55,15 @@ export const saveGIF = (filename: string, fbs: FramebufWithFont[], palette: RgbP
 
     encoder.writeHeader();
     if (options.animMode !== 'anim' || fbs.length == 1) {
-      exportGIF(encoder, selectedFb)
+      exportGIF(selectedFb);
     } else {
       for (let fidx = 0; fidx < fbs.length; fidx++) {
-        exportGIF(encoder, fbs[fidx])
+        exportGIF(fbs[fidx]);
       }
       // Skip last and first frames when looping back to beginning.
       if (options.loopMode === 'pingpong') {
         for (let fidx = fbs.length-2; fidx >= 1; fidx--) {
-          exportGIF(encoder, fbs[fidx])
+          exportGIF(fbs[fidx]);
         }
       }
     }

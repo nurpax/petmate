@@ -1,71 +1,16 @@
 
 import { chunkArray, executablePrgTemplate } from '../../utils'
-import { framebufToPixels } from './util'
-import { FramebufWithFont, ExportOptions, PngExportOptions } from './types'
 
-import { Framebuf, RgbPalette } from '../../redux/types'
+import { Framebuf, FileFormat } from '../../redux/types'
 import { CHARSET_LOWER } from '../../redux/editor'
 
 import { saveAsm } from './asm'
 import { saveBASIC } from './basic'
 import { saveGIF } from './gif'
+import { savePNG } from './png'
+import { saveJSON } from './json'
 
-import { electron, fs } from '../electronImports'
-
-const nativeImage = electron.nativeImage
-
-function doublePixels(buf: Buffer, w: number, h: number): Buffer {
-  const dstPitch = 2*w*4
-  const dst = Buffer.alloc(2*w * 2*h * 4)
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const srcOffs = (x + y*w)*4
-      const dstOffs = (x*2*4 + 2*y*dstPitch)
-      const b = buf[srcOffs + 0]
-      const g = buf[srcOffs + 1]
-      const r = buf[srcOffs + 2]
-      const a = buf[srcOffs + 3]
-
-      for (let o = 0; o < dstPitch*2; o+=dstPitch) {
-        dst[o + dstOffs + 0] = b
-        dst[o + dstOffs + 1] = g
-        dst[o + dstOffs + 2] = r
-        dst[o + dstOffs + 3] = a
-
-        dst[o + dstOffs + 4] = b
-        dst[o + dstOffs + 5] = g
-        dst[o + dstOffs + 6] = r
-        dst[o + dstOffs + 7] = a
-      }
-    }
-  }
-  return dst
-}
-
-const savePNG = (filename: string, fb: FramebufWithFont, palette: RgbPalette, options: PngExportOptions) => {
-  try {
-    const { width, height } = fb
-    const dwidth = width*8
-    const dheight = height*8
-
-    const buf = framebufToPixels(fb, palette);
-    const scale = options.doublePixels ? 2 : 1
-    const pixBuf = options.doublePixels ?
-      doublePixels(buf, dwidth, dheight) : buf
-    if (options.alphaPixel) {
-      // TODO is this enough to fool png->jpeg transcoders heuristics?
-      pixBuf[3] = 254
-    }
-    const img = nativeImage.createFromBuffer(pixBuf, {
-      width: scale*dwidth, height: scale*dheight
-    })
-    fs.writeFileSync(filename, img.toPNG(), null)
-  }
-  catch(e) {
-    alert(`Failed to save file '${filename}'!`)
-    console.error(e)
-  }
-}
+import { fs } from '../electronImports'
 
 function bytesToCommaDelimited(dstLines: string[], bytes: number[], bytesPerLine: number) {
   let lines = chunkArray(bytes, bytesPerLine)
@@ -102,7 +47,7 @@ function convertToMarqC(lines: string[], fb: Framebuf, idx: number) {
   lines.push('};')
 }
 
-function saveMarqC(filename: string, fbs: Framebuf[], _options: ExportOptions) {
+function saveMarqC(filename: string, fbs: Framebuf[], _options: FileFormat) {
   try {
     let lines: string[] = []
     fbs.forEach((fb,idx) => convertToMarqC(lines, fb, idx))
@@ -121,7 +66,7 @@ function saveMarqC(filename: string, fbs: Framebuf[], _options: ExportOptions) {
   }
 }
 
-function saveExecutablePRG(filename: string, fb: Framebuf, _options: ExportOptions) {
+function saveExecutablePRG(filename: string, fb: Framebuf, _options: FileFormat) {
   try {
     const {
       width,
@@ -189,6 +134,7 @@ export {
   saveExecutablePRG,
   saveAsm,
   saveBASIC,
-  saveGIF
+  saveGIF,
+  saveJSON
 }
 

@@ -7,6 +7,9 @@ const {
     ipcMain,
     Menu
 } = require('electron');
+
+app.disableHardwareAcceleration()
+
 const MenuBuilder = require('./menu');
 
 if (process.platform == 'darwin') {
@@ -16,6 +19,7 @@ if (process.platform == 'darwin') {
 
 const path = require('path');
 
+let appClosing = false;
 let mainWindow;
 
 createWindow = () => {
@@ -81,12 +85,32 @@ createWindow = () => {
 
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
-
         ipcMain.on('open-external-window', (event, arg) => {
             shell.openExternal(arg);
         });
     });
+
+    // Prevent main window close.  Ask renderer if it's OK to quit,
+    // if it is, it will send back a 'closed' event where we will actually
+    // quit Petmate.
+    mainWindow.on('close', (e) => {
+      if (!appClosing) {
+        e.preventDefault();
+        mainWindow.webContents.send('prompt-unsaved');
+      }
+    })
 };
+
+var openFilename = null;
+// macOS "click to open" or drag file on app icon handler
+app.on("open-file", (event, file) => {
+  openFilename = file;
+  // Send open command to main window
+  if (mainWindow) {
+    mainWindow.webContents.send('open-petmate-file', file);
+  }
+  event.preventDefault();
+});
 
 app.on('ready', () => {
     createWindow();
@@ -117,3 +141,27 @@ app.on('browser-window-blur', () => {
 ipcMain.on('load-page', (event, arg) => {
     mainWindow.loadURL(arg);
 });
+
+
+// See comments in mainWindow.on('close')
+ipcMain.on('closed', (event, arg) => {
+  appClosing = true;
+  app.quit();
+});
+
+// Windows: handler for clicking a .petmate file in Explorer to open it in Petmate
+ipcMain.on('get-open-args', function(event) {
+    let filename = null;
+    if (process.platform == 'win32' && process.argv.length >= 2) {
+        // When running 'yarn start' to start Petmate in development mode,
+        // the first argument is '.' -- ignore that.
+        if (process.argv[1] !== '.') {
+            filename = process.argv[1];
+        }
+    } else if (process.platform == 'darwin') {
+        // Return a cached result of open-file event when the app is loading.
+        // Later open-file's will be sent directly to the main window.
+        filename = openFilename;
+    }
+    event.returnValue = filename;
+  });
