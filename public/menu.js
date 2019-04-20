@@ -14,7 +14,8 @@ const exporters = [
   { label: 'GIF (.gif)', cmd: 'export-gif' },
   { label: 'JSON (.json)', cmd: 'export-json' },
   { label: 'PETSCII (.c)', cmd: 'export-marq-c' },
-  { label: 'PNG (.png)', cmd: 'export-png' }
+  { label: 'PNG (.png)', cmd: 'export-png' },
+  { label: 'SEQ (.seq)', cmd: 'export-seq' }
 ]
 
 module.exports = class MenuBuilder {

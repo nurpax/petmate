@@ -40,6 +40,11 @@ export interface FileFormatC extends FileFormatBase {
   ext: 'c';
 }
 
+export interface FileFormatSeq extends FileFormatBase {
+  ext: 'seq';
+}
+
+
 export interface FileFormatD64 extends FileFormatBase {
   ext: 'd64';
 }
@@ -72,3 +77,4 @@ export type FileFormat =
   | FileFormatPrg
   | FileFormatBas
   | FileFormatJson
+  | FileFormatSeq
