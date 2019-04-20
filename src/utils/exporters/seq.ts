@@ -100,16 +100,8 @@ const  saveSEQ = (filename: string, fb: FramebufWithFont, fmt: FileFormatSeq) =>
     let bytes:number[] = []
     console.log(fmt) // placeholder for future use
     convertToSEQ(fb, bytes)
-    let length = bytes.length
-    let buff = new Buffer(length)
-    for(var i = 0; i < length; i++) {
-      buff.writeUInt8(bytes[i], i)
-    }
-    let fd = fs.openSync(filename, 'w')
-    fs.write(fd, buff, 0, buff.length, 0, function(err:any, written:any) {
-      console.log('err', err)
-      console.log('written', written)
-    })
+    let buf = new Buffer(bytes);
+    fs.writeFileSync(filename, buf, null);
   }
   catch(e) {
     alert(`Failed to save file '${filename}'!`);
