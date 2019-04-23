@@ -2,6 +2,7 @@ import { fs } from '../electronImports';
 import { framebufFromJson } from '../../redux/workspace';
 import { DEFAULT_BACKGROUND_COLOR, DEFAULT_BORDER_COLOR } from '../../redux/editor';
 import { Pixel } from '../../redux/types';
+import * as fp from '../fp'
 
 class SeqDecoder {
   revsOn = false;
@@ -123,12 +124,11 @@ class SeqDecoder {
   }
 
   cls() {
-    for (let y = 0; y < this.height; y++) {
-      this.c64Screen[y] = []
-      for (let x = 0; x < this.width; x++) {
-        this.c64Screen[y][x] = { code: 0x20, color: DEFAULT_BACKGROUND_COLOR };
-      }
-    }
+    this.c64Screen = fp.mkArray(this.height, () => {
+      return fp.mkArray(this.width, () => {
+        return { code: 0x40, color: DEFAULT_BACKGROUND_COLOR };
+      })
+    });
   }
 
   carriageReturn() {
