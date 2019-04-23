@@ -140,6 +140,9 @@ electron.ipcRenderer.on('menu', (_event: Event, message: string) => {
     case 'import-png':
       store.dispatch(Toolbar.actions.setShowImport({show: true, fmt: formats.png}));
       return
+    case 'import-seq':
+      store.dispatch(ReduxRoot.actions.fileImportAppend(formats.seq));
+      return
     case 'preferences':
       store.dispatch(Toolbar.actions.setShowSettings(true))
       return
