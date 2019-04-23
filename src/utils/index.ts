@@ -1,5 +1,5 @@
 
-import { loadMarqCFramebuf, loadD64Framebuf } from './importers'
+import { loadMarqCFramebuf, loadD64Framebuf, loadSeq } from './importers'
 import {
   savePNG,
   saveMarqC,
@@ -216,6 +216,11 @@ export const loadFramebuf = (filename: string, importFile: (fbs: Framebuf[]) => 
     const fb = loadD64Framebuf(filename);
     if (fb !== undefined) {
       return importFile([fb]);
+    }
+  } else if (ext === '.seq') {
+    const fb = loadSeq(filename);
+    if (fb !== undefined) {
+        return importFile([fb]);
     }
   } else {
     console.error('this shouldn not happen');
