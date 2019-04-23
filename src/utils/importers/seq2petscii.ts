@@ -17,7 +17,14 @@ class SeqDecoder {
     this.cls();
   }
 
-  chrout(c: number) {
+  chrout(c: number, lastByte: boolean) {
+    // lastByte is kind of a hack here.  When decoding
+    // the last byte of input, we don't want to move the
+    // "virtual cursor" to the right as that will cause
+    // the screen to be shifted up.
+    const screencode = (c: number) => {
+      this.scrnOut(c, lastByte);
+    }
     switch (c) {
       case 0x05:
         this.cursorColor = 0x01;
@@ -111,14 +118,14 @@ class SeqDecoder {
         this.cursorColor = 0x03; //Cyan
         break;
       case 0xff:
-        this.scrnOut(94);
+        screencode(94);
         break;
       default:
-        if ((c >= 0x20) && (c < 0x40)) this.scrnOut(c);
-        if ((c >= 0x40) && (c <= 0x5f)) this.scrnOut((c - 0x40));
-        if ((c >= 0x60) && (c <= 0x7f)) this.scrnOut((c - 0x20));
-        if ((c >= 0xa0) && (c <= 0xbf)) this.scrnOut((c - 0x40));
-        if ((c >= 0xc0) && (c <= 0xfe)) this.scrnOut((c - 0x80));
+        if ((c >= 0x20) && (c < 0x40)) screencode(c);
+        if ((c >= 0x40) && (c <= 0x5f)) screencode((c - 0x40));
+        if ((c >= 0x60) && (c <= 0x7f)) screencode((c - 0x20));
+        if ((c >= 0xa0) && (c <= 0xbf)) screencode((c - 0x40));
+        if ((c >= 0xc0) && (c <= 0xfe)) screencode((c - 0x80));
         break;
     }
   }
@@ -139,16 +146,19 @@ class SeqDecoder {
 
   del() {
     this.cursorLeft();
-    this.scrnOut(0x20);
+    this.scrnOut(0x20, false);
     this.cursorLeft();
   }
 
-  scrnOut(b: number) {
+  scrnOut(b: number, lastByte: boolean) {
     var c = b;
     if (this.revsOn) c += 0x80;
     this.c64Screen[this.cursorPosY][this.cursorPosX] = { code: c, color: this.cursorColor };
-    this.cursorRight();
+    if (!lastByte) {
+      this.cursorRight();
+    }
   }
+
   cursorRight() {
     if (this.cursorPosX < this.width - 1) {
       this.cursorPosX++;
@@ -199,7 +209,7 @@ class SeqDecoder {
   decode(seqFile: any) {
     this.cls();
     for (let i = 0; i < seqFile.length; i++) {
-      this.chrout(seqFile[i]);
+      this.chrout(seqFile[i], i == seqFile.length-1);
     }
   }
 
