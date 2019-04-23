@@ -13,8 +13,8 @@
   "scripts": {
     "dev": "yarn react-scripts start",
     "build": "react-scripts build",
-    "start": "concurrently \"cross-env BROWSER=none yarn react-scripts start\" \"wait-on http://localhost:3000 && electron .\"",
-    "debug": "concurrently \"cross-env BROWSER=none yarn react-scripts start\" \"wait-on http://localhost:3000 && electron --remote-debugging-port=9223 .\"",
+    "start": "concurrently --kill-others \"cross-env BROWSER=none yarn react-scripts start\" \"wait-on http://localhost:3000 && electron .\"",
+    "debug": "concurrently --kill-others \"cross-env BROWSER=none yarn react-scripts start\" \"wait-on http://localhost:3000 && electron --remote-debugging-port=9223 .\"",
     "package": "electron-builder --dir",
     "dist-all": "npx build --x64 --macos --win --linux --c.extraMetadata.main=build/electron.js -p never",
     "dist-win": "npx build --x64 --win --c.extraMetadata.main=build/electron.js -p never"
