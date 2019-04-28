@@ -92,7 +92,7 @@ function convertToSEQ(fb: Framebuf, bytes:number[], insCR: boolean) {
       bytes.push(byte_char)
 
     }
-    if (insCR) {
+    if (insCR && (y < height - 1)) {
       if (currev){
         bytes.push(0x0d)
       } else {
