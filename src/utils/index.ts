@@ -51,6 +51,9 @@ export const formats: { [index: string]: FileFormat } = {
     name: 'PETSCII .seq',
     ext: 'seq',
     commonExportParams: defaultExportCommon,
+    exportOptions: {
+      insCR: false
+    }
   },
   c: {
     name: 'PETSCII .c',

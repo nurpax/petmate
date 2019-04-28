@@ -42,6 +42,9 @@ export interface FileFormatC extends FileFormatBase {
 
 export interface FileFormatSeq extends FileFormatBase {
   ext: 'seq';
+  exportOptions: {
+    insCR: boolean;
+  }
 }
 
 
