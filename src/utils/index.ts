@@ -52,7 +52,8 @@ export const formats: { [index: string]: FileFormat } = {
     ext: 'seq',
     commonExportParams: defaultExportCommon,
     exportOptions: {
-      insCR: false
+      insCR: false,
+      insClear: true
     }
   },
   c: {

@@ -21,10 +21,13 @@ const seq_colors: number[]=[
   0x9b //grey 3
 ]
 
-function convertToSEQ(fb: Framebuf, bytes:number[], insCR: boolean) {
+function convertToSEQ(fb: Framebuf, bytes:number[], insCR: boolean, insClear: boolean) {
   const { width, height, framebuf } = fb
   let currcolor = -1
   let currev = false
+  if (insClear) {
+    bytes.push(0x93)
+  }
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let byte_color = framebuf[y][x].color
@@ -104,10 +107,9 @@ function convertToSEQ(fb: Framebuf, bytes:number[], insCR: boolean) {
 
 const  saveSEQ = (filename: string, fb: FramebufWithFont, fmt: FileFormatSeq) => {
   try {
-    const options = fmt.exportOptions;
+    const {insCR, insClear} = fmt.exportOptions;
     let bytes:number[] = []
-    console.log(fmt) // placeholder for future use
-    convertToSEQ(fb, bytes, options.insCR)
+    convertToSEQ(fb, bytes, insCR, insClear)
     let buf = new Buffer(bytes);
     fs.writeFileSync(filename, buf, null);
   }

@@ -44,6 +44,7 @@ export interface FileFormatSeq extends FileFormatBase {
   ext: 'seq';
   exportOptions: {
     insCR: boolean;
+    insClear: boolean;
   }
 }
 
