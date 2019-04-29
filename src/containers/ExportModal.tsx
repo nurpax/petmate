@@ -14,7 +14,7 @@ import * as toolbar from '../redux/toolbar'
 import * as ReduxRoot from '../redux/root'
 
 import * as utils from '../utils'
-import { FileFormatGif, FileFormatPng, FileFormatAsm, FileFormatBas, FileFormatJson, FileFormat, RootState } from '../redux/types';
+import { FileFormatGif, FileFormatPng, FileFormatSeq, FileFormatAsm, FileFormatBas, FileFormatJson, FileFormat, RootState } from '../redux/types';
 import { bindActionCreators } from 'redux';
 
 const ModalTitle: SFC<{}> = ({children}) => <h2>{children}</h2>
@@ -119,6 +119,25 @@ class PNGExportForm extends Component<PNGExportFormatProps> {
   }
 }
 
+interface SEQExportFormatProps extends ExportPropsBase {
+  state: FileFormatSeq['exportOptions'];
+}
+
+class SEQExportForm extends Component<SEQExportFormatProps> {
+  render () {
+    return (
+      <Form state={this.props.state} setField={this.props.setField}>
+        <Title>SEQ export options</Title>
+        <br/>
+        <br/>
+        <Checkbox name='insCR' label='Insert Carriage Returns (0x0D) at end of row' />
+        <Checkbox name='insClear' label='Insert CLS (0x93) at start of file' />
+      </Form>
+    )
+  }
+}
+
+
 interface ASMExportFormatProps extends ExportPropsBase {
   state: FileFormatAsm['exportOptions'];
 }
@@ -205,6 +224,7 @@ class JsonExportForm extends Component<JsonExportFormatProps> {
 
 interface ExportModalState {
   [key: string]: FileFormat['exportOptions'];
+  seq: FileFormatSeq['exportOptions'];
   png: FileFormatPng['exportOptions'];
   asm: FileFormatAsm['exportOptions'];
   bas: FileFormatBas['exportOptions'];
@@ -245,6 +265,10 @@ class ExportForm extends Component<ExportFormProps> {
         return (
           <PNGExportForm {...connectFormState(this.props, 'png')} />
         )
+      case 'seq':
+        return (
+          <SEQExportForm {...connectFormState(this.props, 'seq')} />
+        )
       case 'asm':
         return (
           <ASMExportForm {...connectFormState(this.props, 'asm')} />
@@ -281,6 +305,10 @@ interface ExportModalDispatch {
 
 class ExportModal_ extends Component<ExportModalProps & ExportModalDispatch, ExportModalState> {
   state: ExportModalState = {
+    seq: {
+      insCR: false,
+      insClear: true
+    },
     png: {
       borders: true,
       alphaPixel: false,
