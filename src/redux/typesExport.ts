@@ -45,6 +45,7 @@ export interface FileFormatSeq extends FileFormatBase {
   exportOptions: {
     insCR: boolean;
     insClear: boolean;
+    stripBlanks: boolean;
   }
 }
 
