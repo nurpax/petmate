@@ -21,9 +21,9 @@ const seq_colors: number[]=[
   0x9b //grey 3
 ]
 
-function appendCR(bytes:number[], currev:boolean) {
+function appendCR(bytes:number[], currev:boolean, force:boolean) {
   // Append a Carriage Return if not already done
-  if (bytes.length && (bytes[bytes.length -1] & 0x7f) != 0x0d)
+  if (force || (bytes.length && (bytes[bytes.length -1] & 0x7f) != 0x0d))
     bytes.push(currev ? 0x0d : 0x8d)
 }
 
@@ -123,15 +123,17 @@ function convertToSEQ(fb: Framebuf, bytes:number[], insCR:boolean, insClear:bool
 
     // Check if there are blanks left behind
     // In that case substitute them with a Carriage Return
-    if (stripBlanks && blank_buffer.length > 0 && y != lastCRrow) {
-      appendCR(bytes, currev);
-      lastCRrow = y;
-    }
-    blank_buffer = []
+    if (y < height - 1) {
+      if (stripBlanks && blank_buffer.length > 0 && y != lastCRrow) {
+        appendCR(bytes, currev, blank_buffer.length == width);
+        lastCRrow = y;
+      }
+      blank_buffer = []
 
-    if (insCR && (y < height - 1)) {
-      appendCR(bytes, currev);
-      lastCRrow = y;
+      if (insCR) {
+        appendCR(bytes, currev, false);
+        lastCRrow = y;
+      }
     }
   }
 }
