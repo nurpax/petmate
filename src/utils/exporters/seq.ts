@@ -21,14 +21,24 @@ const seq_colors: number[]=[
   0x9b //grey 3
 ]
 
-function convertToSEQ(fb: Framebuf, bytes:number[], insCR: boolean, insClear: boolean) {
+function appendCR(bytes:number[], currev:boolean) {
+  // Append a Carriage Return if not already done
+  if (bytes.length && (bytes[bytes.length -1] & 0x7f) != 0x0d)
+    bytes.push(currev ? 0x0d : 0x8d)
+}
+
+function convertToSEQ(fb: Framebuf, bytes:number[], insCR:boolean, insClear:boolean, stripBlanks:boolean) {
   const { width, height, framebuf } = fb
   let currcolor = -1
   let currev = false
+  let blank_buffer: number[] = [];
+  let lastCRrow = -1
+
   if (insClear) {
     bytes.push(0x93)
   }
   for (let y = 0; y < height; y++) {
+
     for (let x = 0; x < width; x++) {
       let byte_color = framebuf[y][x].color
       if (byte_color != currcolor) {
@@ -92,24 +102,45 @@ function convertToSEQ(fb: Framebuf, bytes:number[], insCR: boolean, insClear: bo
               }
           }
       }
-      bytes.push(byte_char)
-
-    }
-    if (insCR && (y < height - 1)) {
-      if (currev){
-        bytes.push(0x0d)
+      if (stripBlanks) {
+        // Save blanks into a buffer array
+        if (!currev && (byte_char == 0xC0 || byte_char == 0x20)) {
+          blank_buffer.push(byte_char);
+        } else {
+          // If the char is not a blank take all previuos blanks (if any)
+          // then print current char
+          // If blanks are the lastest chars they are just ignored
+          for (let b = 0; b < blank_buffer.length; b++) {
+            bytes.push(blank_buffer[b]);
+          }
+          blank_buffer = []; // reset blank buffer
+          bytes.push(byte_char);
+        }
       } else {
-        bytes.push(0x8d)
+        bytes.push(byte_char);
       }
+    }
+
+    // Check if there are blanks left behind
+    // In that case substitute them with a Carriage Return
+    if (stripBlanks && blank_buffer.length > 0 && y != lastCRrow) {
+      appendCR(bytes, currev);
+      lastCRrow = y;
+    }
+    blank_buffer = []
+
+    if (insCR && (y < height - 1)) {
+      appendCR(bytes, currev);
+      lastCRrow = y;
     }
   }
 }
 
 const  saveSEQ = (filename: string, fb: FramebufWithFont, fmt: FileFormatSeq) => {
   try {
-    const {insCR, insClear} = fmt.exportOptions;
     let bytes:number[] = []
-    convertToSEQ(fb, bytes, insCR, insClear)
+    const {insCR, insClear, stripBlanks} = fmt.exportOptions;
+    convertToSEQ(fb, bytes, insCR, insClear, stripBlanks);
     let buf = new Buffer(bytes);
     fs.writeFileSync(filename, buf, null);
   }

@@ -53,7 +53,8 @@ export const formats: { [index: string]: FileFormat } = {
     commonExportParams: defaultExportCommon,
     exportOptions: {
       insCR: false,
-      insClear: true
+      insClear: true,
+      stripBlanks: false
     }
   },
   c: {
