@@ -27,74 +27,114 @@ function appendCR(bytes:number[], currev:boolean, force:boolean) {
     bytes.push(currev ? 0x0d : 0x8d)
 }
 
+function packColSequences(bytes:number[]) {
+  let idx:number = bytes.length;
+  while (idx >= 0) {
+    // Strip colour byte if it appears before a CR and a new colour byte
+    if ((bytes[idx] & 0x7f) == 0x0d) {
+      if (seq_colors.includes(bytes[idx - 1]) && seq_colors.includes(bytes[idx + 1])) {
+        bytes.splice(idx - 1,1);
+        idx--;
+      }
+    }
+    // Strip sequence of colour bytes except the last one
+    if (seq_colors.includes(bytes[idx - 1]) && seq_colors.includes(bytes[idx])) {
+      bytes.splice(idx - 1,1);
+      idx--;
+    }
+    idx--;
+  }
+}
+
+function removeDupColours(bytes:number[]) {
+  let idx:number = bytes.length -1;
+  let prevColByte:number = -1;
+  let prevColByteIdx:number = -1;
+
+  while (idx >= 0) {
+    // Seek for repetitive colour bytes (non adjacent too)
+    // and remove them from sequence
+    let currByte:number = bytes[idx];
+    if (seq_colors.includes(currByte)) {
+      if (currByte == prevColByte) {
+        bytes.splice(prevColByteIdx, 1);
+      }
+      prevColByte = currByte;
+      prevColByteIdx = idx;
+    }
+    idx--;
+  }
+}
+
+
 function convertToSEQ(fb: Framebuf, bytes:number[], insCR:boolean, insClear:boolean, stripBlanks:boolean) {
-  const { width, height, framebuf } = fb
-  let currcolor = -1
-  let currev = false
+  const { width, height, framebuf } = fb;
+  let currcolor = -1;
+  let currev = false;
   let blank_buffer: number[] = [];
-  let lastCRrow = -1
+  let lastCRrow = -1;
 
   if (insClear) {
-    bytes.push(0x93)
+    bytes.push(0x93);
   }
   for (let y = 0; y < height; y++) {
 
     for (let x = 0; x < width; x++) {
-      let byte_color = framebuf[y][x].color
+      let byte_color = framebuf[y][x].color;
       if (byte_color != currcolor) {
-        bytes.push(seq_colors[byte_color])
-        currcolor = byte_color
+        bytes.push(seq_colors[byte_color]);
+        currcolor = byte_color;
       }
-      let byte_char = framebuf[y][x].code
-      if(byte_char>=0x80){
+      let byte_char = framebuf[y][x].code;
+      if (byte_char >= 0x80) {
         if (!currev){
-          bytes.push(0x12)
-          currev = true
+          bytes.push(0x12);
+          currev = true;
         }
         byte_char &= 0x7f
       } else {
         if (currev) {
-          bytes.push(0x92)
-          currev = false
+          bytes.push(0x92);
+          currev = false;
         }
       }
-      if ((byte_char >= 0) && (byte_char <= 0x1f)){
-        byte_char = byte_char + 0x40
+      if ((byte_char >= 0) && (byte_char <= 0x1f)) {
+        byte_char = byte_char + 0x40;
       }
       else
       {
           if ((byte_char >= 0x40) && (byte_char <= 0x5d))
           {
-            byte_char = byte_char + 0x80
+            byte_char = byte_char + 0x80;
           }
           else
           {
               if (byte_char == 0x5e) {
-                byte_char = 0xff
+                byte_char = 0xff;
               }
               else
               {
                   if (byte_char == 0x95)
                   {
-                    byte_char = 0xdf
+                    byte_char = 0xdf;
                   }
                   else
                   {
                       if ((byte_char >= 0x60) && (byte_char <= 0x7f))
                       {
-                        byte_char = byte_char + 0x80
+                        byte_char = byte_char + 0x80;
                       }
                       else
                       {
                           if ((byte_char >= 0x80) && (byte_char <= 0xbf))
                           {
-                            byte_char = byte_char - 0x80
+                            byte_char = byte_char - 0x80;
                           }
                           else
                           {
                               if ((byte_char >= 0xc0) && (byte_char <= 0xff))
                               {
-                                byte_char = byte_char -0x40
+                                byte_char = byte_char - 0x40;
                               }
                           }
                       }
@@ -102,6 +142,7 @@ function convertToSEQ(fb: Framebuf, bytes:number[], insCR:boolean, insClear:bool
               }
           }
       }
+
       if (stripBlanks) {
         // Save blanks into a buffer array
         if (!currev && (byte_char == 0xC0 || byte_char == 0x20)) {
@@ -128,13 +169,18 @@ function convertToSEQ(fb: Framebuf, bytes:number[], insCR:boolean, insClear:bool
         appendCR(bytes, currev, blank_buffer.length == width);
         lastCRrow = y;
       }
-      blank_buffer = []
+      blank_buffer = [];
 
       if (insCR) {
         appendCR(bytes, currev, false);
         lastCRrow = y;
       }
     }
+  }
+
+  if (stripBlanks) {
+    packColSequences(bytes);
+    removeDupColours(bytes);
   }
 }
 
