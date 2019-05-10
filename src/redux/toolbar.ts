@@ -18,7 +18,7 @@ import * as matrix from '../utils/matrix';
 
 const defaultFramebufUIState: FramebufUIState = {
   canvasTransform: matrix.ident(),
-  canvasFit: 'fitWidth'
+  canvasFit: 'fitWidthHeight'
 };
 
 const emptyTransform: Transform = {
