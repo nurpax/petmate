@@ -114,27 +114,33 @@ function convertToSEQ(fb: Framebuf, bytes:number[], insCR:boolean, insClear:bool
               }
               else
               {
-                  if (byte_char == 0x95)
-                  {
+                  if (byte_char == 0x5f) {
                     byte_char = 0xdf;
                   }
                   else
                   {
-                      if ((byte_char >= 0x60) && (byte_char <= 0x7f))
+                      if (byte_char == 0x95)
                       {
-                        byte_char = byte_char + 0x80;
+                        byte_char = 0xdf;
                       }
                       else
                       {
-                          if ((byte_char >= 0x80) && (byte_char <= 0xbf))
+                          if ((byte_char >= 0x60) && (byte_char <= 0x7f))
                           {
-                            byte_char = byte_char - 0x80;
+                            byte_char = byte_char + 0x40;
                           }
                           else
                           {
-                              if ((byte_char >= 0xc0) && (byte_char <= 0xff))
+                              if ((byte_char >= 0x80) && (byte_char <= 0xbf))
                               {
-                                byte_char = byte_char - 0x40;
+                                byte_char = byte_char - 0x80;
+                              }
+                              else
+                              {
+                                  if ((byte_char >= 0xc0) && (byte_char <= 0xff))
+                                  {
+                                    byte_char = byte_char - 0x40;
+                                  }
                               }
                           }
                       }
@@ -152,7 +158,13 @@ function convertToSEQ(fb: Framebuf, bytes:number[], insCR:boolean, insClear:bool
           // then print current char
           // If blanks are the lastest chars they are just ignored
           for (let b = 0; b < blank_buffer.length; b++) {
+            if (currev) {
+              bytes.push(0x92);
+            }
             bytes.push(blank_buffer[b]);
+            if (currev) {
+              bytes.push(0x12);
+            }
           }
           blank_buffer = []; // reset blank buffer
           bytes.push(byte_char);
