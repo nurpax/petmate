@@ -136,7 +136,11 @@ ipcMain.on('set-title', (event, arg) => {
 
 app.on('browser-window-blur', () => {
     mainWindow.webContents.send('window-blur')
-})
+});
+
+app.on('browser-window-focus', () => {
+    mainWindow.webContents.send('window-focus')
+});
 
 ipcMain.on('load-page', (event, arg) => {
     mainWindow.loadURL(arg);

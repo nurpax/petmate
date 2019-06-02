@@ -49,7 +49,12 @@ function dispatchExport(fmt: FileFormat) {
 electron.ipcRenderer.on('window-blur', (_event: Event, _message: any) => {
   store.dispatch(Toolbar.actions.setShortcutsActive(false))
   store.dispatch(Toolbar.actions.clearModKeyState())
-})
+});
+
+electron.ipcRenderer.on('window-focus', (_event: Event, _message: any) => {
+  store.dispatch(Toolbar.actions.setShortcutsActive(true));
+  store.dispatch(Toolbar.actions.clearModKeyState());
+});
 
 window.addEventListener('focus', () => {
   store.dispatch(Toolbar.actions.setShortcutsActive(true))
