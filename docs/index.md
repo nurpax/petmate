@@ -12,9 +12,9 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.7.0.dmg'>Petmate-0.7.0.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.7.0.exe'>Petmate Setup 0.7.0.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.7.0_amd64.deb'>petmate_0.7.0_amd64.deb</a>
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.7.1.dmg'>Petmate-0.7.1.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.7.1.exe'>Petmate Setup 0.7.1.exe</a>
+* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.7.1_amd64.deb'>petmate_0.7.1_amd64.deb</a>
 
 ## Features
 
@@ -128,6 +128,10 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.7.1 (2019-06-03)
+- Add SEQ file format import and export.  Thanks [@sixofdloc](https://github.com/sixofdloc) and [@manuelvio](https://github.com/manuelvio) for your contribution!
+- Fix a bug that caused most keyboard shortcuts from working when loading a file.  Affected platforms: Windows and Linux.  This was a mega irritating bug that was possible to work-around by switching to another app and then back to Petmate.  ([#161](https://github.com/nurpax/petmate/issues/161))
 
 Petmate 0.7.0 (2019-03-16)
 - Arbitrary sized PETSCII canvas (edit the 40x25 text below the new screen + button and hit +) ([#20](https://github.com/nurpax/petmate/issues/20))
