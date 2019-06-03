@@ -131,7 +131,7 @@ The settings are saved in the following location:
 
 Petmate 0.7.1 (2019-06-03)
 - Add SEQ file format import and export.  Thanks [@sixofdloc](https://github.com/sixofdloc) and [@manuelvio](https://github.com/manuelvio) for your contribution!
-- Fix a bug that caused most keyboard shortcuts from working when loading a file.  Affected platforms: Windows and Linux.  This was a mega irritating bug that was possible to work-around by switching to another app and then back to Petmate.  ([#161](https://github.com/nurpax/petmate/issues/161))
+- Fix a bug that caused most keyboard shortcuts from not working when loading a file.  Affected platforms: Windows and Linux.  This was a mega irritating bug that was possible to work-around by switching to another app and then back to Petmate.  ([#161](https://github.com/nurpax/petmate/issues/161))
 
 Petmate 0.7.0 (2019-03-16)
 - Arbitrary sized PETSCII canvas (edit the 40x25 text below the new screen + button and hit +) ([#20](https://github.com/nurpax/petmate/issues/20))
