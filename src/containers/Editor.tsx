@@ -41,8 +41,10 @@ import {
   Pixel, Framebuf, FramebufUIState
 } from '../redux/types'
 
+const brushOutlineSelectingColor = 'rgba(128, 255, 128, 0.5)';
+
 const brushOverlayStyleBase: CSSProperties = {
-  outlineColor: 'rgba(128, 255, 128, 0.5)',
+  outlineColor: 'rgba(255, 255, 255, 0.5)',
   outlineStyle: 'solid',
   outlineWidth: 0.5,
   backgroundColor: 'rgba(255,255,255,0)',
@@ -65,13 +67,14 @@ class BrushSelectOverlay extends Component<BrushSelectOverlayProps> {
           charPos={this.props.charPos}
           framebufWidth={this.props.framebufWidth}
           framebufHeight={this.props.framebufHeight}
-          color='rgba(128, 255, 128, 0.5)'
+          color={brushOutlineSelectingColor}
         />
       )
     }
     const { min, max } = utils.sortRegion(this.props.brushRegion)
     const s: CSSProperties = {
       ...brushOverlayStyleBase,
+      outlineColor: brushOutlineSelectingColor,
       position: 'absolute',
       left: min.col*8,
       top: min.row*8,
