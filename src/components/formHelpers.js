@@ -39,9 +39,10 @@ const NumberInput_ = ({label, onChange, value}) => {
     <label className={styles.numberInputContainer}>
       {label}
       <input
+        style={{minWidth: '4em'}}
         type='number'
         value={value}
-        size='4'
+        size='5'
         min='1'
         max='10000'
         onChange={onChange}

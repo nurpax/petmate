@@ -37,7 +37,7 @@ class GIFExportForm extends Component<GIFExportFormatProps> {
       const delayInt = parseInt(this.props.state.delayMS, 10)
       if (delayInt !== 0 && !isNaN(delayInt)) {
         const f = 1000.0 / delayInt
-        fps = `${Math.round(f)} fps`
+        fps = `${f.toFixed(1)} fps`
       }
     }
     const animControls = () => {
