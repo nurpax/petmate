@@ -270,8 +270,21 @@ export const loadAppFile = (filename: string) => {
   return fs.readFileSync(path.resolve(appPath, filename));
 }
 
-export const systemFontData = loadAppFile('assets/system-charset.bin')
-export const systemFontDataLower = loadAppFile('assets/system-charset-lower.bin')
+export const loadFont = (filename: string) => {
+  let fontData , systemFontDataLower, systemFontData
+  try {
+    fontData = loadAppFile(filename)
+    systemFontData = fontData.slice(0, 2048)
+    systemFontDataLower = fontData.slice(2048, 4096)
+  } catch (e) {
+    console.warn(`Charset font ${filename} not found`)
+    systemFontData = loadAppFile('assets/system-charset.bin')
+    systemFontDataLower = loadAppFile('assets/system-charset-lower.bin')
+}
+  return { systemFontData, systemFontDataLower }
+}
+
+export const { systemFontData, systemFontDataLower }  = loadFont('assets/chargen')
 export const executablePrgTemplate = loadAppFile('assets/template.prg')
 
 export function setWorkspaceFilenameWithTitle(setWorkspaceFilename: (fname: string) => void, filename: string) {
