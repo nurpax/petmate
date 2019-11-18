@@ -12,7 +12,7 @@ import * as ReduxRoot from '../redux/root'
 import { FileFormat, RootState, Pixel, Rgb, Framebuf, Charset } from '../redux/types';
 import CharGrid from '../components/CharGrid';
 import FontSelector from '../components/FontSelector';
-import { getFontBits } from '../redux/selectors';
+import { getROMFontBits } from '../redux/selectors';
 import { dialogReadFile, colorIndexToCssRgb, colorPalettes } from '../utils';
 
 import * as png2pet from '../utils/importers/png2petscii'
@@ -27,7 +27,7 @@ const Title: SFC<{}> = ({children}) => <h4>{children}</h4>
 const ErrorMsg: SFC<{ msg: string }> = ({ msg }) => <div className={classnames(styles.error, styles.title)}>Error: <span className={classnames(styles.error, styles.msg)}>{msg}</span></div>
 const Text: SFC<{}> = ({children}) => <div className={styles.text}>{children}</div>
 
-const getFontBitsMemoized = memoize(getFontBits);
+const getROMFontBitsMemoized = memoize(getROMFontBits);
 const petsciifyMemoized = memoize(petsciify);
 
 interface PngPreviewProps {
@@ -74,7 +74,7 @@ class PngPreview extends Component<PngPreviewProps> {
       borderWidth: '10px',
       borderStyle: 'solid',
     }
-    const font = getFontBitsMemoized(this.props.charset);
+    const font = getROMFontBitsMemoized(this.props.charset);
     return (
       <div style={{height:'100%'}}>
         <Title>Preview</Title>
@@ -159,7 +159,7 @@ function petsciify(png: PNG|undefined, colorPalettes: Rgb[][], charset: Charset)
     height: png.height,
     data: png.data,
     rgbPalettes: colorPalettes,
-    fontBits: Buffer.from(getFontBitsMemoized(charset).bits)
+    fontBits: Buffer.from(getROMFontBitsMemoized(charset).bits)
   });
   return petscii;
 }

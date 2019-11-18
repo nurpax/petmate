@@ -25,20 +25,22 @@ export const getCurrentFramebuf = (state: RootState) => {
   return getFramebufByIndex(state, getCurrentScreenFramebufIndex(state))
 }
 
-export const getFontBits = (charset: Charset) => {
+export const getROMFontBits = (charset: Charset): Font => {
   if (charset !== CHARSET_UPPER && charset !== CHARSET_LOWER) {
-    console.error('unknown charset ', charset)
+    throw new Error(`unknown charset ${charset}`);
   }
-  let bits = systemFontData
-  let charOrder = charOrderUpper
   if (charset === CHARSET_LOWER) {
-    bits = systemFontDataLower
-    charOrder = charOrderLower
-  }
-  return {
-    charset,
-    bits,
-    charOrder
+    return {
+      charset,
+      bits: systemFontDataLower,
+      charOrder: charOrderLower,
+    };
+  } else {
+    return {
+      charset,
+      bits: systemFontData,
+      charOrder: charOrderUpper,
+    };
   }
 }
 
@@ -46,16 +48,19 @@ export const getFontBits = (charset: Charset) => {
 // serious cache invalidates in rendering the canvas (since it thinks the font
 // changed).  So memoize the returned object from getFontBits in case it's
 // called with the same value.
-const getFontBitsMemoized = memoize(getFontBits)
+const getROMFontBitsMemoized = memoize(getROMFontBits)
 
-export const getFramebufFont = (_state: RootState, framebuf: Framebuf) => {
-  return getFontBitsMemoized(framebuf.charset)
+export const getFramebufFont = (_state: RootState, framebuf: Framebuf): Font => {
+  if (framebuf.charset === CHARSET_UPPER || framebuf.charset === CHARSET_LOWER) {
+    return getROMFontBitsMemoized(framebuf.charset)
+  }
+  throw new Error('TO BE IMPLEMENTED - read from state');
 }
 
 export const getCurrentFramebufFont = (state: RootState) => {
   const fb = getCurrentFramebuf(state)
   if (!fb) {
-    return getFontBits(CHARSET_UPPER);
+    return getROMFontBits(CHARSET_UPPER);
   }
   return getFramebufFont(state, fb)
 }
