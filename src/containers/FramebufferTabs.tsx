@@ -419,7 +419,7 @@ interface FramebufferTabsProps {
   newScreenSize: { width: number, height: number };
 
   getFramebufByIndex: (framebufId: number) => Framebuf | null;
-  getFont: (framebuf: Framebuf) => Font;
+  getFont: (framebuf: Framebuf) => { charset: string, font: Font };
   setFramebufName: (name: string, framebufIndex: number) => void;
 }
 
@@ -453,6 +453,7 @@ class FramebufferTabs_ extends Component<FramebufferTabsProps & FramebufferTabsD
   render () {
     const lis = this.props.screens.map((framebufId, i) => {
       const framebuf = this.props.getFramebufByIndex(framebufId)!
+      const { font } = this.props.getFont(framebuf);
       return (
         <SortableFramebufTab
           key={framebufId}
@@ -464,7 +465,7 @@ class FramebufferTabs_ extends Component<FramebufferTabsProps & FramebufferTabsD
           onDuplicateTab={this.handleDuplicateTab}
           framebuf={framebuf}
           active={i === this.props.activeScreen}
-          font={this.props.getFont(framebuf)}
+          font={font}
           colorPalette={this.props.colorPalette}
           setName={this.props.setFramebufName}
         />

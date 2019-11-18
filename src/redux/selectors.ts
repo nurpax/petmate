@@ -8,11 +8,12 @@ import {
   charOrderUpper,
   charOrderLower } from '../utils'
 
-import { RootState, Charset, Font, Framebuf, Coord2, Transform, Brush, FramebufUIState } from './types'
+import { RootState, Font, Framebuf, Coord2, Transform, Brush, FramebufUIState } from './types'
 import { mirrorBrush, findTransformedChar } from './brush'
 import { CHARSET_UPPER, CHARSET_LOWER } from './editor'
 
 import { getCurrentScreenFramebufIndex } from './screensSelectors'
+import { CustomFonts } from './customFonts'
 
 export const getFramebufByIndex = (state: RootState, idx: number | null) => {
   if (idx !== null && idx < state.framebufList.length) {
@@ -25,20 +26,20 @@ export const getCurrentFramebuf = (state: RootState) => {
   return getFramebufByIndex(state, getCurrentScreenFramebufIndex(state))
 }
 
-export const getFontBits = (charset: Charset) => {
+export const getROMFontBits = (charset: string): Font => {
   if (charset !== CHARSET_UPPER && charset !== CHARSET_LOWER) {
-    console.error('unknown charset ', charset)
+    throw new Error(`unknown charset ${charset}`);
   }
-  let bits = systemFontData
-  let charOrder = charOrderUpper
   if (charset === CHARSET_LOWER) {
-    bits = systemFontDataLower
-    charOrder = charOrderLower
-  }
-  return {
-    charset,
-    bits,
-    charOrder
+    return {
+      bits: systemFontDataLower,
+      charOrder: charOrderLower,
+    };
+  } else {
+    return {
+      bits: systemFontData,
+      charOrder: charOrderUpper,
+    };
   }
 }
 
@@ -46,18 +47,34 @@ export const getFontBits = (charset: Charset) => {
 // serious cache invalidates in rendering the canvas (since it thinks the font
 // changed).  So memoize the returned object from getFontBits in case it's
 // called with the same value.
-const getFontBitsMemoized = memoize(getFontBits)
+const getROMFontBitsMemoized = memoize(getROMFontBits)
 
-export const getFramebufFont = (_state: RootState, framebuf: Framebuf) => {
-  return getFontBitsMemoized(framebuf.charset)
+export const getFramebufFont = (state: RootState, framebuf: Framebuf): { charset: string, font: Font } => {
+  if (framebuf.charset === CHARSET_UPPER || framebuf.charset === CHARSET_LOWER) {
+    return {
+      charset: framebuf.charset,
+      font: getROMFontBitsMemoized(framebuf.charset)
+    };
+  }
+  return {
+    charset: framebuf.charset,
+    font: state.customFonts[framebuf.charset].font
+  };
 }
 
 export const getCurrentFramebufFont = (state: RootState) => {
   const fb = getCurrentFramebuf(state)
   if (!fb) {
-    return getFontBits(CHARSET_UPPER);
+    return {
+      charset: CHARSET_UPPER,
+      font: getROMFontBits(CHARSET_UPPER)
+    };
   }
-  return getFramebufFont(state, fb)
+  return getFramebufFont(state, fb);
+}
+
+export function getCustomFonts (state: RootState): CustomFonts {
+  return state.customFonts;
 }
 
 const rowColFromScreencodeMemoized_ = (f: Font, sc: number) => rowColFromScreencode(f, sc)

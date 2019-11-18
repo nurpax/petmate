@@ -148,7 +148,13 @@ module.exports = class MenuBuilder {
         },
         { label: 'Export As...',
           submenu: exporters.map(decl => this.mkExportCmd(decl.label, decl.cmd))
-        }
+        },
+        { type: 'separator' },
+        { label: 'Fonts...',
+          click: () => {
+            this.sendMenuCommand('custom-fonts');
+          }
+        },
       ]
     };
     const subMenuEdit = {
@@ -302,6 +308,12 @@ module.exports = class MenuBuilder {
           },
           { label: 'Export As',
             submenu: exporters.map(decl => this.mkExportCmd(decl.label, decl.cmd))
+          },
+          { type: 'separator' },
+          { label: 'Fonts...',
+            click: () => {
+              this.sendMenuCommand('custom-fonts');
+            }
           },
           { type: 'separator' },
           { label: 'E&xit',

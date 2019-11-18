@@ -8,8 +8,6 @@ import { Matrix3x3 } from '../utils/matrix';
 export const DEFAULT_FB_WIDTH = 40;
 export const DEFAULT_FB_HEIGHT = 25;
 
-export type Charset = 'upper' | 'lower';
-
 export interface Coord2 {
   row: number;
   col: number;
@@ -21,7 +19,6 @@ export interface Pixel {
 };
 
 export interface Font {
-  charset: Charset;
   bits: number[];
   charOrder: number[];
 };
@@ -32,7 +29,7 @@ export interface Framebuf {
   readonly height: number;
   readonly backgroundColor: number;
   readonly borderColor: number;
-  readonly charset: Charset;
+  readonly charset: string;
   readonly name?: string;
 };
 
@@ -117,6 +114,7 @@ export interface Toolbar {
   shiftKey: boolean;
   spacebarKey: boolean;
   showSettings: boolean;
+  showCustomFonts: boolean;
   showExport: { show: boolean, fmt?: FileFormat}; // fmt undefined only when show=false
   showImport: { show: boolean, fmt?: FileFormat}; // fmt undefined only when show=false
   selectedPaletteRemap: number;
@@ -140,8 +138,9 @@ export interface RootState {
     saved: Settings;
     editing: Settings;
   };
-  toolbar: Toolbar; // TODO
+  toolbar: Toolbar;
   screens: Screens;
+  customFonts: { [name: string]: {font: Font, name: string} };
   framebufList: UndoableFramebuf[];
   lastSavedSnapshot: LastSavedState;
 };
@@ -149,5 +148,17 @@ export interface RootState {
 export type RootStateThunk = ThunkAction<void, RootState, undefined, Action>;
 
 export type SettingsJson = any;
+
+// Interface describing the custom fonts chunks in
+// .petmate workspace version == 2
+export type WsCustomFontsV2 = {
+  [id: string]: {
+    name: string,
+    font: {
+      bits: number[],
+      charOrder: number[]
+    }
+  }
+};
 
 export * from './typesExport'

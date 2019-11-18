@@ -3,16 +3,16 @@ import ReactDOM from 'react-dom';
 import Root from './containers/Root';
 import './app.global.css';
 
-import { formats, loadSettings, promptProceedWithUnsavedChanges } from './utils'
-import * as Screens from './redux/screens'
-import * as settings  from './redux/settings'
-import { Toolbar } from './redux/toolbar'
-import * as ReduxRoot from './redux/root'
+import { formats, loadSettings, promptProceedWithUnsavedChanges } from './utils';
+import * as Screens from './redux/screens';
+import * as settings  from './redux/settings';
+import { Toolbar } from './redux/toolbar';
+import * as ReduxRoot from './redux/root';
 
-import configureStore from './store/configureStore'
+import configureStore from './store/configureStore';
 
 // TODO prod builds
-import { electron } from './utils/electronImports'
+import { electron } from './utils/electronImports';
 import { FileFormat, RootState } from './redux/types';
 
 const store = configureStore();
@@ -166,6 +166,9 @@ electron.ipcRenderer.on('menu', (_event: Event, message: string) => {
     case 'shift-screen-down':
       store.dispatch(Toolbar.actions.shiftVertical(+1))
       return;
+    case 'custom-fonts':
+      store.dispatch(Toolbar.actions.setShowCustomFonts(true))
+      return
     default:
       console.warn('unknown message from main process', message)
   }

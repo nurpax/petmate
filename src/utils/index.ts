@@ -22,10 +22,12 @@ import {
   FileFormat, Rgb, Font, Coord2, Framebuf, Settings,
   FramebufWithFont,
   RootState,
+  WsCustomFontsV2
 } from '../redux/types';
 
 import * as ReduxRoot from '../redux/root';
 import * as selectors from '../redux/selectors';
+import * as customFonts from '../redux/customFonts'
 
 const { ipcRenderer } = electron
 
@@ -161,7 +163,7 @@ const framebufFields = (framebuf: Framebuf) => {
   }
 }
 
-const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWithFont[], palette: Rgb[]) => {
+const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWithFont[], fonts: customFonts.CustomFonts, palette: Rgb[]) => {
   const { selectedFramebufIndex } = fmt.commonExportParams;
   const selectedFramebuf = framebufs[selectedFramebufIndex];
   if (fmt.ext == 'png') {
@@ -179,18 +181,37 @@ const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWit
   } else if (fmt.ext === 'bas') {
     return saveBASIC(filename, framebufs, fmt);
   } else if (fmt.ext === 'json') {
-    return saveJSON(filename, framebufs, fmt);
+    return saveJSON(filename, framebufs, fonts, fmt);
   }
   throw new Error("shouldn't happen");
 }
 
 type GetFramebufByIdFunc = (fbidx: number) => Framebuf;
 
-const WORKSPACE_VERSION = 1
+// Serialize CustomFonts to a known structure for JSON serialization.
+// Could pass in just the original object, but this extra indirection will
+// protect from accidentally changing the file format in case the internal
+// custom fonts structure changes.
+function customFontsToJson(cf: customFonts.CustomFonts): WsCustomFontsV2 {
+  const res: {[id: string]: any} = {};
+  Object.entries(cf).forEach(([id, { name, font }]) => {
+    let f: { bits: number[], charOrder: number[] } = font;
+    let n: string = name;
+    res[id] = {
+      name: n,
+      font: f
+    };
+  });
+  return res;
+}
+
+const WORKSPACE_VERSION = 2;
+
 export function saveWorkspace (
   filename: string,
   screens: number[],
   getFramebufById: GetFramebufByIdFunc,
+  customFonts: customFonts.CustomFonts,
   updateLastSavedSnapshot: () => void
 ) {
   const content = JSON.stringify({
@@ -201,7 +222,8 @@ export function saveWorkspace (
       return {
         ...framebufFields(getFramebufById(fbid))
       }
-    })
+    }),
+    customFonts: customFontsToJson(customFonts)
   })
   try {
     fs.writeFileSync(filename, content, 'utf-8');
@@ -290,7 +312,7 @@ export function loadWorkspaceNoDialog(
 export function dialogLoadWorkspace(
   dispatch: StoreDispatch
 ) {
-  const {dialog} = electron.remote
+  const { dialog } = electron.remote;
   const window = electron.remote.getCurrentWindow();
   const filters = [
     {name: 'Petmate workspace', extensions: ['petmate']},
@@ -309,6 +331,7 @@ export function dialogLoadWorkspace(
 export function dialogSaveAsWorkspace(
   screens: number[],
   getFramebufByIndex: (fbidx: number) => Framebuf,
+  customFonts: customFonts.CustomFonts,
   setWorkspaceFilename: (fname: string) => void,
   updateLastSavedSnapshot: () => void
 ) {
@@ -321,11 +344,11 @@ export function dialogSaveAsWorkspace(
   if (filename === undefined) {
     return;
   }
-  saveWorkspace(filename, screens, getFramebufByIndex, updateLastSavedSnapshot);
+  saveWorkspace(filename, screens, getFramebufByIndex, customFonts, updateLastSavedSnapshot);
   setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename);
 }
 
-export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[], palette: Rgb[]) {
+export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[], customFonts: customFonts.CustomFonts, palette: Rgb[]) {
   const {dialog} = electron.remote
   const window = electron.remote.getCurrentWindow();
   const filters = [
@@ -335,7 +358,7 @@ export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[],
   if (filename === undefined) {
     return
   }
-  saveFramebufs(fmt, filename, framebufs, palette)
+  saveFramebufs(fmt, filename, framebufs, customFonts, palette)
 }
 
 // Pop up a file select dialog for a certain file type and call the

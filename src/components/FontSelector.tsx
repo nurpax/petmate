@@ -1,35 +1,61 @@
 
 // @flow
-import React, { PureComponent, FunctionComponent as SFC } from 'react';
+import React, { PureComponent } from 'react';
 
-import styles from './FontSelector.module.css';
-import { Charset } from '../redux/types';
+class CustomFontSelect extends React.Component<{
+  customFonts: {id: string, name: string}[],
+  current: string,
+  setCharset: (name: string) => void
+}> {
 
-interface SelectButtonProps {
-  name: Charset;
-  current: Charset;
-  setCharset: (c: Charset) => void;
-  children: {};
-}
+  handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    e.preventDefault();
+    this.props.setCharset(e.target.value);
+  }
 
-const SelectButton: SFC<SelectButtonProps> = (props: SelectButtonProps) => {
-  const { name, current, setCharset, children } = props;
-  return (
-    <div className={styles.charsetSelectButton} style={{
-      borderStyle: 'solid',
-      borderWidth: '1px',
-      borderColor: name === current ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.0)'
-    }}
-    onClick={() => setCharset(name)}
-    >
-      {children}
-    </div>
-  )
+  render () {
+    const charsets = [
+      {
+        id: 'upper',
+        name: 'ABC'
+      },
+      {
+        id: 'lower',
+        name: 'abc'
+      }
+    ].concat(this.props.customFonts);
+    const options = charsets.map(cf => {
+      let displayName = cf.name;
+      return (
+        <option
+          key={cf.id}
+          value={cf.id}
+        >
+          {displayName}
+        </option>
+      );
+    })
+    return (
+      <div style={{marginLeft: '5px'}}>
+        <select style={{
+          borderStyle: 'solid',
+          borderWidth: '0px',
+          borderColor: 'rgba(255,255,255, 0.0)'
+        }}
+          value={this.props.current}
+          onChange={this.handleSelectChange}
+        >
+          {options}
+        </select>
+      </div>
+    )
+  }
 }
 
 interface FontSelectorProps {
-  currentCharset: Charset;
-  setCharset: (c: Charset) => void;
+  currentCharset: string;
+  setCharset: (c: string) => void;
+  customFonts: { id: string, name: string}[];
 }
 
 export default class FontSelector extends PureComponent<FontSelectorProps> {
@@ -42,20 +68,12 @@ export default class FontSelector extends PureComponent<FontSelectorProps> {
         color: 'rgb(120,120,120)'
       }}>
         <div>Charset: </div>
-        <SelectButton
-          name='upper'
+        <CustomFontSelect
+          customFonts={this.props.customFonts}
           current={this.props.currentCharset}
-          setCharset={this.props.setCharset}>
-          ABC
-        </SelectButton>
-        <SelectButton
-          name='lower'
-          current={this.props.currentCharset}
-          setCharset={this.props.setCharset}>
-          abc
-        </SelectButton>
+          setCharset={this.props.setCharset}
+        />
       </div>
     )
   }
 }
-

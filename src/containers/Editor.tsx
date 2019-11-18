@@ -791,7 +791,7 @@ const FramebufferCont = connect(
       throw new Error('cannot render FramebufferCont with a null framebuf, see Editor checks.')
     }
     const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state);
-    const font = selectors.getCurrentFramebufFont(state)
+    const { font } = selectors.getCurrentFramebufFont(state)
     return {
       framebufIndex,
       framebuf: framebuf.framebuf,
@@ -944,4 +944,3 @@ export default connect(
     }
   }
 )(Editor)
-
