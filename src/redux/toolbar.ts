@@ -437,14 +437,14 @@ export class Toolbar {
 
     nextCharcode: (dir: Coord2): RootStateThunk => {
       return (dispatch, getState) => {
-        const font = selectors.getCurrentFramebufFont(getState())
+        const { font } = selectors.getCurrentFramebufFont(getState());
         dispatch(actionCreators.nextCharcodeAction(dir, font));
       }
     },
 
     invertChar: (): RootStateThunk => {
       return (dispatch, getState) => {
-        const font = selectors.getCurrentFramebufFont(getState())
+        const { font } = selectors.getCurrentFramebufFont(getState());
         dispatch(actionCreators.invertCharAction(font));
       }
     },
@@ -458,20 +458,20 @@ export class Toolbar {
 
     setScreencode: (code: number): RootStateThunk => {
       return (dispatch, getState) => {
-        const state = getState()
-        const font = selectors.getCurrentFramebufFont(state)
-        const charPos = utils.rowColFromScreencode(font, code)
-        dispatch(Toolbar.actions.setSelectedChar(charPos))
+        const state = getState();
+        const { font } = selectors.getCurrentFramebufFont(state);
+        const charPos = utils.rowColFromScreencode(font, code);
+        dispatch(Toolbar.actions.setSelectedChar(charPos));
       }
     },
 
     setCurrentColor: (color: number): RootStateThunk => {
       return (dispatch, getState) => {
-        const state = getState()
+        const state = getState();
         dispatch(Toolbar.actions.setTextColor(color))
         if (state.toolbar.selectedTool === Tool.Brush ||
             state.toolbar.selectedTool === Tool.PanZoom) {
-          dispatch(Toolbar.actions.setSelectedTool(Tool.Draw))
+          dispatch(Toolbar.actions.setSelectedTool(Tool.Draw));
         }
       }
     },

@@ -42,12 +42,14 @@ export const UPDATE_LAST_SAVED_SNAPSHOT = 'UPDATE_LAST_SAVED_SNAPSHOT'
 
 function saveAsWorkspace(): ThunkAction<void, RootState, undefined, Action> {
   return (dispatch, getState) => {
-    const state = getState()
-    const screens = screensSelectors.getScreens(state)
-    const getFramebufByIndex = (idx: number) => selectors.getFramebufByIndex(state, idx)!
+    const state = getState();
+    const screens = screensSelectors.getScreens(state);
+    const getFramebufByIndex = (idx: number) => selectors.getFramebufByIndex(state, idx)!;
+    const customFonts = selectors.getCustomFonts(state);
     dialogSaveAsWorkspace(
       screens,
       getFramebufByIndex,
+      customFonts,
       (filename: string) => dispatch(Toolbar.actions.setWorkspaceFilename(filename)),
       () => dispatch(actionCreators.updateLastSavedSnapshot())
     );
@@ -103,17 +105,19 @@ export const actions = {
 
   fileSaveWorkspace: (): RootStateThunk => {
     return (dispatch, getState) => {
-      const state = getState()
-      const screens = screensSelectors.getScreens(state)
-      const getFramebufByIndex = (idx: number) => selectors.getFramebufByIndex(state, idx)!
-      const filename = state.toolbar.workspaceFilename
+      const state = getState();
+      const screens = screensSelectors.getScreens(state);
+      const getFramebufByIndex = (idx: number) => selectors.getFramebufByIndex(state, idx)!;
+      const customFonts = selectors.getCustomFonts(state);
+      const filename = state.toolbar.workspaceFilename;
       if (filename === null) {
-        return dispatch(saveAsWorkspace())
+        return dispatch(saveAsWorkspace());
       }
       saveWorkspace(
         filename,
         screens,
         getFramebufByIndex,
+        customFonts,
         () => dispatch(actionCreators.updateLastSavedSnapshot())
       );
     }
@@ -160,9 +164,10 @@ export const actions = {
         if (selectedFramebufIndex === fbIdx) {
           remappedFbIndex = i
         }
+        const { font } = selectors.getFramebufFont(state, framebuf);
         return {
           ...framebuf,
-          font: selectors.getFramebufFont(state, framebuf)
+          font
         }
       })
       const palette = getSettingsCurrentColorPalette(state)

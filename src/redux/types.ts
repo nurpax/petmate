@@ -8,8 +8,6 @@ import { Matrix3x3 } from '../utils/matrix';
 export const DEFAULT_FB_WIDTH = 40;
 export const DEFAULT_FB_HEIGHT = 25;
 
-export type Charset = 'upper' | 'lower';
-
 export interface Coord2 {
   row: number;
   col: number;
@@ -21,7 +19,6 @@ export interface Pixel {
 };
 
 export interface Font {
-  charset: Charset;
   bits: number[];
   charOrder: number[];
 };
@@ -32,7 +29,7 @@ export interface Framebuf {
   readonly height: number;
   readonly backgroundColor: number;
   readonly borderColor: number;
-  readonly charset: Charset;
+  readonly charset: string;
   readonly name?: string;
 };
 
@@ -140,8 +137,9 @@ export interface RootState {
     saved: Settings;
     editing: Settings;
   };
-  toolbar: Toolbar; // TODO
+  toolbar: Toolbar;
   screens: Screens;
+  customFonts: { [name: string]: Font };
   framebufList: UndoableFramebuf[];
   lastSavedSnapshot: LastSavedState;
 };

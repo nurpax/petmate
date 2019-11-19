@@ -3,12 +3,11 @@
 import React, { PureComponent, FunctionComponent as SFC } from 'react';
 
 import styles from './FontSelector.module.css';
-import { Charset } from '../redux/types';
 
 interface SelectButtonProps {
-  name: Charset;
-  current: Charset;
-  setCharset: (c: Charset) => void;
+  name: string;
+  current: string;
+  setCharset: (c: string) => void;
   children: {};
 }
 
@@ -28,8 +27,8 @@ const SelectButton: SFC<SelectButtonProps> = (props: SelectButtonProps) => {
 }
 
 interface FontSelectorProps {
-  currentCharset: Charset;
-  setCharset: (c: Charset) => void;
+  currentCharset: string;
+  setCharset: (c: string) => void;
 }
 
 export default class FontSelector extends PureComponent<FontSelectorProps> {
@@ -54,8 +53,13 @@ export default class FontSelector extends PureComponent<FontSelectorProps> {
           setCharset={this.props.setCharset}>
           abc
         </SelectButton>
+        <SelectButton
+          name='custom_1'
+          current={this.props.currentCharset}
+          setCharset={this.props.setCharset}>
+          custom_1
+        </SelectButton>
       </div>
     )
   }
 }
-

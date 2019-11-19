@@ -4,6 +4,7 @@ import * as toolbar from '../redux/toolbar'
 import * as settings from '../redux/settings'
 import * as screens from '../redux/screens'
 import * as framebufList from '../redux/framebufList'
+import * as customFonts from '../redux/customFonts';
 import * as Root from '../redux/root'
 
 import { RootState, LastSavedState } from '../redux/types'
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
   toolbar: toolbar.Toolbar.reducer,
   screens: screens.reducer,
   settings: settings.reducer,
+  customFonts: customFonts.reducer,
   lastSavedSnapshot: lastSavedSnapshotDummyReducer
 })
 

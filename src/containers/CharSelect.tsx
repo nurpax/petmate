@@ -3,7 +3,7 @@ import React, { Component, useRef, useCallback, useState, MouseEvent, CSSPropert
 import { connect } from 'react-redux'
 import { Dispatch, bindActionCreators } from 'redux'
 
-import { RootState, Font, Pixel, Coord2, Rgb, Charset } from '../redux/types'
+import { RootState, Font, Pixel, Coord2, Rgb } from '../redux/types'
 import * as framebuffer from '../redux/editor'
 
 import { Toolbar } from '../redux/toolbar'
@@ -28,6 +28,7 @@ import styles from './CharSelect.module.css'
 interface CharSelectProps {
   Toolbar: any; // TODO ts
   Framebuffer: framebuffer.PropsFromDispatch;
+  charset: string;
   font: Font;
   canvasScale: {
     scaleX: number, scaleY: number
@@ -82,6 +83,7 @@ function useCharPos(
 
 function CharSelectView(props: {
   font: Font;
+  charset: string;
   canvasScale: {
     scaleX: number, scaleY: number
   };
@@ -92,7 +94,7 @@ function CharSelectView(props: {
 
   fb: Pixel[][];
   onCharSelected: (pos: Coord2|null) => void;
-  setCharset: (charset: Charset) => void;
+  setCharset: (charset: string) => void;
 }) {
   const W = 16
   const H = 16
@@ -166,7 +168,7 @@ function CharSelectView(props: {
           curScreencode={screencode}
         />
         <FontSelector
-          currentCharset={props.font.charset}
+          currentCharset={props.charset}
           setCharset={props.setCharset}
         />
       </div>
@@ -228,6 +230,7 @@ class CharSelect extends Component<CharSelectProps> {
         backgroundColor={backg}
         style={s}
         fb={this.fb}
+        charset={this.props.charset}
         font={this.props.font}
         colorPalette={colorPalette}
         selected={this.props.selected!}
@@ -247,7 +250,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
 
 const mapStateToProps = (state: RootState) => {
   const framebuf = selectors.getCurrentFramebuf(state)
-  const font = selectors.getCurrentFramebufFont(state)
+  const { charset, font } = selectors.getCurrentFramebufFont(state)
   const selected =
     selectors.getCharRowColWithTransform(
       state.toolbar.selectedChar,
@@ -259,6 +262,7 @@ const mapStateToProps = (state: RootState) => {
     backgroundColor: framebuf ? framebuf.backgroundColor : framebuffer.DEFAULT_BACKGROUND_COLOR,
     selected,
     textColor: state.toolbar.textColor,
+    charset,
     font,
     colorPalette: getSettingsCurrentColorPalette(state)
   }
@@ -269,4 +273,3 @@ export default connect(
   mapDispatchToProps,
   framebufIndexMergeProps
 )(CharSelect)
-

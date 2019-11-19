@@ -9,7 +9,7 @@ import Modal from '../components/Modal'
 import * as toolbar from '../redux/toolbar'
 import * as ReduxRoot from '../redux/root'
 
-import { FileFormat, RootState, Pixel, Rgb, Framebuf, Charset } from '../redux/types';
+import { FileFormat, RootState, Pixel, Rgb, Framebuf } from '../redux/types';
 import CharGrid from '../components/CharGrid';
 import FontSelector from '../components/FontSelector';
 import { getROMFontBits } from '../redux/selectors';
@@ -37,7 +37,7 @@ interface PngPreviewProps {
   borderColor: number;
   width: number;  // PETSCII width in chars
   height: number; // PETSCII height in chars
-  charset: Charset;
+  charset: string;
 }
 
 function convertScreencodes(
@@ -112,7 +112,7 @@ interface ImportModalDispatch {
 
 
 interface ImportModalState {
-  charset: Charset;
+  charset: string;
   png?: PNG;
   selectedBackgroundColor?: number;
 }
@@ -135,7 +135,7 @@ function findMatchByBackgroundColor(
 function toFramebuf(
   petscii: png2pet.Result,
   selectedBackgroundColor: number | undefined,
-  charset: Charset
+  charset: string
 ): Framebuf {
   const { width, height, matches, borderColor } = petscii;
   const match = findMatchByBackgroundColor(matches, selectedBackgroundColor);
@@ -150,7 +150,7 @@ function toFramebuf(
   };
 }
 
-function petsciify(png: PNG|undefined, colorPalettes: Rgb[][], charset: Charset) {
+function petsciify(png: PNG|undefined, colorPalettes: Rgb[][], charset: string) {
   if (!png) {
     return undefined;
   }
@@ -193,7 +193,7 @@ class ImportModal_ extends Component<ImportModalProps & ImportModalDispatch, Imp
     this.setPNG();
   }
 
-  handleSetCharset = (c: Charset) => {
+  handleSetCharset = (c: string) => {
     this.setState({ charset: c });
   }
 

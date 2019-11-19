@@ -191,8 +191,12 @@ export function saveWorkspace (
   filename: string,
   screens: number[],
   getFramebufById: GetFramebufByIdFunc,
+  customFonts: { [name: string]: Font },
   updateLastSavedSnapshot: () => void
 ) {
+  if (Object.entries(customFonts).length !== 0) {
+    throw new Error('fonts todo');
+  }
   const content = JSON.stringify({
     version: WORKSPACE_VERSION,
     // Renumber screen indices to 0,1,2,..,N and drop unused framebufs
@@ -309,6 +313,7 @@ export function dialogLoadWorkspace(
 export function dialogSaveAsWorkspace(
   screens: number[],
   getFramebufByIndex: (fbidx: number) => Framebuf,
+  customFonts: { [name: string]: Font },
   setWorkspaceFilename: (fname: string) => void,
   updateLastSavedSnapshot: () => void
 ) {
@@ -321,7 +326,7 @@ export function dialogSaveAsWorkspace(
   if (filename === undefined) {
     return;
   }
-  saveWorkspace(filename, screens, getFramebufByIndex, updateLastSavedSnapshot);
+  saveWorkspace(filename, screens, getFramebufByIndex, customFonts, updateLastSavedSnapshot);
   setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename);
 }
 
