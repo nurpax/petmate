@@ -30,6 +30,7 @@ interface CharSelectProps {
   Framebuffer: framebuffer.PropsFromDispatch;
   charset: string;
   font: Font;
+  customFonts: { [name: string]: Font } ;
   canvasScale: {
     scaleX: number, scaleY: number
   };
@@ -84,6 +85,7 @@ function useCharPos(
 function CharSelectView(props: {
   font: Font;
   charset: string;
+  customFonts: { [name: string]: Font };
   canvasScale: {
     scaleX: number, scaleY: number
   };
@@ -111,6 +113,7 @@ function CharSelectView(props: {
     props.onCharSelected(charPos);
   }, [charPos]);
 
+  const customFontNames = Object.keys(props.customFonts);
   return (
     <div style={{
       display: 'flex',
@@ -170,6 +173,7 @@ function CharSelectView(props: {
         <FontSelector
           currentCharset={props.charset}
           setCharset={props.setCharset}
+          customFontNames={customFontNames}
         />
       </div>
     </div>
@@ -232,6 +236,7 @@ class CharSelect extends Component<CharSelectProps> {
         fb={this.fb}
         charset={this.props.charset}
         font={this.props.font}
+        customFonts={this.props.customFonts}
         colorPalette={colorPalette}
         selected={this.props.selected!}
         onCharSelected={this.handleClick}
@@ -256,7 +261,7 @@ const mapStateToProps = (state: RootState) => {
       state.toolbar.selectedChar,
       font,
       state.toolbar.charTransform
-    )
+    );
   return {
     framebufIndex: screensSelectors.getCurrentScreenFramebufIndex(state),
     backgroundColor: framebuf ? framebuf.backgroundColor : framebuffer.DEFAULT_BACKGROUND_COLOR,
@@ -264,6 +269,7 @@ const mapStateToProps = (state: RootState) => {
     textColor: state.toolbar.textColor,
     charset,
     font,
+    customFonts: selectors.getCustomFonts(state),
     colorPalette: getSettingsCurrentColorPalette(state)
   }
 }

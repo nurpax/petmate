@@ -29,10 +29,13 @@ const SelectButton: SFC<SelectButtonProps> = (props: SelectButtonProps) => {
 interface FontSelectorProps {
   currentCharset: string;
   setCharset: (c: string) => void;
+  customFontNames: string[];
 }
 
 export default class FontSelector extends PureComponent<FontSelectorProps> {
   render () {
+    // TODO some smarter way of layouting the custom font list.. they don't fit
+    // horizontally
     return (
       <div style={{
         display: 'flex',
@@ -53,12 +56,17 @@ export default class FontSelector extends PureComponent<FontSelectorProps> {
           setCharset={this.props.setCharset}>
           abc
         </SelectButton>
-        <SelectButton
-          name='custom_1'
-          current={this.props.currentCharset}
-          setCharset={this.props.setCharset}>
-          custom_1
-        </SelectButton>
+        {this.props.customFontNames.map((fontName) => {
+          return (
+            <SelectButton
+              name={fontName}
+              current={this.props.currentCharset}
+              setCharset={this.props.setCharset}
+            >
+              {fontName}
+            </SelectButton>
+          )
+        })}
       </div>
     )
   }

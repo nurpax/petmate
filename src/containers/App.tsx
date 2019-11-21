@@ -7,6 +7,7 @@ import ResizeObserver from 'resize-observer-polyfill'
 import Toolbar from './Toolbar'
 import FramebufferTabs from './FramebufferTabs'
 import Settings from './Settings'
+import CustomFontsModal from './CustomFontsModal';
 import ExportModal from './ExportModal'
 import ImportModal from './ImportModal'
 import Editor from './Editor';
@@ -127,6 +128,7 @@ class AppView extends Component<AppViewProps> {
           />
         </FileDrop>
         <Settings />
+        <CustomFontsModal />
         <ExportModal />
         <ImportModal />
       </Fragment>

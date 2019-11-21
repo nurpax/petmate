@@ -6,30 +6,16 @@ import './app.global.css';
 import { formats, loadSettings, promptProceedWithUnsavedChanges } from './utils';
 import * as Screens from './redux/screens';
 import * as settings  from './redux/settings';
-import * as customFonts  from './redux/customFonts';
 import { Toolbar } from './redux/toolbar';
 import * as ReduxRoot from './redux/root';
 
 import configureStore from './store/configureStore';
 
 // TODO prod builds
-import { electron, fs } from './utils/electronImports';
+import { electron } from './utils/electronImports';
 import { FileFormat, RootState } from './redux/types';
 
 const store = configureStore();
-
-// TODO HACK HACK HACK
-function makeCustomFont() {
-  const charOrder = [];
-
-  const bb = fs.readFileSync('/tmp/action_wave.c64c_petmate');
-  const bits = bb.slice(0, 2048);
-
-  for (let i = 0; i < 256; i++) {
-    charOrder.push(i);
-  }
-  return { bits, charOrder };
-}
 
 const filename = electron.ipcRenderer.sendSync('get-open-args');
 if (filename) {
@@ -38,10 +24,6 @@ if (filename) {
 } else {
   // Create one screen/framebuffer so that we have a canvas to draw on
   store.dispatch(Screens.actions.newScreen());
-
-  // TODO HACK HACK HACK
-  store.dispatch(customFonts.actions.addCustomFont('custom_1', makeCustomFont()));
-
   store.dispatch(ReduxRoot.actions.updateLastSavedSnapshot());
 }
 
@@ -184,6 +166,9 @@ electron.ipcRenderer.on('menu', (_event: Event, message: string) => {
     case 'shift-screen-down':
       store.dispatch(Toolbar.actions.shiftVertical(+1))
       return;
+    case 'custom-fonts':
+      store.dispatch(Toolbar.actions.setShowCustomFonts(true))
+      return
     default:
       console.warn('unknown message from main process', message)
   }

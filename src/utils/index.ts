@@ -294,7 +294,7 @@ export function loadWorkspaceNoDialog(
 export function dialogLoadWorkspace(
   dispatch: StoreDispatch
 ) {
-  const {dialog} = electron.remote
+  const { dialog } = electron.remote;
   const window = electron.remote.getCurrentWindow();
   const filters = [
     {name: 'Petmate workspace', extensions: ['petmate']},

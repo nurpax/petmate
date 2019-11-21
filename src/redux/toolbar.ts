@@ -174,6 +174,7 @@ const actionCreators = {
   setShiftKey: (flag: boolean) => createAction('Toolbar/SET_SHIFT_KEY', flag),
   setSpacebarKey: (flag: boolean) => createAction('Toolbar/SET_SPACEBAR_KEY', flag),
   setShowSettings: (flag: boolean) => createAction('Toolbar/SET_SHOW_SETTINGS', flag),
+  setShowCustomFonts: (flag: boolean) => createAction('Toolbar/SET_SHOW_CUSTOM_FONTS', flag),
   setShowExport: (show: {show:boolean, fmt?:FileFormat}) => createAction('Toolbar/SET_SHOW_EXPORT', show),
   setShowImport: (show: {show:boolean, fmt?:FileFormat}) => createAction('Toolbar/SET_SHOW_IMPORT', show),
   setSelectedPaletteRemap: (remapIdx: number) => createAction('Toolbar/SET_SELECTED_PALETTE_REMAP', remapIdx),
@@ -211,6 +212,7 @@ export class Toolbar {
           ctrlKey,
           selectedTool,
           showSettings,
+          showCustomFonts,
           showExport,
           showImport
         } = state.toolbar
@@ -220,10 +222,27 @@ export class Toolbar {
         const inModal =
           state.toolbar.showExport.show ||
           state.toolbar.showImport.show ||
-          state.toolbar.showSettings;
+          state.toolbar.showSettings ||
+          state.toolbar.showCustomFonts;
 
         if (inModal) {
-          return
+          // These shouldn't early exit this function since we check for other
+          // conditions for Esc later.
+          if (key === 'Escape') {
+            if (showSettings) {
+              dispatch(Toolbar.actions.setShowSettings(false));
+            }
+            if (showCustomFonts) {
+              dispatch(Toolbar.actions.setShowCustomFonts(false));
+            }
+            if (showExport) {
+              dispatch(Toolbar.actions.setShowExport({show:false}));
+            }
+            if (showImport) {
+              dispatch(Toolbar.actions.setShowImport({show:false}));
+            }
+          }
+          return;
         }
 
         let width  = 1;
@@ -274,19 +293,6 @@ export class Toolbar {
                 const { canvasGrid } = getState().toolbar
                 dispatch(Toolbar.actions.setCanvasGrid(!canvasGrid))
               })
-            }
-          }
-          // These shouldn't early exit this function since we check for other
-          // conditions for Esc later.
-          if (key === 'Escape') {
-            if (showSettings) {
-              dispatch(Toolbar.actions.setShowSettings(false))
-            }
-            if (showExport) {
-              dispatch(Toolbar.actions.setShowExport({show:false}))
-            }
-            if (showImport) {
-              dispatch(Toolbar.actions.setShowImport({show:false}))
             }
           }
         }
@@ -538,6 +544,7 @@ export class Toolbar {
       shiftKey: false,
       spacebarKey: false,
       showSettings: false,
+      showCustomFonts: false,
       showExport: { show: false },
       showImport: { show: false },
       selectedPaletteRemap: 0,
@@ -663,6 +670,8 @@ export class Toolbar {
         return updateField(state, 'spacebarKey', action.data);
       case 'Toolbar/SET_SHOW_SETTINGS':
         return updateField(state, 'showSettings', action.data);
+      case 'Toolbar/SET_SHOW_CUSTOM_FONTS':
+        return updateField(state, 'showCustomFonts', action.data);
       case 'Toolbar/SET_SHOW_EXPORT':
         return updateField(state, 'showExport', action.data);
       case 'Toolbar/SET_SHOW_IMPORT':

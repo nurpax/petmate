@@ -254,6 +254,7 @@ class ImportModal_ extends Component<ImportModalProps & ImportModalDispatch, Imp
                 <div style={{marginTop: '5px', marginBottom: '5px' }}>
                   <FontSelector
                     currentCharset={this.state.charset}
+                    customFontNames={[]}
                     setCharset={this.handleSetCharset} />
                 </div>}
               <button className='secondary' onClick={this.handleSelectPng}>Select File...</button>
