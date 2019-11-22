@@ -1,29 +1,53 @@
 
 // @flow
-import React, { PureComponent, FunctionComponent as SFC } from 'react';
+import React, { PureComponent } from 'react';
 
-import styles from './FontSelector.module.css';
+class CustomFontSelect extends React.Component<{
+  customFontNames: string[],
+  current: string,
+  setCharset: (name: string) => void
+}> {
 
-interface SelectButtonProps {
-  name: string;
-  current: string;
-  setCharset: (c: string) => void;
-  children: {};
-}
+  handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    e.preventDefault();
+    this.props.setCharset(e.target.value);
+  }
 
-const SelectButton: SFC<SelectButtonProps> = (props: SelectButtonProps) => {
-  const { name, current, setCharset, children } = props;
-  return (
-    <div className={styles.charsetSelectButton} style={{
-      borderStyle: 'solid',
-      borderWidth: '1px',
-      borderColor: name === current ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.0)'
-    }}
-    onClick={() => setCharset(name)}
-    >
-      {children}
-    </div>
-  )
+  render () {
+    const displayNames: {[n: string]: string|undefined} = {
+      'upper': 'ABC',
+      'lower': 'abc'
+    };
+    const charsets = ['upper', 'lower'].concat(this.props.customFontNames);
+    const options = charsets.map(name => {
+      let displayName = displayNames[name];
+      if (displayName === undefined) {
+        displayName = name;
+      }
+      return (
+        <option
+          key={name}
+          value={name}
+        >
+          {displayName}
+        </option>
+      );
+    })
+    return (
+      <div style={{marginLeft: '5px'}}>
+        <select style={{
+          borderStyle: 'solid',
+          borderWidth: '0px',
+          borderColor: 'rgba(255,255,255, 0.0)'
+        }}
+          value={this.props.current}
+          onChange={this.handleSelectChange}
+        >
+          {options}
+        </select>
+      </div>
+    )
+  }
 }
 
 interface FontSelectorProps {
@@ -44,29 +68,11 @@ export default class FontSelector extends PureComponent<FontSelectorProps> {
         color: 'rgb(120,120,120)'
       }}>
         <div>Charset: </div>
-        <SelectButton
-          name='upper'
+        <CustomFontSelect
+          customFontNames={this.props.customFontNames}
           current={this.props.currentCharset}
-          setCharset={this.props.setCharset}>
-          ABC
-        </SelectButton>
-        <SelectButton
-          name='lower'
-          current={this.props.currentCharset}
-          setCharset={this.props.setCharset}>
-          abc
-        </SelectButton>
-        {this.props.customFontNames.map((fontName) => {
-          return (
-            <SelectButton
-              name={fontName}
-              current={this.props.currentCharset}
-              setCharset={this.props.setCharset}
-            >
-              {fontName}
-            </SelectButton>
-          )
-        })}
+          setCharset={this.props.setCharset}
+        />
       </div>
     )
   }

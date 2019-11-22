@@ -6,13 +6,15 @@
   --main-text-color: rgb(173,173,173);
   --main-text-lighter-color: rgb(190,190,190);
   --main-text-darker-color: rgb(130,130,130);
+
+  --main-background-color: rgb(25,25,25);
 }
 
 body {
   position: relative;
   color: white;
   height: 100vh;
-  background-color: rgb(25,25,25);
+  background-color: var(--main-background-color);
   font-family: BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
   overflow-y: hidden;
   overflow-x: hidden;
@@ -116,4 +118,27 @@ button.cancel {
 
 button.cancel:hover {
     border-color: rgba(255,255,255, 0.2);
+}
+
+select {
+  background: var(--main-background-color);
+  color: var(--main-text-color);
+  font-size: inherit;
+}
+
+select, select:hover, select:focus, select:active {
+  outline-style: solid;
+  outline-width: 1px;
+  outline-color: rgba(255,255,255, 0.3);
+  outline-offset: 0px;
+
+}
+
+option,
+option:hover,
+option:focus,
+option:active,
+option:checked {
+  background: var(--main-background-color);
+  font-size: inherit;
 }

@@ -54,21 +54,13 @@ class CustomFont extends Component<CustomFontProps> {
   }
 
   render () {
-    if (this.props.name !== undefined) {
-      return (
-        <div style={{display: 'flex'}}>
-          <div style={{minWidth: '100px'}}>{this.props.name}</div>
-          <button className='secondary' onClick={() => this.handleLoadFont()}>Set Font...</button>
-        </div>
-      )
-    } else {
-      return (
-        <div style={{display: 'flex'}}>
-          <div style={{minWidth: '100px'}}>&nbsp;</div>
-          <button className='secondary' onClick={() => this.handleLoadFont()}>New Custom Font...</button>
-        </div>
-      )
-    }
+    const text = this.props.name !== undefined ? this.props.name : 'New Font...';
+    return (
+      <div style={{display: 'flex', alignItems: 'center', marginBottom: '5px'}}>
+        <div style={{minWidth: '100px'}}>{text}</div>
+        <button style={{margin:'0px'}} className='secondary' onClick={() => this.handleLoadFont()}>Set Font...</button>
+      </div>
+    );
   }
 }
 
@@ -109,7 +101,8 @@ class CustomFontsModal_ extends Component<CustomFontsStateProps & CustomFontsDis
             height: '100%',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            color: 'var(--main-text-color)'
           }}>
 
             <div>
