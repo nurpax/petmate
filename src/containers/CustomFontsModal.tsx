@@ -54,11 +54,17 @@ class CustomFont extends Component<CustomFontProps> {
   }
 
   render () {
-    const text = this.props.name !== undefined ? this.props.name : 'New Font...';
+    const { fontName, buttonText } = this.props.name !== undefined ? {
+      fontName: this.props.name,
+      buttonText: 'Load .64c..'
+    } : {
+      fontName: '',
+      buttonText: 'New Font from .64c'
+    };
     return (
       <div style={{display: 'flex', alignItems: 'center', marginBottom: '5px'}}>
-        <div style={{minWidth: '100px'}}>{text}</div>
-        <button style={{margin:'0px'}} className='secondary' onClick={() => this.handleLoadFont()}>Set Font...</button>
+        <button style={{margin:'0px', minWidth: '140px'}} className='secondary' onClick={() => this.handleLoadFont()}>{buttonText}</button>
+        {fontName === '' ? null : <div style={{marginLeft: '5px'}}>{fontName}</div>}
       </div>
     );
   }
@@ -76,10 +82,6 @@ interface CustomFontsDispatchProps  {
 
 class CustomFontsModal_ extends Component<CustomFontsStateProps & CustomFontsDispatchProps> {
   handleOK = () => {
-    this.props.Toolbar.setShowCustomFonts(false)
-  }
-
-  handleCancel = () => {
     this.props.Toolbar.setShowCustomFonts(false)
   }
 
@@ -117,7 +119,6 @@ class CustomFontsModal_ extends Component<CustomFontsStateProps & CustomFontsDis
             </div>
 
             <div style={{alignSelf: 'flex-end'}}>
-              <button className='cancel' onClick={this.handleCancel}>Cancel</button>
               <button className='primary' onClick={this.handleOK}>OK</button>
             </div>
           </div>
