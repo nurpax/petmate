@@ -149,4 +149,16 @@ export type RootStateThunk = ThunkAction<void, RootState, undefined, Action>;
 
 export type SettingsJson = any;
 
+// Interface describing the custom fonts chunks in
+// .petmate workspace version == 2
+export type WsCustomFontsV2 = {
+  [id: string]: {
+    name: string,
+    font: {
+      bits: number[],
+      charOrder: number[]
+    }
+  }
+};
+
 export * from './typesExport'

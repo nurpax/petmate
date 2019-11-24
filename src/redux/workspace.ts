@@ -5,13 +5,16 @@ import { ThunkAction } from 'redux-thunk';
 
 import * as fp from '../utils/fp'
 
-import * as rscreens from './screens'
-import { Framebuffer } from './editor'
-import { Framebuf, RootState } from './types'
-import * as Root from './root'
-import * as screensSelectors from './screensSelectors'
+import * as rscreens from './screens';
+import * as rcustomFonts from './customFonts';
+import { Framebuffer } from './editor';
+import { Framebuf, RootState, WsCustomFontsV2 } from './types';
+import * as Root from './root';
+import * as screensSelectors from './screensSelectors';
 
-interface Workspace {
+interface WorkspaceJson {
+  version: number;
+  customFonts?: WsCustomFontsV2;
   screens: number[];
   framebufs: Framebuf[];
 };
@@ -28,11 +31,19 @@ export function framebufFromJson(c: any): Framebuf {
   }
 }
 
-export function load(workspace: Workspace): ThunkAction<void, RootState, undefined, Action> {
+export function load(workspace: WorkspaceJson): ThunkAction<void, RootState, undefined, Action> {
   return (dispatch, _getState) => {
     dispatch(Root.actions.resetState())
 
-    const { screens, framebufs } = workspace
+    const { screens, framebufs } = workspace;
+
+    if (workspace.version >= 2 && workspace.customFonts) {
+      const cfonts = workspace.customFonts;
+      Object.entries(cfonts).forEach(([id, cf]) => {
+        dispatch(rcustomFonts.actions.addCustomFont(id, cf.name, cf.font));
+      });
+    }
+
     screens.forEach((fbIdx, screenIdx) => {
       if (fbIdx !== screenIdx) {
         console.warn('fbidx should be screenIdx, this should be ensured by workspace save code')

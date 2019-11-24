@@ -22,6 +22,7 @@ import {
   FileFormat, Rgb, Font, Coord2, Framebuf, Settings,
   FramebufWithFont,
   RootState,
+  WsCustomFontsV2
 } from '../redux/types';
 
 import * as ReduxRoot from '../redux/root';
@@ -191,7 +192,7 @@ type GetFramebufByIdFunc = (fbidx: number) => Framebuf;
 // Could pass in just the original object, but this extra indirection will
 // protect from accidentally changing the file format in case the internal
 // custom fonts structure changes.
-function customFontsToJson(cf: customFonts.CustomFonts) {
+function customFontsToJson(cf: customFonts.CustomFonts): WsCustomFontsV2 {
   const res: {[id: string]: any} = {};
   Object.entries(cf).forEach(([id, { name, font }]) => {
     let f: { bits: number[], charOrder: number[] } = font;

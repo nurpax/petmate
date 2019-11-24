@@ -28,7 +28,7 @@ class CustomFontSelect extends React.Component<{
       let displayName = cf.name;
       return (
         <option
-          key={name}
+          key={cf.id}
           value={cf.id}
         >
           {displayName}
