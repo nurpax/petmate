@@ -187,7 +187,25 @@ const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWit
 
 type GetFramebufByIdFunc = (fbidx: number) => Framebuf;
 
-const WORKSPACE_VERSION = 1
+// Serialize CustomFonts to a known structure for JSON serialization.
+// Could pass in just the original object, but this extra indirection will
+// protect from accidentally changing the file format in case the internal
+// custom fonts structure changes.
+function customFontsToJson(cf: customFonts.CustomFonts) {
+  const res: {[id: string]: any} = {};
+  Object.entries(cf).forEach(([id, { name, font }]) => {
+    let f: { bits: number[], charOrder: number[] } = font;
+    let n: string = name;
+    res[id] = {
+      name: n,
+      font: f
+    };
+  });
+  return res;
+}
+
+const WORKSPACE_VERSION = 2;
+
 export function saveWorkspace (
   filename: string,
   screens: number[],
@@ -195,9 +213,6 @@ export function saveWorkspace (
   customFonts: customFonts.CustomFonts,
   updateLastSavedSnapshot: () => void
 ) {
-  if (Object.entries(customFonts).length !== 0) {
-    throw new Error('fonts todo');
-  }
   const content = JSON.stringify({
     version: WORKSPACE_VERSION,
     // Renumber screen indices to 0,1,2,..,N and drop unused framebufs
@@ -206,7 +221,8 @@ export function saveWorkspace (
       return {
         ...framebufFields(getFramebufById(fbid))
       }
-    })
+    }),
+    customFonts: customFontsToJson(customFonts)
   })
   try {
     fs.writeFileSync(filename, content, 'utf-8');

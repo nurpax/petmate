@@ -18,9 +18,11 @@ const Title4: SFC<{}> = ({children}) => <h4>{children}</h4>
 function loadFont(filename: string): Font {
   const charOrder = [];
 
-  const bb = fs.readFileSync(filename);
-  const bits = bb.slice(2, 2048+2);
-
+  const bb = fs.readFileSync(filename).slice(2, 2048+2);
+  const bits = Array(256*8).fill(0);
+  for (let i = 0; i < bb.length; i++) {
+    bits[i] = bb[i];
+  }
   for (let i = 0; i < 256; i++) {
     charOrder.push(i);
   }
