@@ -3,7 +3,7 @@
 import React, { PureComponent } from 'react';
 
 class CustomFontSelect extends React.Component<{
-  customFontNames: string[],
+  customFonts: {id: string, name: string}[],
   current: string,
   setCharset: (name: string) => void
 }> {
@@ -14,20 +14,22 @@ class CustomFontSelect extends React.Component<{
   }
 
   render () {
-    const displayNames: {[n: string]: string|undefined} = {
-      'upper': 'ABC',
-      'lower': 'abc'
-    };
-    const charsets = ['upper', 'lower'].concat(this.props.customFontNames);
-    const options = charsets.map(name => {
-      let displayName = displayNames[name];
-      if (displayName === undefined) {
-        displayName = name;
+    const charsets = [
+      {
+        id: 'upper',
+        name: 'ABC'
+      },
+      {
+        id: 'lower',
+        name: 'abc'
       }
+    ].concat(this.props.customFonts);
+    const options = charsets.map(cf => {
+      let displayName = cf.name;
       return (
         <option
           key={name}
-          value={name}
+          value={cf.id}
         >
           {displayName}
         </option>
@@ -53,7 +55,7 @@ class CustomFontSelect extends React.Component<{
 interface FontSelectorProps {
   currentCharset: string;
   setCharset: (c: string) => void;
-  customFontNames: string[];
+  customFonts: { id: string, name: string}[];
 }
 
 export default class FontSelector extends PureComponent<FontSelectorProps> {
@@ -69,7 +71,7 @@ export default class FontSelector extends PureComponent<FontSelectorProps> {
       }}>
         <div>Charset: </div>
         <CustomFontSelect
-          customFontNames={this.props.customFontNames}
+          customFonts={this.props.customFonts}
           current={this.props.currentCharset}
           setCharset={this.props.setCharset}
         />

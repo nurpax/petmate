@@ -13,6 +13,7 @@ import { mirrorBrush, findTransformedChar } from './brush'
 import { CHARSET_UPPER, CHARSET_LOWER } from './editor'
 
 import { getCurrentScreenFramebufIndex } from './screensSelectors'
+import { CustomFonts } from './customFonts'
 
 export const getFramebufByIndex = (state: RootState, idx: number | null) => {
   if (idx !== null && idx < state.framebufList.length) {
@@ -57,7 +58,7 @@ export const getFramebufFont = (state: RootState, framebuf: Framebuf): { charset
   }
   return {
     charset: framebuf.charset,
-    font: state.customFonts[framebuf.charset]
+    font: state.customFonts[framebuf.charset].font
   };
 }
 
@@ -72,7 +73,7 @@ export const getCurrentFramebufFont = (state: RootState) => {
   return getFramebufFont(state, fb);
 }
 
-export function getCustomFonts (state: RootState): {[name: string]: Font } {
+export function getCustomFonts (state: RootState): CustomFonts {
   return state.customFonts;
 }
 

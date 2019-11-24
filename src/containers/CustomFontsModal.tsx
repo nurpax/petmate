@@ -5,7 +5,7 @@ import React, {
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux';
 
-import { electron, fs } from '../utils/electronImports'
+import { electron, fs, path } from '../utils/electronImports'
 import Modal from '../components/Modal';
 import { RootState, Font } from '../redux/types';
 import { Toolbar } from '../redux/toolbar';
@@ -41,20 +41,21 @@ export function openFileDialog() {
 }
 
 interface CustomFontProps {
+  id?: string;
   name?: string;
-  onLoadFont: (slotname: string|undefined, filename: string) => void;
+  onLoadFont: (id: string|undefined, filename: string) => void;
 }
 
 class CustomFont extends Component<CustomFontProps> {
   handleLoadFont = () => {
     const filename = openFileDialog();
     if (filename !== undefined) {
-      this.props.onLoadFont(this.props.name, filename);
+      this.props.onLoadFont(this.props.id, filename);
     }
   }
 
   render () {
-    const { fontName, buttonText } = this.props.name !== undefined ? {
+    const { fontName, buttonText } = this.props.id !== undefined ? {
       fontName: this.props.name,
       buttonText: 'Load .64c..'
     } : {
@@ -64,7 +65,7 @@ class CustomFont extends Component<CustomFontProps> {
     return (
       <div style={{display: 'flex', alignItems: 'center', marginBottom: '5px'}}>
         <button style={{margin:'0px', minWidth: '140px'}} className='secondary' onClick={() => this.handleLoadFont()}>{buttonText}</button>
-        {fontName === '' ? null : <div style={{marginLeft: '5px'}}>{fontName}</div>}
+        {fontName === '' ? null : <div style={{marginLeft: '10px'}}>{fontName}</div>}
       </div>
     );
   }
@@ -72,7 +73,7 @@ class CustomFont extends Component<CustomFontProps> {
 
 interface CustomFontsStateProps {
   showCustomFonts: boolean;
-  customFonts: {[name: string]: Font };
+  customFonts: customFonts.CustomFonts;
 };
 
 interface CustomFontsDispatchProps  {
@@ -85,15 +86,16 @@ class CustomFontsModal_ extends Component<CustomFontsStateProps & CustomFontsDis
     this.props.Toolbar.setShowCustomFonts(false)
   }
 
-  handleLoadFont = (customFontName: string | undefined, filename: string) => {
+  handleLoadFont = (customFontId: string | undefined, filename: string) => {
     const font = loadFont(filename);
-    const slotname = customFontName === undefined ? `custom_${Object.entries(this.props.customFonts).length+1}` : customFontName;
-    this.props.CustomFonts.addCustomFont(slotname, font);
+    const fontId = customFontId === undefined ? `custom_${Object.entries(this.props.customFonts).length+1}` : customFontId;
+    const fontName = path.basename(filename, '.64c');
+    this.props.CustomFonts.addCustomFont(fontId, fontName, font);
   }
 
   render () {
-    const fonts = Object.entries(this.props.customFonts).map(([name, _font]) => {
-      return { name };
+    const fonts = Object.entries(this.props.customFonts).map(([id, { name }]) => {
+      return { id, name };
     });
     return (
       <div>
@@ -113,7 +115,7 @@ class CustomFontsModal_ extends Component<CustomFontsStateProps & CustomFontsDis
               <Title4>Load custom fonts</Title4>
               <br/>
               <div>
-                {fonts.map(({ name }) => <CustomFont key={name} name={name} onLoadFont={this.handleLoadFont} />)}
+                {fonts.map(({ id, name }) => <CustomFont key={id} id={id} name={name} onLoadFont={this.handleLoadFont} />)}
                 <CustomFont onLoadFont={this.handleLoadFont} />
               </div>
             </div>

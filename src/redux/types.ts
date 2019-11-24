@@ -140,7 +140,7 @@ export interface RootState {
   };
   toolbar: Toolbar;
   screens: Screens;
-  customFonts: { [name: string]: Font };
+  customFonts: { [name: string]: {font: Font, name: string} };
   framebufList: UndoableFramebuf[];
   lastSavedSnapshot: LastSavedState;
 };

@@ -5,6 +5,7 @@ import { Dispatch, bindActionCreators } from 'redux'
 
 import { RootState, Font, Pixel, Coord2, Rgb } from '../redux/types'
 import * as framebuffer from '../redux/editor'
+import * as cfonts from '../redux/customFonts'
 
 import { Toolbar } from '../redux/toolbar'
 import { framebufIndexMergeProps } from '../redux/utils'
@@ -30,7 +31,7 @@ interface CharSelectProps {
   Framebuffer: framebuffer.PropsFromDispatch;
   charset: string;
   font: Font;
-  customFonts: { [name: string]: Font } ;
+  customFonts: cfonts.CustomFonts;
   canvasScale: {
     scaleX: number, scaleY: number
   };
@@ -85,7 +86,7 @@ function useCharPos(
 function CharSelectView(props: {
   font: Font;
   charset: string;
-  customFonts: { [name: string]: Font };
+  customFonts: cfonts.CustomFonts;
   canvasScale: {
     scaleX: number, scaleY: number
   };
@@ -113,7 +114,12 @@ function CharSelectView(props: {
     props.onCharSelected(charPos);
   }, [charPos]);
 
-  const customFontNames = Object.keys(props.customFonts);
+  const customFonts = Object.entries(props.customFonts).map(([id, { name }]) => {
+    return {
+      id,
+      name
+    };
+  })
   return (
     <div style={{
       display: 'flex',
@@ -173,7 +179,7 @@ function CharSelectView(props: {
         <FontSelector
           currentCharset={props.charset}
           setCharset={props.setCharset}
-          customFontNames={customFontNames}
+          customFonts={customFonts}
         />
       </div>
     </div>

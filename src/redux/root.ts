@@ -45,11 +45,11 @@ function saveAsWorkspace(): ThunkAction<void, RootState, undefined, Action> {
     const state = getState();
     const screens = screensSelectors.getScreens(state);
     const getFramebufByIndex = (idx: number) => selectors.getFramebufByIndex(state, idx)!;
-    const customFonts = selectors.getCustomFonts(state);
+    const customFontMap = selectors.getCustomFonts(state);
     dialogSaveAsWorkspace(
       screens,
       getFramebufByIndex,
-      customFonts,
+      customFontMap,
       (filename: string) => dispatch(Toolbar.actions.setWorkspaceFilename(filename)),
       () => dispatch(actionCreators.updateLastSavedSnapshot())
     );

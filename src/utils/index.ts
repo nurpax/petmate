@@ -26,6 +26,7 @@ import {
 
 import * as ReduxRoot from '../redux/root';
 import * as selectors from '../redux/selectors';
+import * as customFonts from '../redux/customFonts'
 
 const { ipcRenderer } = electron
 
@@ -191,7 +192,7 @@ export function saveWorkspace (
   filename: string,
   screens: number[],
   getFramebufById: GetFramebufByIdFunc,
-  customFonts: { [name: string]: Font },
+  customFonts: customFonts.CustomFonts,
   updateLastSavedSnapshot: () => void
 ) {
   if (Object.entries(customFonts).length !== 0) {
@@ -313,7 +314,7 @@ export function dialogLoadWorkspace(
 export function dialogSaveAsWorkspace(
   screens: number[],
   getFramebufByIndex: (fbidx: number) => Framebuf,
-  customFonts: { [name: string]: Font },
+  customFonts: customFonts.CustomFonts,
   setWorkspaceFilename: (fname: string) => void,
   updateLastSavedSnapshot: () => void
 ) {

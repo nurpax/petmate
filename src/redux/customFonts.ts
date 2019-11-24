@@ -5,12 +5,13 @@ import { ActionsUnion, createAction, DispatchPropsFromActions } from './typeUtil
 const ADD_CUSTOM_FONT = 'ADD_CUSTOM_FONT'
 
 interface AddCustomFontArgs {
+  id: string;
   name: string;
   font: Font;
 };
 
 const actionCreators = {
-  addCustomFont: (name: string, font: Font) => createAction(ADD_CUSTOM_FONT, { name, font  } as AddCustomFontArgs)
+  addCustomFont: (id: string, name: string, font: Font) => createAction(ADD_CUSTOM_FONT, { id, name, font  } as AddCustomFontArgs)
 };
 
 export const actions = {
@@ -19,7 +20,7 @@ export const actions = {
 
 export type Actions = ActionsUnion<typeof actionCreators>;
 export type PropsFromDispatch = DispatchPropsFromActions<typeof actions>;
-export type CustomFonts = { [name: string]: Font };
+export type CustomFonts = { [id: string]: { font: Font, name: string } };
 
 export function reducer(state: CustomFonts = {}, action: Actions): CustomFonts {
   switch (action.type) {
@@ -27,7 +28,10 @@ export function reducer(state: CustomFonts = {}, action: Actions): CustomFonts {
     // TODO handle existing name
     return {
       ...state,
-      [action.data.name]: action.data.font
+      [action.data.id]: {
+        name: action.data.name,
+        font: action.data.font
+      }
     }
   default:
     return state
