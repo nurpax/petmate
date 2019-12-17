@@ -177,7 +177,7 @@ export const actions = {
           selectedFramebufIndex: remappedFbIndex
         }
       }
-      dialogExportFile(amendedFormatOptions, framebufs, palette);
+      dialogExportFile(amendedFormatOptions, framebufs, state.customFonts, palette);
     }
   },
 

@@ -1,6 +1,7 @@
 
 import { fs } from '../electronImports'
 import { FramebufWithFont, FileFormatJson, Pixel } from  '../../redux/types';
+import { CustomFonts } from  '../../redux/customFonts';
 
 function flatten2d(arr: Pixel[][], field: 'code' | 'color'): number[] {
   const res = [];
@@ -26,14 +27,34 @@ function convertFb(fb: FramebufWithFont) {
   }
 }
 
-export function saveJSON(filename: string, fbs: FramebufWithFont[], fmt: FileFormatJson): void {
+export function saveJSON(filename: string, fbs: FramebufWithFont[], customFonts: CustomFonts, fmt: FileFormatJson): void {
   try {
     const selectedFb = fbs[fmt.commonExportParams.selectedFramebufIndex]
     const fbarr = fmt.exportOptions.currentScreenOnly ? [selectedFb] : fbs;
 
+    //---------------------------------------------------------------
+    // Figure out what custom fonts were used and transform to export
+    // JSON format.
+    const usedFonts = new Set<string>();
+    for (let fb of fbarr) {
+      if (fb.charset !== 'upper' && fb.charset !== 'lower') {
+        usedFonts.add(fb.charset);
+      }
+    }
+    const customFontData: {[charset: string]: { name: string, bits: number[] }} = {};
+    for (let charset of usedFonts) {
+      customFontData[charset] = {
+        name: customFonts[charset].name,
+        bits: customFonts[charset].font.bits
+      }
+    }
+
+    //---------------------------------------------------------------
+    // Convert to JSNO and save out
     const json = {
       version: 1,
-      framebufs: fbarr.map(convertFb)
+      framebufs: fbarr.map(convertFb),
+      charsets: customFontData
     };
 
     fs.writeFileSync(filename, JSON.stringify(json));

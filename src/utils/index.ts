@@ -163,7 +163,7 @@ const framebufFields = (framebuf: Framebuf) => {
   }
 }
 
-const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWithFont[], palette: Rgb[]) => {
+const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWithFont[], fonts: customFonts.CustomFonts, palette: Rgb[]) => {
   const { selectedFramebufIndex } = fmt.commonExportParams;
   const selectedFramebuf = framebufs[selectedFramebufIndex];
   if (fmt.ext == 'png') {
@@ -181,7 +181,7 @@ const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWit
   } else if (fmt.ext === 'bas') {
     return saveBASIC(filename, framebufs, fmt);
   } else if (fmt.ext === 'json') {
-    return saveJSON(filename, framebufs, fmt);
+    return saveJSON(filename, framebufs, fonts, fmt);
   }
   throw new Error("shouldn't happen");
 }
@@ -348,7 +348,7 @@ export function dialogSaveAsWorkspace(
   setWorkspaceFilenameWithTitle(setWorkspaceFilename, filename);
 }
 
-export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[], palette: Rgb[]) {
+export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[], customFonts: customFonts.CustomFonts, palette: Rgb[]) {
   const {dialog} = electron.remote
   const window = electron.remote.getCurrentWindow();
   const filters = [
@@ -358,7 +358,7 @@ export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[],
   if (filename === undefined) {
     return
   }
-  saveFramebufs(fmt, filename, framebufs, palette)
+  saveFramebufs(fmt, filename, framebufs, customFonts, palette)
 }
 
 // Pop up a file select dialog for a certain file type and call the
