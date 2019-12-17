@@ -1,6 +1,6 @@
 {
   "name": "petmate",
-  "version": "0.8.0-beta0",
+  "version": "0.8.0",
   "description": "Petmate - a C64 PETSCII graphics editor",
   "private": false,
   "author": "Janne Hellsten <jjhellst@gmail.com>",
