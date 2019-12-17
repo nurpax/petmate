@@ -12,13 +12,13 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.7.1.dmg'>Petmate-0.7.1.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.7.1.exe'>Petmate Setup 0.7.1.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.7.1_amd64.deb'>petmate_0.7.1_amd64.deb</a>
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.8.0.dmg'>Petmate-0.8.0.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.8.0.exe'>Petmate Setup 0.8.0.exe</a>
+* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.8.0_amd64.deb'>petmate_0.8.0_amd64.deb</a>
 
 ## Features
 
-- Commodore 64 standard character mode graphics with the upper/lower case system ROM character sets
+- Commodore 64 standard character mode graphics with the upper/lower case system ROM character sets and custom .64c charsets.
 - Drawing operations: draw character, colorize a character, select brush, draw with brush
 - Undo/redo stack
 - Multiple screens (each with their own undo stack)
@@ -62,6 +62,8 @@ Pan/zoom (new in Petmate 0.7):
 Open/Save/Save As: use platform shortcuts (e.g., Save is `Ctrl+S` on Windows, `⌘S` on Mac).
 
 Undo/Redo: use platform shortcuts (e.g., `⌘Z` and `⌘⇧Z` on Mac).
+
+Custom fonts/charsets: Use the `File/Fonts` menu.
 
 ## Using Petmate to edit Dir Art
 
@@ -128,6 +130,11 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.8.0 (2019-12-17)
+- Add custom charsets.  You can load .64c font files from [http://kofler.dot.at/c64/font_01.html](http://kofler.dot.at/c64/font_01.html).  Fonts cannot be edited within Petmate -- but this will probably get added in later releases.
+- Increase the size of gif Frame delay input width ([#165](https://github.com/nurpax/petmate/issues/165))
+- Choose different outline color for a defined brush opposed to an empty one ([#163](https://github.com/nurpax/petmate/issues/163))
 
 Petmate 0.7.1 (2019-06-03)
 - Add SEQ file format import and export.  Thanks [@sixofdloc](https://github.com/sixofdloc) and [@manuelvio](https://github.com/manuelvio) for your contribution!
