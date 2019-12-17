@@ -132,7 +132,7 @@ The settings are saved in the following location:
 ## Release history
 
 Petmate 0.8.0 (2019-12-17)
-- Add custom charsets.  You can load .64c font files from [http://kofler.dot.at/c64/font_01.html](http://kofler.dot.at/c64/font_01.html).  Fonts cannot be edited within Petmate -- but this will probably get added in later releases.
+- Add custom charsets ([#174](https://github.com/nurpax/petmate/issues/174)).  You can load .64c font files from [http://kofler.dot.at/c64/font_01.html](http://kofler.dot.at/c64/font_01.html).  Fonts cannot be edited within Petmate -- but this will probably get added in later releases.
 - Increase the size of gif Frame delay input width ([#165](https://github.com/nurpax/petmate/issues/165))
 - Choose different outline color for a defined brush opposed to an empty one ([#163](https://github.com/nurpax/petmate/issues/163))
 
@@ -246,4 +246,3 @@ Petmate 0.1.1 (2018-07-31)
 - Implement [Hold down SHIFT while drawing for straight lines](https://github.com/nurpax/petmate/issues/9)
 
 Petmate 0.1.0 (2018-07-29)
-
