@@ -13,7 +13,7 @@ export interface FileFormatAsm extends FileFormatBase {
   exportOptions: {
     currentScreenOnly: boolean;
     standalone: boolean;
-    assembler: 'acme' | 'c64tass' | 'kickass';
+    assembler: 'acme' | 'c64tass' | 'ca65' | 'c64jasm' | 'kickass';
   };
 }
 
