@@ -184,6 +184,10 @@ class ASMExportForm extends Component<ASMExportFormatProps> {
           name='standalone'
           label='Make output compilable to a .prg'
         />
+        <Checkbox
+          name='hex'
+          label='Hexadecimal output'
+        />
       </Form>
     )
   }
@@ -329,6 +333,7 @@ class ExportModal_ extends Component<ExportModalProps & ExportModalDispatch, Exp
     asm: {
       assembler: 'kickass',
       currentScreenOnly: true,
+      hex: false,
       standalone: false
     },
     bas: {

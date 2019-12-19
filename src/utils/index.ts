@@ -81,6 +81,7 @@ export const formats: { [index: string]: FileFormat } = {
     exportOptions: {
       currentScreenOnly: true,
       standalone: false,
+      hex: false,
       assembler: 'kickass'
     }
   },

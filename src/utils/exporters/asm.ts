@@ -98,10 +98,15 @@ loop:
     jmp *
 `;
 
-function bytesToCommaDelimited(dstLines: string[], bytes: number[], bytesPerLine: number) {
+function toHex8(v: number): string {
+  return `${v.toString(16).toUpperCase().padStart(2, '0')}`
+}
+
+function bytesToCommaDelimited(dstLines: string[], bytes: number[], bytesPerLine: number, hex: boolean) {
   let lines = chunkArray(bytes, bytesPerLine)
   for (let i = 0; i < lines.length; i++) {
-    dstLines.push(`!byte ${lines[i].join(',')}`);
+    const nums = lines[i].map(n => hex ? `$${toHex8(n)}` : `${n}`);
+    dstLines.push(`!byte ${nums.join(',')}`);
   }
 }
 
@@ -109,7 +114,7 @@ function maybeLabelName(name: string | undefined) {
   return fp.maybeDefault(name, 'untitled' as string);
 }
 
-function convertToAsm(lines: string[], fb: FramebufWithFont) {
+function convertToAsm(lines: string[], fb: FramebufWithFont, hex: boolean) {
   const { width, height, framebuf, backgroundColor, borderColor, name } = fb;
 
   lines.push(`${maybeLabelName(name)}:`);
@@ -126,13 +131,13 @@ function convertToAsm(lines: string[], fb: FramebufWithFont) {
     }
   }
   lines.push(`!byte ${borderColor},${backgroundColor}`);
-  bytesToCommaDelimited(lines, bytes, width);
+  bytesToCommaDelimited(lines, bytes, width, hex);
 
   // Save font bits
   if (fb.charset !== CHARSET_UPPER && fb.charset !== CHARSET_LOWER) {
     lines.push('', `* = $3000`);
     lines.push(`${maybeLabelName(name)}_font:`);
-    bytesToCommaDelimited(lines, fb.font.bits, 16);
+    bytesToCommaDelimited(lines, fb.font.bits, 16, hex);
   }
 }
 
@@ -159,11 +164,12 @@ const saveAsm = (filename: string, fbs: FramebufWithFont[], fmt: FileFormatAsm) 
   try {
     let lines: string[] = [];
     // Single screen export?
+    const hexOutput = fmt.exportOptions.hex;
     const selectedFb = fbs[fmt.commonExportParams.selectedFramebufIndex];
     if (fmt.exportOptions.currentScreenOnly) {
-      convertToAsm(lines, selectedFb);
+      convertToAsm(lines, selectedFb, hexOutput);
     } else {
-      fbs.forEach((fb) => convertToAsm(lines, fb));
+      fbs.forEach((fb) => convertToAsm(lines, fb, hexOutput));
     }
     let backgroundColor = selectedFb.backgroundColor;
     let borderColor = selectedFb.borderColor;
