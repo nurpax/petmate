@@ -165,6 +165,16 @@ class ASMExportForm extends Component<ASMExportFormatProps> {
           value='c64tass'
           label='64tass'
         />
+        <RadioButton
+          name='assembler'
+          value='ca65'
+          label='ca65'
+        />
+        <RadioButton
+          name='assembler'
+          value='c64jasm'
+          label='c64jasm'
+        />
         <br/>
         <Checkbox
           name='currentScreenOnly'

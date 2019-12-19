@@ -13,6 +13,39 @@ interface InitCodeParams {
   label: string;
 }
 
+const syntaxes: { [index: string]: { cli: string, comment: string, byte: string, label: string } } = {
+  'kickass': {
+    cli: '; java -jar KickAss.jar foo.asm -o foo.prg',
+    comment: '//',
+    byte: '.byte',
+    label: ':'
+  },
+  'acme': {
+    cli: '; acme --cpu 6510 --format cbm --outfile foo.prg foo.asm',
+    comment: ';',
+    byte: '!byte',
+    label: ' '
+  },
+  'c64tass': {
+    cli: '; 64tass -C -a --cbm-prg foo.asm -o foo.prg',
+    comment: ';',
+    byte: '.byte',
+    label: ' '
+  },
+  'c64jasm': {
+    cli: '; c64jasm foo.asm --out foo.prg',
+    comment: ';',
+    byte: '!byte',
+    label: ':'
+  },
+  'ca65': {
+    cli: '',
+    comment: ';',
+    byte: '.byte',
+    label: ':'
+  },
+};
+
 const binaryFormatHelp = `
 ; PETSCII memory layout (example for a 40x25 screen)'
 ; byte  0         = border color'
@@ -26,18 +59,15 @@ const initCode = ({
   charsetBits,
   label
 }: InitCodeParams) => `
-; TODO add command lines invocations for different assemblers
-; acme --cpu 6510 --format cbm --outfile foo.prg foo.asm
-
 * = $0801          ; BASIC start address (#2049)
 !byte $0C, $08, $00, $00, $9E, $32, $30, $36
 !byte $31, $00, $00, $00
 
-start: {
+start:
     lda ${label}
     sta $d020
     lda ${label}+1
-    sta $d021
+    sta $d021   ; test
     lda #${charsetBits}
     sta $d018
 
@@ -65,9 +95,7 @@ loop:
     inx
     bne loop
 
-infloop:
-    jmp infloop
-}
+    jmp *
 `;
 
 function bytesToCommaDelimited(dstLines: string[], bytes: number[], bytesPerLine: number) {
@@ -108,6 +136,24 @@ function convertToAsm(lines: string[], fb: FramebufWithFont) {
   }
 }
 
+function convertSyntax(asm: string, syntax: typeof syntaxes['c64jasm']) {
+  function convertLine(line: string) {
+    let m;
+    if (m = /^!byte (.*)/.exec(line)) {
+      return `${syntax.byte} ${m[1]}`;
+    }
+    if (m = /^([^;]*); (.*)/.exec(line)) {
+      return `${m[1]}${syntax.comment} ${m[2]}`;
+    }
+    if (m = /^([a-zA-Z_]+[a-zA-Z_0-9]*):(.*)/.exec(line)) {
+      return `${m[1]}${syntax.label}${m[2]}`;
+    }
+    return line;
+  }
+  const lines = asm.split('\n');
+  return lines.map(convertLine).join('\n');
+}
+
 const saveAsm = (filename: string, fbs: FramebufWithFont[], fmt: FileFormatAsm) => {
   const options = fmt.exportOptions;
   try {
@@ -128,11 +174,11 @@ const saveAsm = (filename: string, fbs: FramebufWithFont[], fmt: FileFormatAsm) 
       case 'lower': charsetBits = "$17"; break;
       default:      charsetBits = `%00010000 | ((${label}_font/2048)*2)`; break;
     }
-    const init = options.standalone ?
-      initCode({ backgroundColor, borderColor, charsetBits, label }) : '';
+    const syntax = syntaxes[fmt.exportOptions.assembler];
+    const init = options.standalone ? `${syntax.cli}\n${initCode({ backgroundColor, borderColor, charsetBits, label })}` : '';
     fs.writeFileSync(
       filename,
-      init + '\n\n' + binaryFormatHelp + '\n' + lines.join('\n') + '\n', null
+      convertSyntax(init + '\n' + binaryFormatHelp + '\n' + lines.join('\n') + '\n', syntax), null
     );
   }
   catch(e) {
