@@ -23,10 +23,12 @@ export function saveGIF(filename: string, fbs: FramebufWithFont[], palette: RgbP
 
     let encoder = new GifEncoder(imgWidth, imgHeight, {
       palette: gifPalette,
-      highWaterMark:1024*256
+      highWaterMark: 1024*256
     })
 
     function exportGIF(fb: FramebufWithFont) {
+      // Note: read() is a work-around for https://github.com/twolfson/gif-encoder/issues/10
+      encoder.read(1024*128);
       const pixels = framebufToPixelsIndexed(fb, options.borders)
       encoder.addFrame(pixels)
     }
