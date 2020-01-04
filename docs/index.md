@@ -131,6 +131,11 @@ The settings are saved in the following location:
 
 ## Release history
 
+Petmate 0.8.1 (2020-01-04)
+- Add support for setting up custom fonts when exporting a stand-alone assembly file.
+- Add CA65 and c64jasm support for assembly export ([#166](https://github.com/nurpax/petmate/issues/166))
+- Fix gif export bug with more than 64 frame gif anims ([#166](https://github.com/nurpax/petmate/issues/166))
+
 Petmate 0.8.0 (2019-12-17)
 - Add custom charsets ([#174](https://github.com/nurpax/petmate/issues/174)).  You can load .64c font files from [http://kofler.dot.at/c64/font_01.html](http://kofler.dot.at/c64/font_01.html).  Fonts cannot be edited within Petmate -- but this will probably get added in later releases.
 - Increase the size of gif Frame delay input width ([#165](https://github.com/nurpax/petmate/issues/165))
