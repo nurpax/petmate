@@ -1,5 +1,5 @@
 
-const { app, Menu, shell, BrowserWindow } = require('electron');
+const { app, Menu, shell } = require('electron');
 
 const importers = [
   { label: 'D64 disk image (.d64)', cmd: 'import-d64' },
@@ -319,7 +319,7 @@ module.exports = class MenuBuilder {
           { label: 'E&xit',
             accelerator: 'CmdOrCtrl+Q',
             click: () => {
-              app.exit(0)
+              app.quit();
             }
           },
         ]
@@ -423,7 +423,19 @@ module.exports = class MenuBuilder {
             click() {
               shell.openExternal('https://github.com/nurpax/petmate/issues');
             }
-          }
+          },
+          { type: 'separator' },
+          {
+            label: 'About',
+            click() {
+              app.setAboutPanelOptions({
+                applicationName: app.name,
+                applicationVersion: app.getVersion(),
+                copyright: "Copyright (c) 2018-2020, Janne Hellsten",
+              });
+              app.showAboutPanel();
+            }
+          },
         ]
       }
     ];

@@ -1,6 +1,6 @@
 {
   "name": "petmate",
-  "version": "0.8.1",
+  "version": "0.8.2-beta0",
   "description": "Petmate - a C64 PETSCII graphics editor",
   "private": false,
   "author": "Janne Hellsten <jjhellst@gmail.com>",
@@ -15,9 +15,9 @@
     "build": "react-scripts build",
     "start": "concurrently --kill-others \"cross-env BROWSER=none yarn react-scripts start\" \"wait-on http://localhost:3000 && electron .\"",
     "debug": "concurrently --kill-others \"cross-env BROWSER=none yarn react-scripts start\" \"wait-on http://localhost:3000 && electron --remote-debugging-port=9223 .\"",
-    "dist-macos": "npx build --x64 --macos --c.extraMetadata.main=build/electron.js -p never",
-    "dist-win": "npx build --x64 --win --c.extraMetadata.main=build/electron.js -p never",
-    "dist-linux": "npx build --x64 --linux --c.extraMetadata.main=build/electron.js -p never"
+    "dist-macos": "npx electron-builder --x64 --macos --c.extraMetadata.main=build/electron.js -p never",
+    "dist-win": "npx electron-builder --x64 --win --c.extraMetadata.main=build/electron.js -p never",
+    "dist-linux": "npx electron-builder --x64 --linux --c.extraMetadata.main=build/electron.js -p never"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.8",
@@ -48,8 +48,8 @@
     "@types/react-redux": "^6.0.10",
     "concurrently": "^3.6.0",
     "cross-env": "^5.2.0",
-    "electron": "^4.0.4",
-    "electron-builder": "^20.38.5",
+    "electron": "^8.0.0",
+    "electron-builder": "^22.3.2",
     "react-scripts": "2.1.1",
     "typescript": "^3.1.6",
     "version-bump-prompt": "^4.2.1",

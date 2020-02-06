@@ -416,7 +416,7 @@ export function loadSettings(dispatchSettingsLoad: (json: Settings) => void) {
 export function promptProceedWithUnsavedChanges(state: RootState, msg: { title: string, detail: string }) {
   if (selectors.anyUnsavedChanges(state)) {
     const { dialog } = electron.remote;
-    return dialog.showMessageBox({
+    return dialog.showMessageBoxSync({
       type: 'question',
       buttons: [msg.title, 'Cancel'],
       cancelId: 1,
@@ -433,7 +433,7 @@ export function promptProceedWithUnsavedChanges(state: RootState, msg: { title: 
 export function promptProceedWithUnsavedChangesInFramebuf(state: RootState, fbIndex: number, msg: { title: string, detail: string }) {
   if (selectors.anyUnsavedChangesInFramebuf(state, fbIndex)) {
     const { dialog } = electron.remote;
-    return dialog.showMessageBox({
+    return dialog.showMessageBoxSync({
       type: 'question',
       buttons: [msg.title, 'Cancel'],
       cancelId: 1,
