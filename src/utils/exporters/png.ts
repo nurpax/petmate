@@ -1,6 +1,6 @@
 
 import { FramebufWithFont, FileFormatPng, RgbPalette } from '../../redux/types'
-import { framebufToPixels, doublePixels, computeOutputImageDims } from './util'
+import { framebufToPixels, scalePixels, computeOutputImageDims } from './util'
 import { electron, fs } from '../electronImports'
 
 const nativeImage = electron.nativeImage
@@ -10,10 +10,10 @@ export function savePNG(filename: string, fb: FramebufWithFont, palette: RgbPale
     const options = fmt.exportOptions;
 
     const { imgWidth, imgHeight } = computeOutputImageDims(fb, options.borders);
-
+    const scale = options.scale
     const buf = framebufToPixels(fb, palette, options.borders);
-    const scale = options.doublePixels ? 2 : 1;
-    const pixBuf = options.doublePixels ? doublePixels(buf, imgWidth, imgHeight) : buf;
+    const pixBuf = scale != 1 ? scalePixels(buf, imgWidth, imgHeight, scale) : buf;
+
     if (options.alphaPixel) {
       // TODO is this enough to fool png->jpeg transcoders heuristics?
       pixBuf[3] = 254;

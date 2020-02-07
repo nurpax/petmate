@@ -46,7 +46,7 @@ export const formats: { [index: string]: FileFormat } = {
     exportOptions: {
       borders: false,
       alphaPixel: false,
-      doublePixels: false
+      scale: 1
     }
   },
   seq: {
