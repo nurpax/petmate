@@ -31,9 +31,9 @@ export interface FileFormatGif extends FileFormatBase {
 export interface FileFormatPng extends FileFormatBase {
   ext: 'png';
   exportOptions: {
-    doublePixels: boolean;
     alphaPixel: boolean;
     borders: boolean;
+    scale: number;
   };
 }
 

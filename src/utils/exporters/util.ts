@@ -69,9 +69,9 @@ export function framebufToPixels(fb: FramebufWithFont, palette: RgbPalette, bord
   return buf
 }
 
-export function doublePixels(buf: Buffer, w: number, h: number): Buffer {
-  const dstPitch = 2*w*4
-  const dst = Buffer.alloc(2*w * 2*h * 4)
+export function doublePixels(buf: Buffer, w: number, h: number, scale: number): Buffer {
+  const dstPitch = scale*w*4 // could be 4 needs to be scale * 2
+  const dst = Buffer.alloc(scale*w * scale*h * 4) // same here and down below
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const srcOffs = (x + y*w)*4

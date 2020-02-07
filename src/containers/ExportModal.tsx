@@ -112,8 +112,8 @@ class PNGExportForm extends Component<PNGExportFormatProps> {
         <br/>
         <br/>
         <Checkbox name='alphaPixel' label='Alpha pixel work-around for Twitter' />
-        <Checkbox name='doublePixels' label='Double pixels' />
         <Checkbox name='borders' label='Include borders' />
+        <NumberInput name='scale' label='Scale' />
       </Form>
     )
   }
@@ -328,7 +328,7 @@ class ExportModal_ extends Component<ExportModalProps & ExportModalDispatch, Exp
     png: {
       borders: true,
       alphaPixel: false,
-      doublePixels: false
+      scale: 1,
     },
     asm: {
       assembler: 'kickass',
