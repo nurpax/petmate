@@ -10,10 +10,10 @@ export function savePNG(filename: string, fb: FramebufWithFont, palette: RgbPale
     const options = fmt.exportOptions;
 
     const { imgWidth, imgHeight } = computeOutputImageDims(fb, options.borders);
-
-    const buf = framebufToPixels(fb, palette, options.borders);
     const scale = options.scale
-    const pixBuf = options.scale != 1 ? doublePixels(buf, imgWidth, imgHeight, scale) : buf;
+    const buf = framebufToPixels(fb, palette, options.borders);
+    const pixBuf = scale != 1 ? scalePixels(buf, imgWidth, imgHeight, scale) : buf;
+
     if (options.alphaPixel) {
       // TODO is this enough to fool png->jpeg transcoders heuristics?
       pixBuf[3] = 254;
