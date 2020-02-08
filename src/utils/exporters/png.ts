@@ -1,6 +1,6 @@
 
 import { FramebufWithFont, FileFormatPng, RgbPalette } from '../../redux/types'
-import { framebufToPixels, doublePixels, computeOutputImageDims } from './util'
+import { framebufToPixels, scalePixels, computeOutputImageDims } from './util'
 import { electron, fs } from '../electronImports'
 
 const nativeImage = electron.nativeImage

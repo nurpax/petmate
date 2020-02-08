@@ -69,28 +69,28 @@ export function framebufToPixels(fb: FramebufWithFont, palette: RgbPalette, bord
   return buf
 }
 
-export function doublePixels(buf: Buffer, w: number, h: number, scale: number): Buffer {
-  const dstPitch = scale*w*4 // could be 4 needs to be scale * 2
-  const dst = Buffer.alloc(scale*w * scale*h * 4) // same here and down below
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const srcOffs = (x + y*w)*4
-      const dstOffs = (x*2*4 + 2*y*dstPitch)
+export function scalePixels(buf: Buffer, width: number, height: number, scale: number): Buffer {
+
+  const pixelLength = 4;
+  const dstPitch = scale * width * pixelLength // could be 4 needs to be scale * 2
+  const dst = Buffer.alloc(scale * width * scale * height * pixelLength) // same here and down below
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const srcOffs = (x + y * width) * pixelLength
       const b = buf[srcOffs + 0]
       const g = buf[srcOffs + 1]
       const r = buf[srcOffs + 2]
       const a = buf[srcOffs + 3]
 
-      for (let o = 0; o < dstPitch*2; o+=dstPitch) {
-        dst[o + dstOffs + 0] = b
-        dst[o + dstOffs + 1] = g
-        dst[o + dstOffs + 2] = r
-        dst[o + dstOffs + 3] = a
-
-        dst[o + dstOffs + 4] = b
-        dst[o + dstOffs + 5] = g
-        dst[o + dstOffs + 6] = r
-        dst[o + dstOffs + 7] = a
+      const dstOffs = (x * scale * 4 + scale * y * dstPitch)
+      for (let o = 0; o < dstPitch * scale; o += dstPitch) {
+        for (let horizontal = 0; horizontal < scale * 4; horizontal+=4) {
+          dst[o + dstOffs + 0 + horizontal] = b
+          dst[o + dstOffs + 1 + horizontal] = g
+          dst[o + dstOffs + 2 + horizontal] = r
+          dst[o + dstOffs + 3 + horizontal] = a
+        }
       }
     }
   }
