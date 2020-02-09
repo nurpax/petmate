@@ -34,12 +34,10 @@ const RadioButton_ = ({label, onChange, checked, value}) => {
 }
 
 const NumberInput_ = ({label, onChange, value, defaultValue}) => {
-  console.log(value)
   return (
     <label className={styles.numberInputContainer}>
       {label}
       <input
-        defaultValue={defaultValue}
         style={{minWidth: '4em'}}
         type='number'
         value={value}
@@ -104,15 +102,13 @@ export class RadioButton extends Component {
 
 export class NumberInput extends Component {
   static propTypes = {
-    name: PropTypes.string.isRequired,
-    value: PropTypes.string.isRequired,
-    defaultValue: PropTypes.number
+    name: PropTypes.string.isRequired
   }
 
   render () {
     return (
       <FormContext.Consumer>
-        {({ setField, state}) => <NumberInput_ defaultValue={this.props.defaultValue} onChange={(e) => setField(this.props.name, e.target.value)} {...this.props} />}
+        {({ setField, state}) => <NumberInput_ value={state[this.props.name]} onChange={(e) => setField(this.props.name, e.target.value)} {...this.props} />}
       </FormContext.Consumer>
     )
   }

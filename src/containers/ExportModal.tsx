@@ -113,7 +113,7 @@ class PNGExportForm extends Component<PNGExportFormatProps> {
         <br/>
         <Checkbox name='alphaPixel' label='Alpha pixel work-around for Twitter' />
         <Checkbox name='borders' label='Include borders' />
-        <NumberInput name='scale' label='Scale' defaultValue={1} />
+        <NumberInput name='scale' label='Scale' />
       </Form>
     )
   }
