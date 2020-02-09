@@ -318,7 +318,7 @@ export function dialogLoadWorkspace(
   const filters = [
     {name: 'Petmate workspace', extensions: ['petmate']},
   ]
-  const filename = dialog.showOpenDialog(window, {properties: ['openFile'], filters})
+  const filename = dialog.showOpenDialogSync(window, {properties: ['openFile'], filters})
   if (filename === undefined) {
     return
   }
@@ -341,7 +341,7 @@ export function dialogSaveAsWorkspace(
   const filters = [
     {name: 'Petmate workspace file', extensions: ['petmate']},
   ];
-  const filename = dialog.showSaveDialog(window, {properties: ['openFile'], filters});
+  const filename = dialog.showSaveDialogSync(window, {properties: ['openFile'], filters});
   if (filename === undefined) {
     return;
   }
@@ -355,7 +355,7 @@ export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[],
   const filters = [
     {name: fmt.name, extensions: [fmt.ext]}
   ]
-  const filename = dialog.showSaveDialog(window, {properties: ['openFile'], filters})
+  const filename = dialog.showSaveDialogSync(window, {properties: ['openFile'], filters})
   if (filename === undefined) {
     return
   }
@@ -370,7 +370,7 @@ export function dialogReadFile(type: FileFormat, loadFile: (data: Buffer) => voi
   const filters = [
     { name: type.name, extensions: [type.ext] }
   ]
-  const filename = dialog.showOpenDialog(window, {properties: ['openFile'], filters})
+  const filename = dialog.showOpenDialogSync(window, {properties: ['openFile'], filters})
   if (filename === undefined) {
     return
   }
@@ -390,7 +390,7 @@ export function dialogImportFile(type: FileFormat, importFile: (fbs: Framebuf[])
   const filters = [
     { name: type.name, extensions: [type.ext] }
   ]
-  const filename = dialog.showOpenDialog(window, {properties: ['openFile'], filters})
+  const filename = dialog.showOpenDialogSync(window, {properties: ['openFile'], filters})
   if (filename === undefined) {
     return
   }
