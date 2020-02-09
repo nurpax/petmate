@@ -33,7 +33,7 @@ const RadioButton_ = ({label, onChange, checked, value}) => {
   )
 }
 
-const NumberInput_ = ({label, onChange, value, defaultValue}) => {
+const NumberInput_ = ({label, onChange, value, ...rest}) => {
   return (
     <label className={styles.numberInputContainer}>
       {label}
@@ -41,7 +41,6 @@ const NumberInput_ = ({label, onChange, value, defaultValue}) => {
         style={{minWidth: '4em'}}
         type='number'
         value={value}
-        size='5'
         min='1'
         max='10000'
         onChange={onChange}
