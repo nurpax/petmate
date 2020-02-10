@@ -35,7 +35,7 @@ export function openFileDialog() {
   const filters = [
     { name: 'C64 font file', extensions: ['64c'] },
   ]
-  const filename = dialog.showOpenDialog(window, { properties: ['openFile'], filters })
+  const filename = dialog.showOpenDialogSync(window, { properties: ['openFile'], filters })
   if (filename === undefined || filename.length !== 1) {
     return undefined;
   }

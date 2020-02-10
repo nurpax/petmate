@@ -54,9 +54,9 @@ class ModalAnimWrapper extends Component<{}, ModalAnimWrapperState> {
       // This is for to force a repaint,
       // which is necessary in order to transition styles.
       // (jjhellst: or so I think..  From https://github.com/reactjs/react-transition-group/blob/780e8e5bf62efa655a2683c216cdabd7f7a09897/src/CSSTransition.js#L210-L217)
-      /* eslint-disable no-unused-expressions */
+      /* eslint-disable @typescript-eslint/no-unused-expressions */
       this.ref && this.ref.scrollTop
-      /* eslint-enable no-unused-expressions */
+      /* eslint-enable @typescript-eslint/no-unused-expressions */
       this.setState({init: false})
     }, ANIMATION_TIMEOUT)
   }

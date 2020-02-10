@@ -1,10 +1,10 @@
 
 import { chunkArray, executablePrgTemplate } from '../../utils'
 
-import { Framebuf, FileFormat } from '../../redux/types'
+import { Framebuf, FileFormat, FileFormatPrg, FramebufWithFont } from '../../redux/types'
 import { CHARSET_LOWER } from '../../redux/editor'
 
-import { saveAsm } from './asm'
+import { saveAsm, genAsm } from './asm'
 import { saveBASIC } from './basic'
 import { saveGIF } from './gif'
 import { savePNG } from './png'
@@ -12,6 +12,8 @@ import { saveJSON } from './json'
 import { saveSEQ } from './seq'
 
 import { fs } from '../electronImports'
+
+import * as c64jasm from 'c64jasm';
 
 function bytesToCommaDelimited(dstLines: string[], bytes: number[], bytesPerLine: number) {
   let lines = chunkArray(bytes, bytesPerLine)
@@ -67,7 +69,43 @@ function saveMarqC(filename: string, fbs: Framebuf[], _options: FileFormat) {
   }
 }
 
-function saveExecutablePRG(filename: string, fb: Framebuf, _options: FileFormat) {
+function exportC64jasmPRG(filename: string, fb: FramebufWithFont, fmt: FileFormatPrg) {
+  const source = genAsm([fb], {
+    ...fmt,
+    ext: 'asm',
+    exportOptions: {
+      currentScreenOnly: true,
+      standalone: true,
+      hex: true,
+      assembler: 'c64jasm'
+    }
+  });
+
+  const sourceFileMap: {[index: string]: string } = {
+    "main.asm": source
+  }
+  const options = {
+    readFileSync: (fname: string) => {
+      if (fname in sourceFileMap) {
+        return Buffer.from(sourceFileMap[fname]);
+      }
+      throw new Error(`File not found ${fname}`);
+    }
+  }
+  const res = c64jasm.assemble("main.asm", options);
+  if (res.errors.length !== 0) {
+    throw new Error("c64jasm.assemble failed, this should not happen.");
+  }
+
+  try {
+    fs.writeFileSync(filename, res.prg, null)
+  } catch(e) {
+    alert(`Failed to save file '${filename}'!`)
+    console.error(e)
+  }
+}
+
+function saveExecutablePRG(filename: string, fb: FramebufWithFont, options: FileFormatPrg) {
   try {
     const {
       width,
@@ -80,6 +118,16 @@ function saveExecutablePRG(filename: string, fb: Framebuf, _options: FileFormat)
 
     if (width !== 40 || height !== 25) {
       throw 'Only 40x25 framebuffer widths are supported!'
+    }
+
+    // Custom font export chooses a more complex path that doesn't produce
+    // the same .PRG binary format as the below code.  This assembler
+    // path would support the same features as this template thingie,
+    // but some apps like Marq's PETSCII support loading .PRG files
+    // if the binary is exactly as converted below.
+    if (!(charset == 'upper' || charset == 'lower')) {
+      exportC64jasmPRG(filename, fb, options);
+      return;
     }
 
     // Patch a .prg template that has a known code structure.
@@ -139,4 +187,3 @@ export {
   saveJSON,
   saveSEQ
 }
-

@@ -159,37 +159,38 @@ function convertSyntax(asm: string, syntax: typeof syntaxes['c64jasm']) {
   return lines.map(convertLine).join('\n');
 }
 
-const saveAsm = (filename: string, fbs: FramebufWithFont[], fmt: FileFormatAsm) => {
+export function genAsm(fbs: FramebufWithFont[], fmt: FileFormatAsm) {
   const options = fmt.exportOptions;
-  try {
-    let lines: string[] = [];
-    // Single screen export?
-    const hexOutput = fmt.exportOptions.hex;
-    const selectedFb = fbs[fmt.commonExportParams.selectedFramebufIndex];
-    if (fmt.exportOptions.currentScreenOnly) {
-      convertToAsm(lines, selectedFb, hexOutput);
-    } else {
-      fbs.forEach((fb) => convertToAsm(lines, fb, hexOutput));
-    }
-    let backgroundColor = selectedFb.backgroundColor;
-    let borderColor = selectedFb.borderColor;
-    const label = maybeLabelName(selectedFb.name);
-    let charsetBits;
-    switch(selectedFb.charset) {
-      case 'upper': charsetBits = "$15"; break;
-      case 'lower': charsetBits = "$17"; break;
-      default:      charsetBits = `%00010000 | ((${label}_font/2048)*2)`; break;
-    }
-    const syntax = syntaxes[fmt.exportOptions.assembler];
-    const init = options.standalone ? `${syntax.cli}\n${initCode({ backgroundColor, borderColor, charsetBits, label })}` : '';
-    fs.writeFileSync(
-      filename,
-      convertSyntax(init + '\n' + binaryFormatHelp + '\n' + lines.join('\n') + '\n', syntax), null
-    );
+  let lines: string[] = [];
+  // Single screen export?
+  const hexOutput = fmt.exportOptions.hex;
+  const selectedFb = fbs[fmt.commonExportParams.selectedFramebufIndex];
+  if (fmt.exportOptions.currentScreenOnly) {
+    convertToAsm(lines, selectedFb, hexOutput);
+  } else {
+    fbs.forEach((fb) => convertToAsm(lines, fb, hexOutput));
   }
-  catch(e) {
-    alert(`Failed to save file '${filename}'!`)
-    console.error(e)
+  let backgroundColor = selectedFb.backgroundColor;
+  let borderColor = selectedFb.borderColor;
+  const label = maybeLabelName(selectedFb.name);
+  let charsetBits;
+  switch(selectedFb.charset) {
+    case 'upper': charsetBits = "$15"; break;
+    case 'lower': charsetBits = "$17"; break;
+    default:      charsetBits = `%00010000 | ((${label}_font/2048)*2)`; break;
+  }
+  const syntax = syntaxes[fmt.exportOptions.assembler];
+  const init = options.standalone ? `${syntax.cli}\n${initCode({ backgroundColor, borderColor, charsetBits, label })}` : '';
+  return convertSyntax(init + '\n' + binaryFormatHelp + '\n' + lines.join('\n') + '\n', syntax);
+}
+
+const saveAsm = (filename: string, fbs: FramebufWithFont[], fmt: FileFormatAsm) => {
+  try {
+    const src = genAsm(fbs, fmt);
+    fs.writeFileSync(filename, src, null);
+  } catch(e) {
+    alert(`Failed to save file '${filename}'!`);
+    console.error(e);
   }
 }
 
