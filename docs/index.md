@@ -132,7 +132,7 @@ The settings are saved in the following location:
 ## Release history
 
 Petmate 0.8.2 (2020-02-11)
-- Add an integer scale PNG export option for allowing to scale width/height up by an integer.  Previously only doubling width and height was supported. ([#187](https://github.com/nurpax/petmate/issues/187))
+- Add an integer scale PNG export option for allowing to scale width/height up by an integer.  Previously only doubling width and height was supported.  Thank you [https://github.com/Krad23](https://github.com/Krad23) for the pull request! ([#187](https://github.com/nurpax/petmate/issues/187))
 - Custom fonts are now supported in PRG export ([#183](https://github.com/nurpax/petmate/issues/183))
 - Add an about menu item for Linux and Windows.  Handy for looking up the current Petmate version. ([#186](https://github.com/nurpax/petmate/issues/186))
 - Upgrade to Electron 8.0.
