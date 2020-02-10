@@ -12,9 +12,9 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.8.1.dmg'>Petmate-0.8.1.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.8.1.exe'>Petmate Setup 0.8.1.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.8.1_amd64.deb'>petmate_0.8.1_amd64.deb</a>
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.8.2.dmg'>Petmate-0.8.2.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.8.2.exe'>Petmate Setup 0.8.2.exe</a>
+* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.8.2_amd64.deb'>petmate_0.8.2_amd64.deb</a>
 
 ## Features
 
@@ -130,6 +130,12 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.8.2 (2020-02-11)
+- Add an integer scale PNG export option for allowing to scale width/height up by an integer.  Previously only doubling width and height was supported. ([#187](https://github.com/nurpax/petmate/issues/187))
+- Custom fonts are now supported in PRG export ([#183](https://github.com/nurpax/petmate/issues/183))
+- Add an about menu item for Linux and Windows.  Handy for looking up the current Petmate version. ([#186](https://github.com/nurpax/petmate/issues/186))
+- Upgrade to Electron 8.0.
 
 Petmate 0.8.1 (2020-01-04)
 - Add support for setting up custom fonts when exporting a stand-alone assembly file.
