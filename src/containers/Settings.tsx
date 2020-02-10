@@ -7,7 +7,6 @@ import React, {
 import { connect } from 'react-redux'
 
 import Modal from '../components/Modal'
-import { CheckboxInput } from '../components/formHelpers'
 import { RootState, Rgb, PaletteName, EditBranch } from '../redux/types'
 import { Toolbar } from '../redux/toolbar'
 import * as settings from '../redux/settings'
@@ -205,14 +204,14 @@ class Settings_ extends Component<SettingsStateProps & SettingsDispatchProps> {
                 colorPalette={colorPalette}
               />
 
-              <Title3>View</Title3>
+              {/*<Title3>View</Title3>
               <div style={{marginTop: '9px'}}>
                 <CheckboxInput
                   label='Snap window scale to integers to keep 1x1 pixels.'
                   checked={this.props.integerScale}
                   onChange={this.handleIntegerScale}
                 />
-              </div>
+              </div>*/}
               <br/>
             </div>
 

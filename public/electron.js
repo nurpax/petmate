@@ -33,7 +33,7 @@ createWindow = () => {
             nodeIntegration: true
         },
         width: 1100,
-        height: 680,
+        height: 720,
         minWidth: 768,
         minHeight: 500
     });
