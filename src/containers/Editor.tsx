@@ -43,6 +43,8 @@ import {
 
 const brushOutlineSelectingColor = 'rgba(128, 255, 128, 0.5)';
 
+const gridColor = 'rgba(128, 128, 128, 1)'
+
 const brushOverlayStyleBase: CSSProperties = {
   outlineColor: 'rgba(255, 255, 255, 0.5)',
   outlineStyle: 'solid',
@@ -735,7 +737,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
             colorPalette={this.props.colorPalette}
           />
           {overlays}
-          {this.props.canvasGrid ? <GridOverlay width={charWidth} height={charHeight} /> : null}
+          {this.props.canvasGrid ? <GridOverlay width={charWidth} height={charHeight} color={gridColor}   /> : null}
         </div>
       </div>
     )
