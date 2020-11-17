@@ -4,17 +4,18 @@ import React, { PureComponent } from 'react'
 interface GridOverlayProps {
   width: number;
   height: number;
+  color?: string;
 }
 
 export default class GridOverlay extends PureComponent<GridOverlayProps> {
   render () {
-    const { width, height } = this.props
+    const { width, height, color } = this.props
     const pixWidth = width*8
     const pixHeight = height*8
     let lines = []
     let keyCount = 0
     const s = {
-      stroke:'rgb(255,255,255)',
+      stroke: color || 'rgb(255,255,255)',
       strokeWidth:0.5
     }
     for (let y = 0; y <= height; y++, keyCount++) {
