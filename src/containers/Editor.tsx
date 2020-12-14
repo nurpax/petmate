@@ -43,8 +43,7 @@ import {
 
 const brushOutlineSelectingColor = 'rgba(128, 255, 128, 0.5)';
 
-const gridColorLight = 'rgb(255,255,255)'
-const gridColorDark = 'rgb(0,0,0)'
+const gridColor = 'rgba(128, 128, 128, 1)'
 
 const brushOverlayStyleBase: CSSProperties = {
   outlineColor: 'rgba(255, 255, 255, 0.5)',
@@ -601,8 +600,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     const charWidth = this.props.framebufWidth;
     const charHeight = this.props.framebufHeight;
     const backg = utils.colorIndexToCssRgb(this.props.colorPalette, this.props.backgroundColor)
-    const backgLuminance = utils.luminance(this.props.colorPalette[this.props.backgroundColor])
-    const gridColor = backgLuminance > 0.5 ? gridColorDark : gridColorLight
+    // const backgLuminance = utils.luminance(this.props.colorPalette[this.props.backgroundColor])
     const { selectedTool } = this.props
     let overlays = null
     let screencodeHighlight: number|undefined = this.props.curScreencode
