@@ -50,7 +50,7 @@
     "cross-env": "^5.2.0",
     "electron": "^8.0.0",
     "electron-builder": "^22.3.2",
-    "react-scripts": "3.3.1",
+    "react-scripts": "3.4.1",
     "typescript": "^3.1.6",
     "version-bump-prompt": "^4.2.1",
     "wait-on": "^3.2.0"
