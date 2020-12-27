@@ -123,7 +123,7 @@ export function colorIndexToCssRgb(palette: Rgb[], idx: number) {
   return rgbToCssRgb(palette[idx])
 }
 
-export function luminance (color: Rgb): Number {
+export function luminance (color: Rgb): number {
   const r = color.r / 255
   const g = color.g / 255
   const b = color.b / 255
