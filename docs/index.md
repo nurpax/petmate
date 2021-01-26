@@ -4,7 +4,7 @@ title: Petmate
 
 # Petmate
 
-Petmate is a cross-platform C64 PETSCII image editor, drawing inspiration from the [PETSCII](http://www.kameli.net/marq/?page_id=2717) editor.
+Petmate is a cross-platform C64 PETSCII image editor.
 
 Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an internet connection.
 
@@ -12,9 +12,9 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.8.2.dmg'>Petmate-0.8.2.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.8.2.exe'>Petmate Setup 0.8.2.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.8.2_amd64.deb'>petmate_0.8.2_amd64.deb</a>
+* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.8.3.dmg'>Petmate-0.8.3.dmg</a>
+* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.8.3.exe'>Petmate Setup 0.8.3.exe</a>
+* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.8.3_amd64.deb'>petmate_0.8.3_amd64.deb</a>
 
 ## Features
 
@@ -130,6 +130,12 @@ The settings are saved in the following location:
 - Linux: `$XDG_CONFIG_HOME/Petmate` or `~/.config/Petmate`
 
 ## Release history
+
+Petmate 0.8.3 (2021-01-27)
+- Thank you [https://github.com/manuelvio](https://github.com/manuelvio) for .pet export and grid changes!
+- Add .pet export format ([#204](https://github.com/nurpax/petmate/issues/204))
+- Show grid uses different blend mode that works better against diffrent background colors ([#199](https://github.com/nurpax/petmate/issues/199))
+- Use simpler assembler syntax in .asm output to make it compile on CBM prg Studio ([#195](https://github.com/nurpax/petmate/issues/195))
 
 Petmate 0.8.2 (2020-02-11)
 - Add an integer scale PNG export option for allowing to scale width/height up by an integer.  Previously only doubling width and height was supported.  Thank you [https://github.com/Krad23](https://github.com/Krad23) for the pull request! ([#187](https://github.com/nurpax/petmate/issues/187))
