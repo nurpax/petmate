@@ -73,25 +73,25 @@ start:
 
     ldx #$00
 loop:
-    lda ${label}+2+0*$100,x
-    sta $0400+0*$100,x
-    lda ${label}+2+25*40+0*$100,x
-    sta $d800+0*$100,x
+    lda ${label}+2,x
+    sta $0400,x
+    lda ${label}+$3ea,x
+    sta $d800,x
 
-    lda ${label}+2+1*$100,x
-    sta $0400+1*$100,x
-    lda ${label}+2+25*40+1*$100,x
-    sta $d800+1*$100,x
+    lda ${label}+$102,x
+    sta $0500,x
+    lda ${label}+$4ea,x
+    sta $d900,x
 
-    lda ${label}+2+2*$100,x
-    sta $0400+2*$100,x
-    lda ${label}+2+25*40+2*$100,x
-    sta $d800+2*$100,x
+    lda ${label}+$202,x
+    sta $0600,x
+    lda ${label}+$5ea,x
+    sta $da00,x
 
-    lda ${label}+2+$2e8,x
-    sta $0400+$2e8,x
-    lda ${label}+2+25*40+$2e8,x
-    sta $d800+$2e8,x
+    lda ${label}+$2ea,x
+    sta $06e8,x
+    lda ${label}+$6d2,x
+    sta $dae8,x
     inx
     bne loop
 
