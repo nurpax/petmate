@@ -16,59 +16,13 @@ function screencodeColorMap(charcodes: number[], colors: number[]) {
   })
 }
 
-/*
-export const loadCalTxtFramebuf = (filename, importFile) => {
-  try {
-    const content = fs.readFileSync(filename, 'utf-8')
-    const lines = content.split('\n')
-
-    let mode = undefined
-    let charcodes = []
-    let colors = []
-    lines.forEach(line => {
-      if (line.match(/Character data/)) {
-        mode = 'char'
-        return
-      }
-      if (line.match(/Colour data/)) {
-        mode = 'color'
-        return
-      }
-      var m;
-      if (m = /BYTE (.*)/.exec(line)) {
-        let arr = JSON.parse(`[${m[1]}]`)
-        arr.forEach(c => {
-          if (mode === 'char') {
-            charcodes.push(c)
-          } else if (mode === 'color') {
-            colors.push(c)
-          } else {
-            console.error('invalid mode')
-          }
-        })
-      }
-    })
-    const codes = screencodeColorMap(charcodes, colors)
-    importFile(framebufFromJson({
-      width: 40,
-      height: 25,
-      backgroundColor: 0,
-      borderColor: 0,
-      framebuf: chunkArray(codes, 40)
-    }))
-  }
-  catch(e) {
-    alert(`Failed to load file '${filename}'!`)
-  }
-}
-*/
-
 export function loadMarqCFramebuf(filename: string, importFile: ImportDispatch) {
   try {
     const content = fs.readFileSync(filename, 'utf-8')
     const lines = content.split('\n')
 
-    let frames = []
+    let frames = [];
+    let charset = 'upper';
     let bytes: number[] = []
     for (let li = 0; li < lines.length; li++) {
       let line = lines[li]
@@ -81,7 +35,14 @@ export function loadMarqCFramebuf(filename: string, importFile: ImportDispatch) 
         continue
       }
       if (/\/\/ META:/.exec(line)) {
-        break
+        const parts = line.split(' ');
+        // Emit only upper/lower.  If charset is unknown, default to upper.
+        if (parts.length > 0) {
+          if (parts[parts.length-1] === 'lower') {
+            charset = 'lower';
+          }
+        }
+        break;
       }
 
       let str = line.trim()
@@ -106,6 +67,7 @@ export function loadMarqCFramebuf(filename: string, importFile: ImportDispatch) 
         height: 25,
         backgroundColor: bytes[1],
         borderColor: bytes[0],
+        charset,
         framebuf: chunkArray(codes, 40)
       })
     })

@@ -57,11 +57,16 @@ function saveMarqC(filename: string, fbs: Framebuf[], _options: FileFormat) {
     fbs.forEach((fb,idx) => convertToMarqC(lines, fb, idx))
     let width = 0
     let height = 0
+    let charset = 'upper';
     if (fbs.length >= 1) {
-      width = fbs[0].width
-      height = fbs[0].height
+      width = fbs[0].width;
+      height = fbs[0].height;
+      // emit only 'lower' or 'upper' into META
+      if (fbs[0].charset === 'lower') {
+        charset = 'lower';
+      }
     }
-    lines.push(`// META: ${width} ${height} C64 upper`)
+    lines.push(`// META: ${width} ${height} C64 ${charset}`)
     fs.writeFileSync(filename, lines.join('\n') + '\n', null)
   }
   catch(e) {
