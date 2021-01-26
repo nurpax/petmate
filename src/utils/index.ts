@@ -8,7 +8,8 @@ import {
   saveBASIC,
   saveGIF,
   saveJSON,
-  saveSEQ
+  saveSEQ,
+  savePET
 } from './exporters'
 
 import {
@@ -113,6 +114,11 @@ export const formats: { [index: string]: FileFormat } = {
       currentScreenOnly: true
     }
   },
+  pet: {
+    name: 'C64 Raster Effect Editor .pet',
+    ext: 'pet',
+    commonExportParams: defaultExportCommon,
+  },
 }
 
 export function rgbToCssRgb(o: Rgb) {
@@ -183,6 +189,8 @@ const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWit
     return saveBASIC(filename, framebufs, fmt);
   } else if (fmt.ext === 'json') {
     return saveJSON(filename, framebufs, fonts, fmt);
+  } else if (fmt.ext === 'pet') {
+    return savePET(filename, framebufs, fmt);
   }
   throw new Error("shouldn't happen");
 }

@@ -16,7 +16,8 @@ const exporters = [
   { label: 'JSON (.json)', cmd: 'export-json' },
   { label: 'PETSCII (.c)', cmd: 'export-marq-c' },
   { label: 'PNG (.png)', cmd: 'export-png' },
-  { label: 'SEQ (.seq)', cmd: 'export-seq' }
+  { label: 'SEQ (.seq)', cmd: 'export-seq' },
+  { label: 'PET (.pet)', cmd: 'export-pet' }
 ]
 
 module.exports = class MenuBuilder {

@@ -10,6 +10,7 @@ import { saveGIF } from './gif'
 import { savePNG } from './png'
 import { saveJSON } from './json'
 import { saveSEQ } from './seq'
+import { savePET } from './pet'
 
 import { fs } from '../electronImports'
 
@@ -185,5 +186,6 @@ export {
   saveBASIC,
   saveGIF,
   saveJSON,
-  saveSEQ
+  saveSEQ,
+  savePET
 }

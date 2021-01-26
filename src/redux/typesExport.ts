@@ -74,6 +74,10 @@ export interface FileFormatJson extends FileFormatBase {
   };
 }
 
+export interface FileFormatPet extends FileFormatBase {
+  ext: 'pet';
+}
+
 export type FileFormat =
     FileFormatAsm
   | FileFormatD64
@@ -84,3 +88,4 @@ export type FileFormat =
   | FileFormatBas
   | FileFormatJson
   | FileFormatSeq
+  | FileFormatPet
