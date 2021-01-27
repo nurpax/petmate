@@ -12,9 +12,9 @@ Petmate runs locally on a Mac/Windows/Linux machine and doesn't require an inter
 
 ## Download Petmate
 {:.downloads}
-* MacOS: <a href='http://nurpax.com/petmate/releases/mac/Petmate-0.8.3.dmg'>Petmate-0.8.3.dmg</a>
-* Windows: <a href='http://nurpax.com/petmate/releases/win/Petmate%20Setup%200.8.3.exe'>Petmate Setup 0.8.3.exe</a>
-* Linux: <a href='http://nurpax.com/petmate/releases/linux/petmate_0.8.3_amd64.deb'>petmate_0.8.3_amd64.deb</a>
+* MacOS: <a href='https://nurpax.com/petmate/releases/mac/Petmate-0.8.3.dmg'>Petmate-0.8.3.dmg</a>
+* Windows: <a href='https://nurpax.com/petmate/releases/win/Petmate%20Setup%200.8.3.exe'>Petmate Setup 0.8.3.exe</a>
+* Linux: <a href='https://nurpax.com/petmate/releases/linux/petmate_0.8.3_amd64.deb'>petmate_0.8.3_amd64.deb</a>
 
 ## Features
 
