@@ -132,7 +132,7 @@ The settings are saved in the following location:
 ## Release history
 
 Petmate 0.8.3 (2021-01-27)
-- Thank you [https://github.com/manuelvio](https://github.com/manuelvio) for .pet export and grid changes!
+- Thank you [@manuelvio](https://github.com/manuelvio) for .pet export and grid changes!
 - Add .pet export format ([#204](https://github.com/nurpax/petmate/issues/204))
 - Show grid uses different blend mode that works better against diffrent background colors ([#199](https://github.com/nurpax/petmate/issues/199))
 - Use simpler assembler syntax in .asm output to make it compile on CBM prg Studio ([#195](https://github.com/nurpax/petmate/issues/195))
