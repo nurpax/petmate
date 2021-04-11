@@ -21,6 +21,8 @@ export function loadMarqCFramebuf(filename: string, importFile: ImportDispatch) 
     const content = fs.readFileSync(filename, 'utf-8')
     const lines = content.split('\n')
 
+    let width = 40;
+    let height = 25;
     let frames = [];
     let charset = 'upper';
     let bytes: number[] = []
@@ -34,17 +36,16 @@ export function loadMarqCFramebuf(filename: string, importFile: ImportDispatch) 
         bytes = []
         continue
       }
-      if (/\/\/ META:/.exec(line)) {
-        const parts = line.split(' ');
-        // Emit only upper/lower.  If charset is unknown, default to upper.
-        if (parts.length > 0) {
-          if (parts[parts.length-1] === 'lower') {
-            charset = 'lower';
-          }
+      let m = line.match(/^\/\/ META:(.*)/);
+      if (m) {
+        m =  m[1].match(/\s*(\d+) (\d+) .* (upper|lower)/);
+        if (m) {
+          width = parseInt(m[1]);
+          height = parseInt(m[2]);
+          charset = m[3];
         }
         break;
       }
-
       let str = line.trim()
       if (str[str.length-1] === ',') {
         str = str.substring(0, str.length - 1);
@@ -55,20 +56,19 @@ export function loadMarqCFramebuf(filename: string, importFile: ImportDispatch) 
       })
     }
 
-    // TODO support parsing the META tag after the array for machine make,
-    // width, height
     const framebufs = frames.map(frame => {
-      const bytes = frame
-      const charcodes = bytes.slice(2, 1002)
-      const colors = bytes.slice(1002, 2002)
+      const bytes = frame;
+      const nb = width*height;
+      const charcodes = bytes.slice(2, nb+2)
+      const colors = bytes.slice(nb+2, nb*2+2)
       const codes = screencodeColorMap(charcodes, colors)
       return framebufFromJson({
-        width: 40,
-        height: 25,
+        width,
+        height,
         backgroundColor: bytes[1],
         borderColor: bytes[0],
         charset,
-        framebuf: chunkArray(codes, 40)
+        framebuf: chunkArray(codes, width)
       })
     })
     // TODO don't call importFile here, just return the framebuf array
