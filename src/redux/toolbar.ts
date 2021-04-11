@@ -94,6 +94,7 @@ function convertAsciiToScreencode(asc: string) {
     '$': 0x24,
     '%': 0x25,
     '&': 0x26,
+    '\'': 0x27,
     '(': 0x28,
     ')': 0x29,
     '*': 0x2a,
