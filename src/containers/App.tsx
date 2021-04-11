@@ -2,7 +2,6 @@
 import React, { Component, Fragment, ReactNode } from 'react';
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
-import ResizeObserver from 'resize-observer-polyfill'
 
 import Toolbar from './Toolbar'
 import FramebufferTabs from './FramebufferTabs'
@@ -43,7 +42,7 @@ class DivSize extends Component<DivSizeProps, DivSizeState> {
   constructor (props: DivSizeProps) {
     super(props)
 
-    this.ro = new ResizeObserver(entries => {
+    this.ro = new ResizeObserver((entries: ResizeObserverEntry[]) => {
       const e = entries[0]
       this.setState({
         containerSize: {

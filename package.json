@@ -1,6 +1,6 @@
 {
   "name": "petmate",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Petmate - a C64 PETSCII graphics editor",
   "private": false,
   "author": "Janne Hellsten <jjhellst@gmail.com>",
@@ -26,7 +26,7 @@
     "c1541": "^0.1.0",
     "c64jasm": "^0.8.1",
     "classnames": "^2.2.6",
-    "electron-devtools-installer": "^2.2.4",
+    "electron-devtools-installer": "^3.1.1",
     "fast-memoize": "^2.5.1",
     "gif-encoder": "https://github.com/nurpax/gif-encoder#indexed-inputs",
     "pngjs": "^3.3.3",
@@ -37,8 +37,7 @@
     "redux": "^4.0.1",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
-    "redux-undo": "1.0.0-beta9-9-7",
-    "resize-observer-polyfill": "^1.5.0"
+    "redux-undo": "1.0.0-beta9-9-7"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.6",
@@ -46,10 +45,11 @@
     "@types/react": "^16.8.1",
     "@types/react-dom": "^16.8.0",
     "@types/react-redux": "^6.0.10",
+    "@types/resize-observer-browser": "^0.1.5",
     "concurrently": "^3.6.0",
     "cross-env": "^5.2.0",
-    "electron": "^8.0.0",
-    "electron-builder": "^22.3.2",
+    "electron": "^12.0.2",
+    "electron-builder": "^22.10.5",
     "react-scripts": "3.4.1",
     "typescript": "^3.1.6",
     "version-bump-prompt": "^4.2.1",

@@ -27,10 +27,11 @@ createWindow = () => {
         backgroundColor: '#F7F7F7',
         minWidth: 880,
         show: false,
-//		titleBarStyle: 'hidden',
         webPreferences: {
             webSecurity: false,
-            nodeIntegration: true
+            nodeIntegration: true,
+            contextIsolation: false,
+            enableRemoteModule: true
         },
         width: 1100,
         height: 720,
@@ -58,30 +59,6 @@ createWindow = () => {
         mainWindow.show();
         mainWindow.focus();
     });
-
-    if (!app.isPackaged) {
-        const {
-            default: installExtension,
-            REACT_DEVELOPER_TOOLS,
-            REDUX_DEVTOOLS,
-        } = require('electron-devtools-installer');
-
-        installExtension(REACT_DEVELOPER_TOOLS)
-            .then(name => {
-                console.log(`Added Extension: ${name}`);
-            })
-            .catch(err => {
-                console.log('An error occurred: ', err);
-            });
-
-        installExtension(REDUX_DEVTOOLS)
-            .then(name => {
-                console.log(`Added Extension: ${name}`);
-            })
-            .catch(err => {
-                console.log('An error occurred: ', err);
-            });
-    }
 
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
@@ -127,6 +104,27 @@ app.on('activate', () => {
     if (mainWindow === null) {
         createWindow();
     }
+});
+
+app.whenReady().then(() => {
+  if (!app.isPackaged) {
+    console.log('install Chrome extensions if not packaged');
+    const {
+        default: installExtension,
+        REACT_DEVELOPER_TOOLS,
+        REDUX_DEVTOOLS,
+    } = require('electron-devtools-installer');
+
+    installExtension(REACT_DEVELOPER_TOOLS)
+        .then(name => { console.log(`Added Extension: ${name}`); })
+        .catch(err => { console.log('An error occurred: ', err); });
+
+    // TODO throws an error similar to https://github.com/nklayman/vue-cli-plugin-electron-builder/issues/776,
+    // just disable it for now.
+    // installExtension(REDUX_DEVTOOLS)
+    //     .then(name => { console.log(`Added Extension: ${name}`); })
+    //     .catch(err => { console.log('An error occurred: ', err); });
+  }
 });
 
 // Handle browser window set window title requests
