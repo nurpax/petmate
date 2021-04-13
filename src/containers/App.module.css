@@ -13,7 +13,7 @@
 .topmenu {
   composes: topPadding;
   grid-area: topmenu;
-  overflow-x: auto;
+  overflow-x: hidden;
   padding-left: 10px;
 }
 

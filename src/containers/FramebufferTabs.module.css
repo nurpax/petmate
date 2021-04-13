@@ -1,8 +1,8 @@
 
 .tabHeadings {
-  padding-top: 4px;
+  padding-top: 6px;
   padding-bottom: 4px;
-  padding-bottom: 0px;
+  overflow-x: auto;
 }
 
 .tabs {
@@ -12,6 +12,7 @@
 }
 
 .tab {
+  margin-left: 2px;
   outline-style: solid;
   outline-width: 2px;
   outline-color: rgba(0,0,0,0);

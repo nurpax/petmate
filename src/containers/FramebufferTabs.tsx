@@ -192,6 +192,8 @@ interface FramebufTabProps {
 };
 
 class FramebufTab extends PureComponent<FramebufTabProps> {
+  tabRef = React.createRef<HTMLDivElement>();
+
   handleSelect = () => {
     this.props.onSetActiveTab(this.props.id)
   }
@@ -207,6 +209,12 @@ class FramebufTab extends PureComponent<FramebufTabProps> {
   handleNameSave = (name: string) => {
     if (name !== '') {
       this.props.setName(name, this.props.framebufId)
+    }
+  }
+
+  componentDidUpdate() {
+    if (this.props.active && this.tabRef.current) {
+      this.tabRef.current.scrollIntoView();
     }
   }
 
@@ -257,7 +265,9 @@ class FramebufTab extends PureComponent<FramebufTabProps> {
         flexDirection: 'column',
         alignItems: 'flex-start',
         marginRight: '4px'
-      }}>
+      }}
+      ref={this.tabRef}
+      >
         <ContextMenuArea menuItems={menuItems}>
           <div
             onClick={this.handleSelect}
