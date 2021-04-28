@@ -71,6 +71,7 @@ export class CanvasStatusbar extends PureComponent<CanvasStatusbarProps> {
         <FixedWidthCoord axis='Y' number={cp !== null ? cp.row : null} />
         <FixedWidthCoord axis='C' number={formatScreencode(cc)} numberPixelWidth={60} />
         <FixedWidthCoord axis='Size' number={widthHeight} numberPixelWidth={40} />
+        <FixedWidthCoord axis="Position" number={cp !== null ? 1024 + (40 * cp.row) + cp.col : null} />
       </div>
     )
   }
