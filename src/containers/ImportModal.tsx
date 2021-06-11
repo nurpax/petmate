@@ -231,9 +231,9 @@ class ImportModal_ extends Component<ImportModalProps & ImportModalDispatch, Imp
               {petscii && !png2pet.isError(petscii) &&
                 <div>
                   <PngPreview
+                    {...toFramebuf(petscii, this.state.selectedBackgroundColor, this.state.charset)}
                     currentColorPalette={this.props.currentColorPalette}
                     charset={this.state.charset}
-                    {...toFramebuf(petscii, this.state.selectedBackgroundColor, this.state.charset)}
                   />
                   {matchedBackgroundColors.length > 1 &&
                     <div>
