@@ -11,9 +11,9 @@
     "Graphics"
   ],
   "scripts": {
-    "build": "react-scripts build",
-    "start": "concurrently --kill-others \"cross-env BROWSER=none yarn react-scripts start\" \"wait-on http://localhost:3000 && electron .\"",
-    "debug": "concurrently --kill-others \"cross-env BROWSER=none yarn react-scripts start\" \"wait-on http://localhost:3000 && electron --remote-debugging-port=9223 .\"",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
+    "start": "concurrently --kill-others \"cross-env BROWSER=none NODE_OPTIONS=--openssl-legacy-provider npx react-scripts start\" \"wait-on http://localhost:3000 && electron --no-sandbox .\"",
+    "debug": "concurrently --kill-others \"cross-env BROWSER=none npx react-scripts start\" \"wait-on http://localhost:3000 && electron --remote-debugging-port=9223 .\"",
     "dist-macos": "npx electron-builder --x64 --arm64 --macos --c.extraMetadata.main=build/electron.js -p never",
     "dist-win": "npx electron-builder --x64 --win --c.extraMetadata.main=build/electron.js -p never",
     "dist-linux": "npx electron-builder --x64 --linux --c.extraMetadata.main=build/electron.js -p never"
@@ -41,6 +41,7 @@
   },
   "devDependencies": {
     "@types/classnames": "^2.2.6",
+    "@types/ms": "^0.7.34",
     "@types/pngjs": "^3.3.2",
     "@types/react": "^16.8.1",
     "@types/react-dom": "^16.8.0",
@@ -49,7 +50,7 @@
     "concurrently": "^3.6.0",
     "cross-env": "^5.2.0",
     "electron": "^12.0.2",
-    "electron-builder": "^22.10.5",
+    "electron-builder": "^26.8.1",
     "react-scripts": "3.4.1",
     "typescript": "^3.1.6",
     "version-bump-prompt": "^4.2.1",
@@ -84,7 +85,13 @@
         "deb"
       ],
       "description": "Petmate",
-      "category": "Graphics"
+      "category": "Graphics",
+      "executableArgs": [
+        "--no-sandbox"
+      ]
+    },
+    "deb": {
+      "afterInstall": "build-scripts/afterInstall.sh"
     },
     "fileAssociations": {
       "ext": "petmate",
