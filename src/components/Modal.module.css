@@ -26,7 +26,8 @@
   transform: translate(-50%, -50%);
 
   width: 420px;
-  max-width: 100%;
+  max-width: calc(100% - 24px);
+  max-height: calc(100% - 24px);
 
   padding-top: 10px;
   padding-bottom: 10px;

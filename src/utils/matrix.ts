@@ -90,10 +90,10 @@ export function toCss(a: Matrix3x3) {
   return `matrix(${v[0][0]}, ${v[1][0]}, ${v[0][1]}, ${v[1][1]}, ${v[0][2]}, ${v[1][2]})`;
 }
 
-export function scale(s: number): Matrix3x3 {
+export function scale(sx: number, sy: number = sx): Matrix3x3 {
   const m = ident();
-  m.v[0][0] = s;
-  m.v[1][1] = s;
+  m.v[0][0] = sx;
+  m.v[1][1] = sy;
   return m;
 }
 

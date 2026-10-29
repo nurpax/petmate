@@ -29,12 +29,14 @@ import {
   saveWorkspace,
   loadSettings,
   promptProceedWithUnsavedChanges,
-  setWorkspaceFilenameWithTitle
+  setWorkspaceFilenameWithTitle,
+  workspaceBaseName
 } from '../utils'
 
 import { importFramebufs } from './workspace'
 
-import { fs, electron } from '../utils/electronImports'
+import { fs } from '../utils/electronImports'
+import { addRecentDocument } from '../utils/platform'
 
 export const RESET_STATE = 'RESET_STATE'
 export const LOAD_WORKSPACE = 'LOAD_WORKSPACE'
@@ -50,6 +52,7 @@ function saveAsWorkspace(): ThunkAction<void, RootState, undefined, Action> {
       screens,
       getFramebufByIndex,
       customFontMap,
+      state.toolbar.workspaceFilename,
       (filename: string) => dispatch(Toolbar.actions.setWorkspaceFilename(filename)),
       () => dispatch(actionCreators.updateLastSavedSnapshot())
     );
@@ -84,7 +87,7 @@ export const actions = {
             () => dispatch(Toolbar.actions.setWorkspaceFilename(filename)),
             filename
           );
-          electron.remote.app.addRecentDocument(filename);
+          addRecentDocument(filename);
         } catch(e) {
           console.error(e)
           alert(`Failed to load workspace '${filename}'!`)
@@ -177,7 +180,7 @@ export const actions = {
           selectedFramebufIndex: remappedFbIndex
         }
       }
-      dialogExportFile(amendedFormatOptions, framebufs, state.customFonts, palette);
+      dialogExportFile(amendedFormatOptions, framebufs, state.customFonts, palette, workspaceBaseName(state.toolbar.workspaceFilename));
     }
   },
 

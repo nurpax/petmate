@@ -1,0 +1,809 @@
+/* Touch UI (iPhone / iPad).  Colors follow iOS dark mode, with the C64
+   light blue as the accent. */
+
+.app,
+.sheet,
+.webMenuButton {
+  --ground: #1c1c1e;
+  --surface: #2c2c2e;
+  --surface-raised: #3a3a3c;
+  --separator: #48484a;
+  --text: #f2f2f7;
+  --text-secondary: #a1a1a6;
+  --accent: #6c5eb5;
+  --accent-light: #a9a0f0;
+}
+
+.app {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  background: var(--ground);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.phone {
+  flex-direction: column;
+}
+
+.tablet {
+  flex-direction: column;
+}
+
+.tabletBody {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* ---- buttons ---- */
+
+/* Undo the desktop UI's global button styles (app.global.css) */
+.app button {
+  min-width: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.iconButton {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--text);
+  padding: 0;
+}
+
+.iconButton.on {
+  background: var(--surface-raised);
+}
+
+.iconButton.accentOn {
+  background: var(--accent);
+  color: #fff;
+}
+
+.iconButton:disabled {
+  color: var(--separator);
+}
+
+/* ---- top bar ---- */
+
+.topBar {
+  flex: none;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 6px;
+  border-bottom: 1px solid var(--surface);
+}
+
+.screenTitle {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: 600 16px -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 0;
+  touch-action: none;
+}
+
+.screenTitle .name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.screenTitle .meta {
+  flex: none;
+  color: var(--text-secondary);
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.tabs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tab {
+  flex: none;
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--text-secondary);
+  font: 500 14px -apple-system, BlinkMacSystemFont, sans-serif;
+  white-space: nowrap;
+}
+
+.tab.on {
+  background: var(--surface-raised);
+  color: #fff;
+}
+
+.divider {
+  flex: none;
+  width: 1px;
+  height: 28px;
+  margin: 0 4px;
+  background: var(--surface-raised);
+}
+
+/* ---- canvas ---- */
+
+.canvasArea {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.canvasArea > div {
+  /* DivSize's child */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- tools ---- */
+
+.toolBar {
+  flex: none;
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--surface);
+}
+
+.toolRail {
+  flex: none;
+  width: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0;
+  border-right: 1px solid var(--surface);
+  overflow-y: auto;
+}
+
+.tool {
+  flex: 1;
+  height: 56px;
+  min-width: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  color: var(--text-secondary);
+  font: 500 11px -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 0;
+}
+
+.toolRail .tool {
+  flex: none;
+  width: 56px;
+}
+
+.tool.on {
+  background: var(--surface-raised);
+  color: #fff;
+}
+
+.tool.held {
+  background: var(--accent);
+  color: #fff;
+}
+
+.railSpacer {
+  flex: 1;
+}
+
+.railLabel {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+/* ---- char actions ---- */
+
+.charActions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--surface);
+}
+
+.charChip {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px var(--accent-light);
+  overflow: hidden;
+  position: relative;
+  image-rendering: pixelated;
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* ---- palette ---- */
+
+.palette {
+  flex: none;
+  display: flex;
+  padding: 10px 16px 8px;
+}
+
+.palette button {
+  flex: 1;
+  height: 36px;
+  border: 0;
+  padding: 0;
+}
+
+.palette button:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.palette button:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.paletteGrid {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.paletteGrid button {
+  height: 36px;
+  border: 0;
+  padding: 0;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.palette button.selected,
+.paletteGrid button.selected {
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 0 2px var(--ground), 0 0 0 4px #fff;
+}
+
+/* ---- character grid ---- */
+
+.charSection {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px 8px;
+}
+
+.sectionHeader {
+  flex: none;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.sectionHeader select {
+  max-width: 60%;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: 400 14px -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.charScroller {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border-radius: 10px;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.charGrid {
+  position: relative;
+  image-rendering: pixelated;
+}
+
+/* ---- tablet side panel ---- */
+
+.sidePanel {
+  flex: none;
+  width: 344px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px;
+  border-left: 1px solid var(--surface);
+  overflow-y: auto;
+}
+
+.sidePanel .charActions {
+  padding: 0;
+  border: 0;
+}
+
+.sidePanel .charSection {
+  flex: none;
+  padding: 0;
+}
+
+/* ---- cursor mode ---- */
+
+.recentRow {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 16px 10px;
+}
+
+.recentChar {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  image-rendering: pixelated;
+}
+
+.recentChar.selected {
+  box-shadow: 0 0 0 2px var(--ground), 0 0 0 4px #fff;
+}
+
+.textButton {
+  flex: none;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: 500 14px -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.cursorDock {
+  flex: 1;
+  min-height: 150px;
+  display: flex;
+  gap: 12px;
+  padding: 0 16px 8px;
+}
+
+.sidePanel .cursorDock {
+  flex: none;
+  height: 220px;
+  padding: 0;
+}
+
+.pad {
+  flex: 1;
+  border-radius: 20px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  touch-action: none;
+  text-align: center;
+  padding: 8px;
+}
+
+.padButtons {
+  flex: none;
+  width: 104px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.drawButton {
+  flex: 1;
+  border: 0;
+  border-radius: 20px;
+  background: var(--accent);
+  color: #fff;
+  font: 600 16px -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  touch-action: none;
+}
+
+.drawButton.active {
+  background: #8b7fe0;
+}
+
+.pickButton {
+  flex: none;
+  height: 56px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: 500 15px -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* ---- sheets ---- */
+
+.sheetBackdrop {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 8;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.sheet {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 9;
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100% - env(safe-area-inset-top) - 24px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px 14px 0 0;
+  background: var(--ground);
+  color: var(--text);
+  padding-bottom: env(safe-area-inset-bottom);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.grabber {
+  flex: none;
+  align-self: center;
+  width: 36px;
+  height: 5px;
+  margin: 6px 0 2px;
+  border-radius: 3px;
+  background: var(--separator);
+}
+
+.sheetHeader {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px 8px 16px;
+}
+
+.sheetHeader h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.doneButton {
+  height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--accent-light);
+  font: 600 17px -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.sheetBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 0 16px 16px;
+}
+
+.caption {
+  font: 600 13px -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-secondary);
+  padding: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 16px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: 400 16px -apple-system, BlinkMacSystemFont, sans-serif;
+  text-align: left;
+}
+
+.row + .row {
+  border-top: 1px solid var(--surface-raised);
+}
+
+.row .label {
+  flex: 1;
+}
+
+.row .detail {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.row svg {
+  flex: none;
+}
+
+.row .accentIcon {
+  color: var(--accent-light);
+  display: flex;
+}
+
+.row .chevron {
+  color: #636366;
+  display: flex;
+}
+
+.switch {
+  flex: none;
+  width: 51px;
+  height: 31px;
+  border-radius: 16px;
+  position: relative;
+  background: var(--separator);
+  transition: background 0.15s;
+}
+
+.switch.on {
+  background: var(--accent);
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.15s;
+}
+
+.switch.on::after {
+  left: 22px;
+}
+
+.screens {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 4px 8px;
+  margin: 0 -4px;
+}
+
+.screenThumb {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--text);
+  font: 500 12px -apple-system, BlinkMacSystemFont, sans-serif;
+  max-width: 96px;
+}
+
+.screenThumb .thumbName {
+  max-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thumb {
+  position: relative;
+  box-sizing: border-box;
+  border-radius: 6px;
+  overflow: hidden;
+  image-rendering: pixelated;
+}
+
+.thumb.active {
+  box-shadow: 0 0 0 2px var(--ground), 0 0 0 4px var(--accent-light);
+}
+
+.newScreen {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.newScreen > button:first-child {
+  width: 76px;
+  height: 54px;
+  border-radius: 6px;
+  border: 1.5px dashed #636366;
+  background: none;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.segmented {
+  display: flex;
+  border-radius: 9px;
+  padding: 2px;
+  background: var(--surface);
+}
+
+.segmented button {
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--text-secondary);
+  font: 500 13px -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.segmented button.on {
+  background: #636366;
+  color: #fff;
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 3px;
+  padding: 0 16px 12px;
+}
+
+.swatches button {
+  height: 28px;
+  border: 0;
+  padding: 0;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.swatches button.selected {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px #fff;
+}
+
+.swatchLabel {
+  padding: 10px 16px 6px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.shiftButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.shiftButtons button {
+  width: 40px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footnote {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Desktop browsers get the desktop layout, plus this button for the menu
+   that Electron has natively. */
+.webMenuButton {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 5;
+  width: 44px;
+  height: 44px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+}

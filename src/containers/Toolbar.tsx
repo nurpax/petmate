@@ -22,7 +22,7 @@ import { Tool, Rgb, RootState, FramebufUIState } from '../redux/types';
 import { withHoverFade } from './hoc'
 
 import {
-  faBrush, faPencilAlt, faFont, faUndo, faRedo, faBroom, faCog, faArrowsAlt
+  faBrush, faPencilAlt, faFont, faUndo, faRedo, faBroom, faCog, faArrowsAlt, faTv
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -241,6 +241,7 @@ interface ToolbarSelectorProps {
   paletteRemap: number[];
   colorPalette: Rgb[];
   canvasFit: FramebufUIState['canvasFit'];
+  crtEffect: boolean;
 }
 
 interface ToolbarViewProps extends ToolbarSelectorProps {
@@ -365,6 +366,12 @@ class ToolbarView extends Component<
             fit={this.props.canvasFit}
             setFit={this.props.setFramebufCanvasFit}
          />
+        <Icon
+          onIconClick={() => this.props.Toolbar.setCrtEffect(!this.props.crtEffect)}
+          selected={this.props.crtEffect}
+          iconName={faTv}
+          tooltip='CRT (P)'
+        />
 
         <FbColorPicker
           pickerId='border'
@@ -447,8 +454,8 @@ const mapStateToProps = (state: RootState): ToolbarSelectorProps => {
     selectedTool:    state.toolbar.selectedTool,
     paletteRemap:    getSettingsPaletteRemap(state),
     colorPalette:    getSettingsCurrentColorPalette(state),
-    canvasFit
-
+    canvasFit,
+    crtEffect: state.toolbar.crtEffect
   }
 }
 export default connect(

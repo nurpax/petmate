@@ -37,7 +37,7 @@ export function saveJSON(filename: string, fbs: FramebufWithFont[], customFonts:
     // JSON format.
     const usedFonts = new Set<string>();
     for (let fb of fbarr) {
-      if (fb.charset !== 'upper' && fb.charset !== 'lower') {
+      if (!['upper', 'lower', 'petUpper', 'petLower'].includes(fb.charset)) {
         usedFonts.add(fb.charset);
       }
     }

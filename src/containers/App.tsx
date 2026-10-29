@@ -11,6 +11,8 @@ import ExportModal from './ExportModal'
 import ImportModal from './ImportModal'
 import Editor from './Editor';
 import FileDrop from './FileDrop'
+import TouchApp, { isTouchLayout, WebMenuButton } from '../touch/TouchApp'
+import { isElectron } from '../utils/platform'
 
 import * as reduxToolbar from '../redux/toolbar'
 import { loadWorkspaceNoDialog } from '../utils'
@@ -84,6 +86,7 @@ interface AppViewProps {
 }
 
 class AppView extends Component<AppViewProps> {
+  private touchLayout = isTouchLayout();
 
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyDown);
@@ -109,6 +112,9 @@ class AppView extends Component<AppViewProps> {
   }
 
   render() {
+    if (this.touchLayout) {
+      return <TouchApp />
+    }
     return (
       <Fragment>
         <FileDrop
@@ -126,6 +132,7 @@ class AppView extends Component<AppViewProps> {
             render={(containerSize: Dims) => <Editor containerSize={containerSize} />}
           />
         </FileDrop>
+        {isElectron ? null : <WebMenuButton />}
         <Settings />
         <CustomFontsModal />
         <ExportModal />

@@ -166,13 +166,14 @@ class NameEditor extends Component<NameEditorProps, NameEditorState> {
 function computeContainerSize(fb: Framebuf, maxHeight: number) {
   const pixWidth = fb.width * 8;
   const pixHeight = fb.height * 8;
+  const aspectX = utils.screenPixelAspectX(fb.width);
   // TODO if height is bigger than maxHeight, need to scale differently
   // to fit the box.
   const s = maxHeight / pixHeight;
   return {
-    divWidth: pixWidth * s,
+    divWidth: pixWidth * aspectX * s,
     divHeight: maxHeight,
-    scaleX: s,
+    scaleX: s * aspectX,
     scaleY: s
   }
 }
@@ -413,6 +414,16 @@ function NewTabButton (props: {
         dims={props.dims}
         Toolbar={props.Toolbar}
       />
+      <div
+        className={styles.screenDimText}
+        title='Toggle new screen width between 40 and 80 columns'
+        onClick={() => props.Toolbar.setNewScreenSize({
+          width: props.dims.width === 80 ? 40 : 80,
+          height: props.dims.height
+        })}
+      >
+        {props.dims.width === 80 ? '80 col' : '40 col'}
+      </div>
     </div>
   )
 }

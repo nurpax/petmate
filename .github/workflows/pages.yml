@@ -1,0 +1,53 @@
+# Build the web/PWA version of Petmate and publish it on GitHub Pages.
+#
+# One-time setup: in the repository settings under Pages, set
+# "Build and deployment" -> "Source" to "GitHub Actions".
+name: Deploy web app
+
+on:
+  push:
+    branches: [master, web-version]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # react-scripts 3 / webpack 4 needs a Node version from its era.
+          node-version: 16
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+        env:
+          # Only the web build is needed here.
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+      - run: yarn build
+        env:
+          # Don't fail the build on the existing lint warnings.
+          CI: 'false'
+      - name: Remove Electron main process files
+        run: rm -f build/electron.js build/menu.js
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

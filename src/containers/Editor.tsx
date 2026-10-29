@@ -1,5 +1,6 @@
 
-import React, { Component, Fragment, CSSProperties, PointerEvent, WheelEvent } from 'react';
+import React, { Component, Fragment, CSSProperties, WheelEvent } from 'react';
+import ReactDOM from 'react-dom';
 import { connect } from 'react-redux'
 import classNames from 'classnames'
 
@@ -7,6 +8,7 @@ import ColorPicker from '../components/ColorPicker'
 import CharGrid from '../components/CharGrid'
 import CharPosOverlay, { TextCursorOverlay } from '../components/CharPosOverlay'
 import GridOverlay from '../components/GridOverlay'
+import CrtOverlay, { CRT_FILTER_COLOR, CRT_FILTER_PET } from '../components/CrtOverlay'
 import { CanvasStatusbar } from '../components/Statusbar'
 
 import CharSelect from './CharSelect'
@@ -26,8 +28,10 @@ import { framebufIndexMergeProps }  from '../redux/utils'
 
 import * as toolbar from '../redux/toolbar'
 import { Toolbar } from '../redux/toolbar'
+import * as ReduxRoot from '../redux/root'
 import * as utils from '../utils';
 import * as matrix from '../utils/matrix';
+import { focusTextInput } from '../touch/TextInputBridge';
 
 import styles from './Editor.module.css';
 import {
@@ -195,30 +199,52 @@ interface FramebufferViewProps {
 
   canvasGrid: boolean;
 
+  cursorMode: boolean;
+  cursorPos: Coord2;
+  cursorDrawing: boolean;
+
   onCharPosChanged: (args: {isActive: boolean, charPos: Coord2}) => void;
 
   framebufLayout: {
     width: number, height: number,
-    pixelScale: number
+    pixelScaleX: number,
+    pixelScaleY: number
   };
 }
 
 interface FramebufferViewDispatch {
   Framebuffer: framebuf.PropsFromDispatch;
   Toolbar: toolbar.PropsFromDispatch;
+  undo: () => void;
+  redo: () => void;
 }
 
 interface FramebufferViewState {
   // Floor'd to int
   charPos: Coord2;
   isActive: boolean;
+  // Touch long-press color & char picker
+  loupe: { charPos: Coord2, clientX: number, clientY: number } | null;
 }
+
+// How long a finger has to rest on a cell for the loupe/picker to open.
+const LONG_PRESS_MS = 400;
+// Two or three finger taps (undo/redo) must be shorter than this.
+const MULTI_TAP_MS = 300;
+const MAX_ZOOM = 24;
+
+// Once an Apple Pencil (or other stylus) has been used, a single finger pans
+// the canvas instead of drawing, like in most iPad drawing apps.
+let penSeen = false;
+
+type TouchState = 'idle' | 'pending' | 'drawing' | 'picking' | 'gesture' | 'cursor';
 
 class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDispatch, FramebufferViewState> {
 
   state: FramebufferViewState = {
     charPos: { row: -1, col: 0 },
-    isActive: false
+    isActive: false,
+    loupe: null
   }
 
   prevDragPos: Coord2|null = null;
@@ -349,8 +375,8 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     }
 
     const bbox = this.ref.current.getBoundingClientRect();
-    const xx = (e.clientX - bbox.left) / this.props.framebufLayout.pixelScale;
-    const yy = (e.clientY - bbox.top) / this.props.framebufLayout.pixelScale;
+    const xx = (e.clientX - bbox.left) / this.props.framebufLayout.pixelScaleX;
+    const yy = (e.clientY - bbox.top) / this.props.framebufLayout.pixelScaleY;
 
     const invXform = matrix.invert(this.props.framebufUIState.canvasTransform);
     let [x, y] = matrix.multVect3(invXform, [xx, yy, 1]);
@@ -378,6 +404,16 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
   }
 
   handlePointerDown = (e: any) => {
+    if (e.pointerType === 'touch') {
+      this.handleTouchDown(e);
+      return;
+    }
+    if (e.pointerType === 'pen') {
+      penSeen = true;
+      this.penDown = true;
+      this.cancelTouches();
+    }
+
     if (this.props.selectedTool == Tool.PanZoom ||
       (this.props.selectedTool !== Tool.Text && this.props.spacebarKey)) {
       this.handlePanZoomPointerDown(e);
@@ -396,19 +432,18 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
 
     this.dragging = true
     e.target.setPointerCapture(e.pointerId);
-    this.prevCoord = charPos
-    this.dragStart(charPos)
-
-    const lock = this.props.shiftKey
-    this.shiftLockAxis = lock ? 'shift' : null
-    if (lock) {
-      this.lockStartCoord = {
-        ...charPos
-      }
-    }
+    this.strokeStart(charPos)
   }
 
-  handlePointerUp = (e: PointerEvent) => {
+  handlePointerUp = (e: any) => {
+    if (e.pointerType === 'touch') {
+      this.handleTouchUp(e, false);
+      return;
+    }
+    if (e.pointerType === 'pen') {
+      this.penDown = false;
+    }
+
     if (this.props.selectedTool == Tool.PanZoom || this.panZoomDragging) {
       this.handlePanZoomPointerUp(e);
       return;
@@ -423,7 +458,20 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     this.shiftLockAxis = null
   }
 
-  handlePointerMove = (e: PointerEvent) => {
+  handlePointerCancel = (e: any) => {
+    if (e.pointerType === 'touch') {
+      this.handleTouchUp(e, true);
+      return;
+    }
+    this.handlePointerUp(e);
+  }
+
+  handlePointerMove = (e: any) => {
+    if (e.pointerType === 'touch') {
+      this.handleTouchMove(e);
+      return;
+    }
+
     if (this.props.selectedTool == Tool.PanZoom ||
       (this.props.selectedTool !== Tool.Text && this.props.spacebarKey)) {
       this.handlePanZoomPointerMove(e);
@@ -443,9 +491,27 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     if (!this.dragging) {
       return
     }
+    this.strokeMove(charPos)
+  }
 
+  // Start a drawing stroke at charPos.  Holding shift (or the touch UI's
+  // axis lock) locks the stroke to a row or a column.
+  strokeStart (charPos: Coord2) {
+    this.prevCoord = charPos
+    this.dragStart(charPos)
+
+    const lock = this.props.shiftKey
+    this.shiftLockAxis = lock ? 'shift' : null
+    if (lock) {
+      this.lockStartCoord = {
+        ...charPos
+      }
+    }
+  }
+
+  strokeMove (charPos: Coord2) {
     // Note: prevCoord is known to be not null here as it's been set
-    // in mouse down
+    // in strokeStart
     const coord = charPos;
     if (this.prevCoord!.row !== coord.row || this.prevCoord!.col !== coord.col) {
 
@@ -474,6 +540,258 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       this.prevCoord = charPos
     }
   }
+
+  strokeEnd () {
+    this.dragEnd()
+    this.dragging = false
+    this.lockStartCoord = null
+    this.shiftLockAxis = null
+  }
+
+  //---------------------------------------------------------------------
+  // Touch gestures
+  //
+  // - One finger draws with the current tool.  The stroke only starts once
+  //   the finger moves to another cell, or on lift (a tap), so that resting
+  //   a finger on a cell can open the picker loupe instead.
+  // - Long-press opens a loupe; lifting the finger picks the char & color.
+  // - Two fingers pinch-zoom and pan.  A quick two-finger tap undoes, a
+  //   three-finger tap redoes.
+  // - In cursor mode, a finger on the canvas moves the drawing cursor.
+  // - After a pen has been used, one finger pans and fingers never draw.
+
+  private touches = new Map<number, { x: number, y: number }>();
+  private touchState: TouchState = 'idle';
+  private touchStart: { charPos: Coord2, time: number } | null = null;
+  private longPressTimer: number | null = null;
+  private gesture = { startTime: 0, maxTouches: 0, moved: 0 };
+  private penDown = false;
+
+  clearLongPressTimer () {
+    if (this.longPressTimer !== null) {
+      window.clearTimeout(this.longPressTimer);
+      this.longPressTimer = null;
+    }
+  }
+
+  cancelTouches () {
+    this.clearLongPressTimer();
+    if (this.touchState === 'drawing') {
+      this.strokeEnd();
+    }
+    this.touches.clear();
+    this.touchState = 'idle';
+    if (this.state.loupe !== null) {
+      this.setState({ loupe: null });
+    }
+  }
+
+  startGesture () {
+    this.clearLongPressTimer();
+    if (this.touchState === 'drawing') {
+      this.strokeEnd();
+    }
+    if (this.state.loupe !== null) {
+      this.setState({ loupe: null });
+    }
+    if (this.touchState !== 'gesture') {
+      this.gesture = {
+        startTime: this.touchStart !== null ? this.touchStart.time : Date.now(),
+        maxTouches: this.touches.size,
+        moved: 0
+      };
+    }
+    this.touchState = 'gesture';
+    this.setCharPos(false, this.state.charPos);
+  }
+
+  handleTouchDown (e: any) {
+    if (this.penDown) {
+      return;
+    }
+    e.currentTarget.setPointerCapture(e.pointerId);
+    this.touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (this.touches.size >= 2) {
+      this.startGesture();
+      this.gesture.maxTouches = Math.max(this.gesture.maxTouches, this.touches.size);
+      return;
+    }
+
+    const { charPos } = this.currentCharPos(e);
+    this.touchStart = { charPos, time: Date.now() };
+
+    if (penSeen) {
+      this.startGesture();
+      return;
+    }
+    if (this.props.cursorMode) {
+      this.touchState = 'cursor';
+      this.props.Toolbar.setCursorPos(this.clampToFramebuf(charPos));
+      return;
+    }
+    if (this.props.selectedTool === Tool.PanZoom) {
+      this.startGesture();
+      return;
+    }
+
+    this.touchState = 'pending';
+    this.setCharPos(true, charPos);
+    const { clientX, clientY } = e;
+    this.longPressTimer = window.setTimeout(() => {
+      this.longPressTimer = null;
+      if (this.touchState === 'pending') {
+        this.touchState = 'picking';
+        this.setCharPos(false, charPos);
+        this.setState({ loupe: { charPos, clientX, clientY } });
+      }
+    }, LONG_PRESS_MS);
+  }
+
+  handleTouchMove (e: any) {
+    const prev = this.touches.get(e.pointerId);
+    if (prev === undefined) {
+      return;
+    }
+    const cur = { x: e.clientX, y: e.clientY };
+
+    if (this.touchState === 'gesture') {
+      if (this.touches.size >= 2) {
+        const [id0, id1] = Array.from(this.touches.keys());
+        const p0 = this.touches.get(id0)!;
+        const p1 = this.touches.get(id1)!;
+        const n0 = id0 === e.pointerId ? cur : p0;
+        const n1 = id1 === e.pointerId ? cur : p1;
+        const prevMid = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
+        const mid = { x: (n0.x + n1.x) / 2, y: (n0.y + n1.y) / 2 };
+        const prevDist = Math.hypot(p0.x - p1.x, p0.y - p1.y);
+        const dist = Math.hypot(n0.x - n1.x, n0.y - n1.y);
+        const scale = prevDist > 0 ? dist / prevDist : 1;
+        this.gesture.moved += Math.hypot(mid.x - prevMid.x, mid.y - prevMid.y) + Math.abs(dist - prevDist);
+        this.panZoom(mid.x - prevMid.x, mid.y - prevMid.y, scale, mid.x, mid.y);
+      } else {
+        this.gesture.moved += Math.hypot(cur.x - prev.x, cur.y - prev.y);
+        this.panZoom(cur.x - prev.x, cur.y - prev.y, 1, cur.x, cur.y);
+      }
+      this.touches.set(e.pointerId, cur);
+      return;
+    }
+    this.touches.set(e.pointerId, cur);
+
+    const { charPos } = this.currentCharPos(e);
+    if (this.touchState === 'cursor') {
+      this.props.Toolbar.setCursorPos(this.clampToFramebuf(charPos));
+    } else if (this.touchState === 'picking') {
+      this.setState({ loupe: { charPos, clientX: e.clientX, clientY: e.clientY } });
+    } else if (this.touchState === 'pending') {
+      const start = this.touchStart!.charPos;
+      this.setCharPos(true, charPos);
+      if (start.row !== charPos.row || start.col !== charPos.col) {
+        this.clearLongPressTimer();
+        this.touchState = 'drawing';
+        this.dragging = true;
+        this.strokeStart(start);
+        this.strokeMove(charPos);
+      }
+    } else if (this.touchState === 'drawing') {
+      this.setCharPos(true, charPos);
+      this.strokeMove(charPos);
+    }
+  }
+
+  handleTouchUp (e: any, cancelled: boolean) {
+    if (!this.touches.has(e.pointerId)) {
+      return;
+    }
+    this.touches.delete(e.pointerId);
+    const remaining = this.touches.size;
+
+    switch (this.touchState) {
+      case 'pending': {
+        this.clearLongPressTimer();
+        this.touchState = 'idle';
+        this.setCharPos(false, this.state.charPos);
+        if (cancelled) {
+          break;
+        }
+        // A tap
+        const charPos = this.touchStart!.charPos;
+        if (this.props.altKey) {
+          this.altClick(charPos);
+          this.props.Toolbar.setAltKey(false);
+        } else if (this.props.selectedTool === Tool.Text) {
+          this.dragStart(charPos);
+          focusTextInput();
+        } else {
+          this.dragging = true;
+          this.strokeStart(charPos);
+          this.strokeEnd();
+        }
+        break;
+      }
+      case 'drawing':
+        if (remaining === 0) {
+          this.strokeEnd();
+          this.touchState = 'idle';
+          this.setCharPos(false, this.state.charPos);
+        }
+        break;
+      case 'picking':
+        if (!cancelled && this.state.loupe !== null) {
+          this.altClick(this.state.loupe.charPos);
+          this.props.Toolbar.setAltKey(false);
+        }
+        this.setState({ loupe: null });
+        this.touchState = 'idle';
+        break;
+      case 'cursor':
+        if (remaining === 0) {
+          this.touchState = 'idle';
+        }
+        break;
+      case 'gesture':
+        if (remaining === 0) {
+          const { startTime, maxTouches, moved } = this.gesture;
+          if (!cancelled && !penSeen && moved < 20 && Date.now() - startTime < MULTI_TAP_MS) {
+            if (maxTouches === 2) {
+              this.props.undo();
+            } else if (maxTouches === 3) {
+              this.props.redo();
+            }
+          }
+          this.touchState = 'idle';
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  clampToFramebuf (charPos: Coord2): Coord2 {
+    return {
+      row: Math.max(0, Math.min(this.props.framebufHeight - 1, charPos.row)),
+      col: Math.max(0, Math.min(this.props.framebufWidth - 1, charPos.col))
+    };
+  }
+
+  // Cursor mode: the cursor pad's draw button drives strokes at the cursor.
+  componentDidUpdate (prevProps: FramebufferViewProps) {
+    if (!this.props.cursorMode) {
+      if (prevProps.cursorDrawing && this.dragging) {
+        this.strokeEnd();
+      }
+      return;
+    }
+    const { cursorPos, cursorDrawing } = this.props;
+    if (cursorDrawing && !prevProps.cursorDrawing) {
+      this.dragging = true;
+      this.strokeStart(cursorPos);
+    } else if (cursorDrawing && cursorPos !== prevProps.cursorPos && this.dragging) {
+      this.strokeMove(cursorPos);
+    } else if (!cursorDrawing && prevProps.cursorDrawing && this.dragging) {
+      this.strokeEnd();
+    }
+  }
+
   //---------------------------------------------------------------------
   // Pan/zoom mouse event handlers.  Called by the bound handlePointerDown/Move/Up
   // functions if the pan/zoom tool is selected.
@@ -497,8 +815,8 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     let ty = xf.v[1][2];
     tx = Math.min(tx, 0);
     ty = Math.min(ty, 0);
-    const xx = this.props.framebufLayout.width / this.props.framebufLayout.pixelScale;
-    const yy = this.props.framebufLayout.height / this.props.framebufLayout.pixelScale;
+    const xx = this.props.framebufLayout.width / this.props.framebufLayout.pixelScaleX;
+    const yy = this.props.framebufLayout.height / this.props.framebufLayout.pixelScaleY;
     const [swidth, sheight] = matrix.multVect3(xform, [this.props.framebufWidth*8, this.props.framebufHeight*8, 0]);
     tx = Math.max(tx, -(swidth - xx));
     ty = Math.max(ty, -(sheight - yy));
@@ -507,26 +825,49 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     return xf;
   }
 
+  // Pan by (dx, dy) screen pixels, then zoom by scaleDelta around the
+  // (clientX, clientY) screen position.
+  panZoom (dx: number, dy: number, scaleDelta: number, clientX: number, clientY: number) {
+    if (!this.ref.current) {
+      return;
+    }
+    const { pixelScaleX, pixelScaleY } = this.props.framebufLayout;
+    const prevUIState = this.props.framebufUIState;
+    const prevTransform = prevUIState.canvasTransform;
+
+    const srcDxDy = matrix.multVect3(matrix.invert(prevTransform), [dx / pixelScaleX, dy / pixelScaleY, 0]);
+    let xform = matrix.mult(prevTransform, matrix.translate(srcDxDy[0], srcDxDy[1]));
+
+    if (scaleDelta !== 1) {
+      const curScale = xform.v[0][0];
+      const s = Math.max(1.0 / curScale, Math.min(MAX_ZOOM / curScale, scaleDelta));
+      const bbox = this.ref.current.getBoundingClientRect();
+      const mouseX = (clientX - bbox.left) / pixelScaleX;
+      const mouseY = (clientY - bbox.top) / pixelScaleY;
+      const srcPos = matrix.multVect3(matrix.invert(xform), [mouseX, mouseY, 1]);
+      xform =
+        matrix.mult(
+          xform,
+          matrix.mult(
+            matrix.translate(srcPos[0]-s*srcPos[0], srcPos[1]-s*srcPos[1]),
+            matrix.scale(s)
+          )
+        )
+      if (xform.v[0][0] < 1.0 || xform.v[1][1] < 1.0) {
+        xform.v[0][0] = 1.0;
+        xform.v[1][1] = 1.0;
+      }
+    }
+
+    this.props.Toolbar.setCurrentFramebufUIState({
+      ...prevUIState,
+      canvasTransform: this.clampToWindow(xform)
+    });
+  }
+
   handlePanZoomPointerMove (e: any) {
     if (this.panZoomDragging) {
-      const dx = e.nativeEvent.movementX / this.props.framebufLayout.pixelScale;
-      const dy = e.nativeEvent.movementY / this.props.framebufLayout.pixelScale;
-
-      const prevUIState = this.props.framebufUIState;
-      const prevTransform = prevUIState.canvasTransform;
-
-      const invXform = matrix.invert(prevTransform);
-      const srcDxDy = matrix.multVect3(invXform, [dx, dy, 0]);
-
-      const xform =
-        matrix.mult(
-          prevTransform,
-          matrix.translate(srcDxDy[0], srcDxDy[1])
-        );
-      this.props.Toolbar.setCurrentFramebufUIState({
-        ...prevUIState,
-        canvasTransform: this.clampToWindow(xform)
-      });
+      this.panZoom(e.nativeEvent.movementX, e.nativeEvent.movementY, 1, 0, 0);
     }
   }
 
@@ -547,10 +888,6 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
         (this.props.selectedTool !== Tool.Text && this.props.altKey))) {
       return;
     }
-
-    if (!this.ref.current) {
-      return;
-    }
     if (e.deltaY == 0) {
       return;
     }
@@ -558,39 +895,64 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     const delta = Math.min(Math.abs(e.deltaY), wheelScale);
     const scaleDelta = e.deltaY < 0 ?
       1.0/(1 - (delta / (wheelScale+1))) : (1 - (delta / (wheelScale+1)));
+    this.panZoom(0, 0, scaleDelta, e.nativeEvent.clientX, e.nativeEvent.clientY);
+  }
 
-    const bbox = this.ref.current.getBoundingClientRect();
-    const mouseX = (e.nativeEvent.clientX - bbox.left) / this.props.framebufLayout.pixelScale;
-    const mouseY = (e.nativeEvent.clientY - bbox.top) / this.props.framebufLayout.pixelScale;
-
-    const prevUIState = this.props.framebufUIState;
-
-    const invXform = matrix.invert(prevUIState.canvasTransform);
-    const srcPos = matrix.multVect3(invXform, [mouseX, mouseY, 1]);
-
-    let xform =
-      matrix.mult(
-        prevUIState.canvasTransform,
-        matrix.mult(
-          matrix.translate(srcPos[0]-scaleDelta*srcPos[0], srcPos[1]-scaleDelta*srcPos[1]),
-          matrix.scale(scaleDelta)
-        )
-      )
-
-    // Clamp scale to 1.0
-    if (xform.v[0][0] < 1.0 || xform.v[1][1] < 1.0) {
-      const invScale = matrix.scale(1.0 / xform.v[0][0]);
-      xform = matrix.mult(xform, invScale);
-      // scale is roughly 1.0 now but let's force float values
-      // to exact 1.0
-      xform.v[0][0] = 1.0;
-      xform.v[1][1] = 1.0;
+  // Magnified view of the cells around a long-pressed cell, shown above the
+  // finger so that the finger doesn't cover it.
+  renderLoupe (backgroundColor: string) {
+    const { loupe } = this.state
+    if (loupe === null) {
+      return null
     }
-
-    this.props.Toolbar.setCurrentFramebufUIState({
-      ...prevUIState,
-      canvasTransform: this.clampToWindow(xform)
-    })
+    const N = 5
+    const size = 132
+    const srcX = Math.max(0, Math.min(this.props.framebufWidth - N, loupe.charPos.col - 2))
+    const srcY = Math.max(0, Math.min(this.props.framebufHeight - N, loupe.charPos.row - 2))
+    const w = Math.min(N, this.props.framebufWidth)
+    const h = Math.min(N, this.props.framebufHeight)
+    const scaleY = size / (N * 8)
+    const scaleX = scaleY * utils.screenPixelAspectX(this.props.framebufWidth)
+    const inside = loupe.charPos.row >= 0 && loupe.charPos.row < this.props.framebufHeight &&
+      loupe.charPos.col >= 0 && loupe.charPos.col < this.props.framebufWidth
+    const left = Math.max(8, Math.min(window.innerWidth - size - 8, loupe.clientX - size / 2))
+    const top = loupe.clientY - size - 48 > 8 ? loupe.clientY - size - 48 : loupe.clientY + 48
+    return ReactDOM.createPortal(
+      <div style={{
+        position: 'fixed', left, top, width: size, height: size, zIndex: 20,
+        borderRadius: '50%', overflow: 'hidden', pointerEvents: 'none',
+        backgroundColor, boxShadow: '0 0 0 3px #fff, 0 8px 30px rgba(0,0,0,0.6)'
+      }}>
+        <div style={{
+          position: 'absolute',
+          left: size / 2 - (loupe.charPos.col - srcX + 0.5) * 8 * scaleX,
+          top: size / 2 - (loupe.charPos.row - srcY + 0.5) * 8 * scaleY,
+          width: w * 8, height: h * 8,
+          transform: `scale(${scaleX}, ${scaleY})`, transformOrigin: '0 0',
+          imageRendering: 'pixelated'
+        }}>
+          <CharGrid
+            width={w}
+            height={h}
+            srcX={srcX}
+            srcY={srcY}
+            grid={false}
+            backgroundColor={backgroundColor}
+            colorPalette={this.props.colorPalette}
+            font={this.props.font}
+            framebuf={this.props.framebuf}
+          />
+          {inside ?
+            <div style={{
+              position: 'absolute',
+              left: (loupe.charPos.col - srcX) * 8, top: (loupe.charPos.row - srcY) * 8,
+              width: 8, height: 8, outline: `${2.5 / scaleY}px solid #fff`
+            }} /> :
+            null}
+        </div>
+      </div>,
+      document.body
+    )
   }
 
   render () {
@@ -601,17 +963,21 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
     const charHeight = this.props.framebufHeight;
     const backg = utils.colorIndexToCssRgb(this.props.colorPalette, this.props.backgroundColor)
     const { selectedTool } = this.props
+    // In cursor mode, the cursor stands in for the mouse pointer.
+    const { isActive, charPos } = this.props.cursorMode ?
+      { isActive: true, charPos: this.props.cursorPos } :
+      this.state
     let overlays = null
     let screencodeHighlight: number|undefined = this.props.curScreencode
     let colorHighlight: number|undefined = this.props.textColor
     let highlightCharPos = true
-    if (this.state.isActive) {
+    if (isActive) {
       if (selectedTool === Tool.Brush) {
         highlightCharPos = false
         if (this.props.brush !== null) {
           overlays =
             <BrushOverlay
-              charPos={this.state.charPos}
+              charPos={charPos}
               framebufWidth={this.props.framebufWidth}
               framebufHeight={this.props.framebufHeight}
               backgroundColor={backg}
@@ -622,7 +988,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
         } else {
           overlays =
             <BrushSelectOverlay
-              charPos={this.state.charPos}
+              charPos={charPos}
               framebufWidth={this.props.framebufWidth}
               framebufHeight={this.props.framebufHeight}
               brushRegion={this.props.brushRegion}
@@ -637,7 +1003,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
           <CharPosOverlay
             framebufWidth={this.props.framebufWidth}
             framebufHeight={this.props.framebufHeight}
-            charPos={this.state.charPos}
+            charPos={charPos}
             opacity={0.5}
           />
         if (selectedTool === Tool.Colorize) {
@@ -675,11 +1041,11 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       overlays =
         <Fragment>
           {textCursorOverlay}
-          {this.state.isActive ?
+          {isActive ?
             <CharPosOverlay
               framebufWidth={this.props.framebufWidth}
               framebufHeight={this.props.framebufHeight}
-              charPos={this.state.charPos}
+              charPos={charPos}
               opacity={0.5}
             />
             :
@@ -700,12 +1066,13 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
       imageRendering: 'pixelated',
       clipPath: `polygon(0% 0%, ${cx} 0%, ${cx} ${cy}, 0% ${cy})`,
       overflowX: 'hidden',
-      overflowY: 'hidden'
+      overflowY: 'hidden',
+      touchAction: 'none'
     }
     const canvasContainerStyle: CSSProperties = {
       transform: matrix.toCss(
         matrix.mult(
-          matrix.scale(this.props.framebufLayout.pixelScale),
+          matrix.scale(this.props.framebufLayout.pixelScaleX, this.props.framebufLayout.pixelScaleY),
             this.clampToWindow(transform)
         )
       )
@@ -722,6 +1089,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
         onPointerDown={(e) => this.handlePointerDown(e)}
         onPointerMove={(e) => this.handlePointerMove(e)}
         onPointerUp={(e) => this.handlePointerUp(e)}
+        onPointerCancel={(e) => this.handlePointerCancel(e)}
       >
         <div style={canvasContainerStyle}>
           <CharGrid
@@ -730,7 +1098,7 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
             grid={false}
             backgroundColor={backg}
             framebuf={this.props.framebuf}
-            charPos={this.state.isActive && highlightCharPos ? this.state.charPos : undefined}
+            charPos={isActive && highlightCharPos ? charPos : undefined}
             curScreencode={screencodeHighlight}
             textColor={colorHighlight}
             font={this.props.font}
@@ -738,7 +1106,16 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
           />
           {overlays}
           {this.props.canvasGrid ? <GridOverlay width={charWidth} height={charHeight} color={gridColor}   /> : null}
+          {this.props.cursorMode ?
+            <CharPosOverlay
+              framebufWidth={this.props.framebufWidth}
+              framebufHeight={this.props.framebufHeight}
+              charPos={this.props.cursorPos}
+              color='rgba(255,255,255,1)'
+            /> :
+            null}
         </div>
+        {this.renderLoupe(backg)}
       </div>
     )
   }
@@ -747,19 +1124,23 @@ class FramebufferView extends Component<FramebufferViewProps & FramebufferViewDi
 function computeFramebufLayout(args: {
   containerSize: { width: number, height: number },
   framebufSize: { charWidth: number, charHeight: number },
-  canvasFit: FramebufUIState['canvasFit']
+  canvasFit: FramebufUIState['canvasFit'],
+  pad?: { right: number, bottom: number }
 }) {
-  const bottomPad = 60;
-  const rightPad = 320;
+  const { bottom: bottomPad, right: rightPad } = args.pad || { bottom: 60, right: 320 };
   const { charWidth, charHeight } = args.framebufSize;
   const maxWidth = args.containerSize.width - rightPad;
   const maxHeight = args.containerSize.height - bottomPad;
 
   const canvasWidth = charWidth * 8;
   const canvasHeight = charHeight * 8;
+  // 80-column glyphs stay 8 dots wide, but occupy half the horizontal space
+  // so the screen is the same width as a 40-column screen.
+  const aspectX = utils.screenPixelAspectX(charWidth);
+  const visualWidth = canvasWidth * aspectX;
 
-  let ws =  maxWidth / canvasWidth;
-  let divWidth = canvasWidth * ws;
+  let ws =  maxWidth / visualWidth;
+  let divWidth = visualWidth * ws;
   let divHeight = canvasHeight * ws;
 
   const fitWidth = args.canvasFit == 'fitWidth';
@@ -780,7 +1161,8 @@ function computeFramebufLayout(args: {
   return {
     width: divWidth,
     height: divHeight,
-    pixelScale: ws
+    pixelScaleX: ws * aspectX,
+    pixelScaleY: ws
   }
 }
 
@@ -812,17 +1194,82 @@ const FramebufferCont = connect(
       spacebarKey: state.toolbar.spacebarKey,
       font,
       colorPalette: getSettingsCurrentColorPalette(state),
-      canvasGrid: state.toolbar.canvasGrid
+      canvasGrid: state.toolbar.canvasGrid,
+      cursorMode: state.toolbar.cursorMode,
+      cursorPos: state.toolbar.cursorPos,
+      cursorDrawing: state.toolbar.cursorDrawing
     }
   },
-  dispatch => {
+  (dispatch: any) => {
     return {
       Framebuffer: Framebuffer.bindDispatch(dispatch),
-      Toolbar: Toolbar.bindDispatch(dispatch)
+      Toolbar: Toolbar.bindDispatch(dispatch),
+      undo: () => dispatch(ReduxRoot.actions.undo()),
+      redo: () => dispatch(ReduxRoot.actions.redo())
     }
   },
   framebufIndexMergeProps
 )(FramebufferView)
+
+interface TouchScreenProps {
+  framebuf: Framebuf | null;
+  framebufUIState: FramebufUIState | undefined;
+  colorPalette: Rgb[];
+  crtEffect: boolean;
+  containerSize: { width: number, height: number } | null;
+  borderWidth: number;
+}
+
+// The touch UI's canvas: just the screen and its border, fit and centered
+// into the container.  (The desktop Editor below also lays out the color
+// picker and character selector next to it.)
+class TouchScreenView extends Component<TouchScreenProps> {
+  render () {
+    const { framebuf: fb, framebufUIState, containerSize, colorPalette, borderWidth } = this.props
+    if (fb === null || containerSize === null || !framebufUIState) {
+      return null
+    }
+    const layout = computeFramebufLayout({
+      containerSize,
+      framebufSize: { charWidth: fb.width, charHeight: fb.height },
+      canvasFit: 'fitWidthHeight',
+      pad: { right: 2*borderWidth, bottom: 2*borderWidth }
+    })
+    const petScreen = fb.charset === framebuf.CHARSET_PET_UPPER
+      || fb.charset === framebuf.CHARSET_PET_LOWER
+    const screenStyle: CSSProperties = {
+      width: `${layout.width}px`,
+      height: `${layout.height}px`,
+      borderColor: utils.colorIndexToCssRgb(colorPalette, fb.borderColor),
+      borderStyle: 'solid',
+      borderWidth: `${borderWidth}px`,
+      filter: this.props.crtEffect ? `url(#${petScreen ? CRT_FILTER_PET : CRT_FILTER_COLOR})` : undefined
+    }
+    return (
+      <div className={styles.fbContainer}>
+        <div style={screenStyle}>
+          <FramebufferCont
+            framebufLayout={layout}
+            framebufUIState={framebufUIState}
+            onCharPosChanged={() => {}} />
+        </div>
+        {this.props.crtEffect ? <CrtOverlay green={petScreen} /> : null}
+      </div>
+    )
+  }
+}
+
+export const TouchScreen = connect(
+  (state: RootState) => {
+    const framebufIndex = screensSelectors.getCurrentScreenFramebufIndex(state);
+    return {
+      framebuf: selectors.getCurrentFramebuf(state),
+      colorPalette: getSettingsCurrentColorPalette(state),
+      crtEffect: state.toolbar.crtEffect,
+      framebufUIState: selectors.getFramebufUIState(state, framebufIndex)
+    }
+  }
+)(TouchScreenView)
 
 interface EditorProps {
   framebuf: Framebuf | null;
@@ -833,6 +1280,7 @@ interface EditorProps {
   selectedTool: Tool;
 
   integerScale: boolean;
+  crtEffect: boolean;
   containerSize: { width: number, height: number };
 }
 
@@ -887,6 +1335,11 @@ class Editor extends Component<EditorProps & EditorDispatch> {
     const scaleY = scaleX;
     const fbContainerClass =
       classNames(styles.fbContainer, this.props.selectedTool == Tool.PanZoom ? styles.panzoom : null);
+    const petScreen = this.props.framebuf.charset === framebuf.CHARSET_PET_UPPER
+      || this.props.framebuf.charset === framebuf.CHARSET_PET_LOWER;
+    const screenStyle = this.props.crtEffect ?
+      { ...framebufStyle, filter: `url(#${petScreen ? CRT_FILTER_PET : CRT_FILTER_COLOR})` } :
+      framebufStyle;
     return (
       <div
         className={styles.editorLayoutContainer}
@@ -894,13 +1347,16 @@ class Editor extends Component<EditorProps & EditorDispatch> {
         <div>
           <div
             className={fbContainerClass}
-            style={framebufStyle}>
-            {this.props.framebuf ?
-              <FramebufferCont
-                framebufLayout={framebufSize}
-                framebufUIState={this.props.framebufUIState}
-                onCharPosChanged={this.handleCharPosChanged} /> :
-              null}
+          >
+            <div style={screenStyle}>
+              {this.props.framebuf ?
+                <FramebufferCont
+                  framebufLayout={framebufSize}
+                  framebufUIState={this.props.framebufUIState}
+                  onCharPosChanged={this.handleCharPosChanged} /> :
+                null}
+            </div>
+            {this.props.crtEffect ? <CrtOverlay green={petScreen} /> : null}
           </div>
           <CanvasStatusbar
             framebuf={this.props.framebuf}
@@ -937,6 +1393,7 @@ export default connect(
       paletteRemap: getSettingsPaletteRemap(state),
       colorPalette: getSettingsCurrentColorPalette(state),
       integerScale: getSettingsIntegerScale(state),
+      crtEffect: state.toolbar.crtEffect,
       framebufUIState: selectors.getFramebufUIState(state, framebufIndex)
     }
   },

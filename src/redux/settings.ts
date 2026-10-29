@@ -2,7 +2,7 @@
 import { Action } from 'redux'
 import { ThunkAction } from 'redux-thunk';
 
-import { electron, path, fs } from '../utils/electronImports'
+import { writeSettings } from '../utils/platform'
 
 import {
   Settings as RSettings,
@@ -32,9 +32,7 @@ const initialState: RSettings = {
 }
 
 function saveSettings(settings: RSettings) {
-  let settingsFile = path.join(electron.remote.app.getPath('userData'), 'Settings')
-  const j = JSON.stringify(settings)
-  fs.writeFileSync(settingsFile, j, 'utf-8')
+  writeSettings(JSON.stringify(settings))
 }
 
 // Load settings from a JSON doc.  Handle version upgrades.

@@ -81,8 +81,10 @@ button {
     font-size: 16px;
 }
 
-button:hover {
-  background-color: #007CAA;
+@media (hover: hover) {
+  button:hover {
+    background-color: #007CAA;
+  }
 }
 
 button.primary {

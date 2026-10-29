@@ -5,7 +5,8 @@ import React, {
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux';
 
-import { electron, fs, path } from '../utils/electronImports'
+import { fs, path } from '../utils/electronImports'
+import { showOpenDialog } from '../utils/platform'
 import Modal from '../components/Modal';
 import { RootState, Font } from '../redux/types';
 import { Toolbar } from '../redux/toolbar';
@@ -29,17 +30,11 @@ function loadFont(filename: string): Font {
   return { bits, charOrder };
 }
 
-export function openFileDialog() {
-  const { dialog } = electron.remote;
-  const window = electron.remote.getCurrentWindow();
+export function openFileDialog(): Promise<string|undefined> {
   const filters = [
     { name: 'C64 font file', extensions: ['64c'] },
   ]
-  const filename = dialog.showOpenDialogSync(window, { properties: ['openFile'], filters })
-  if (filename === undefined || filename.length !== 1) {
-    return undefined;
-  }
-  return filename[0];
+  return showOpenDialog(filters);
 }
 
 interface CustomFontProps {
@@ -50,10 +45,11 @@ interface CustomFontProps {
 
 class CustomFont extends Component<CustomFontProps> {
   handleLoadFont = () => {
-    const filename = openFileDialog();
-    if (filename !== undefined) {
-      this.props.onLoadFont(this.props.id, filename);
-    }
+    openFileDialog().then(filename => {
+      if (filename !== undefined) {
+        this.props.onLoadFont(this.props.id, filename);
+      }
+    });
   }
 
   render () {

@@ -1,0 +1,43 @@
+.backdrop {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+}
+
+.menu {
+  position: fixed;
+  z-index: 41;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #3a3a3c;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.menu button {
+  min-width: 0;
+  margin: 0;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  background: none;
+  color: #f2f2f7;
+  font: 400 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-align: left;
+}
+
+.menu button + button {
+  border-top: 1px solid #48484a;
+}
+
+.menu button:hover {
+  background: #48484a;
+}
+
+.menu .destructive {
+  color: #ff6961;
+}

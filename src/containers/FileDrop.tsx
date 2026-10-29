@@ -5,6 +5,8 @@ import React, {
   DragEvent
 } from 'react';
 
+import { putBrowserFile } from '../utils/platform';
+
 interface FileDropProps {
   className: string;
   loadDroppedFile: (filename: string) => void;
@@ -83,7 +85,12 @@ export default class FileDrop extends Component<FileDropProps, FileDropState> {
       const files = event.dataTransfer.files;
       if (files.length == 1) {
         const file0 = files[0] as any;
-        this.props.loadDroppedFile(file0.path);
+        if (file0.path) {
+          this.props.loadDroppedFile(file0.path);
+        } else {
+          // Browser build: no filesystem path, copy the file into memory first.
+          putBrowserFile(file0).then(this.props.loadDroppedFile);
+        }
       }
     }
   }

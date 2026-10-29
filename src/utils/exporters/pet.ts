@@ -32,3 +32,19 @@ export function savePET(filename: string, fbs: FramebufWithFont[], fmt: FileForm
     console.error(e)
   }
 }
+
+// Commodore PET screen RAM dump as a .prg: a $8000 load address followed
+// by the screencodes, so LOAD"NAME",8,1 puts the picture on screen.  A
+// 40-column PET screen is 1000 bytes, 80-column 2000 bytes.
+const PET_SCREEN_RAM = 0x8000;
+
+export function savePetPrg(filename: string, fb: FramebufWithFont): void {
+  try {
+    const bytes = [PET_SCREEN_RAM & 0xff, PET_SCREEN_RAM >> 8];
+    Array.prototype.push.apply(bytes, flatten2d(fb.framebuf, 'code'));
+    fs.writeFileSync(filename, Buffer.from(bytes), null);
+  } catch(e) {
+    alert(`Failed to save file '${filename}'!`)
+    console.error(e)
+  }
+}

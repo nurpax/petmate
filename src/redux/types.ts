@@ -119,9 +119,16 @@ export interface Toolbar {
   showImport: { show: boolean, fmt?: FileFormat}; // fmt undefined only when show=false
   selectedPaletteRemap: number;
   canvasGrid: boolean;
+  crtEffect: boolean;
   shortcutsActive: boolean;
 
   newScreenSize: { width: number, height: number };
+
+  // Touch UI cursor mode: drawing happens at an on-screen cursor that's
+  // moved with a touch pad, instead of under the finger.
+  cursorMode: boolean;
+  cursorPos: Coord2;
+  cursorDrawing: boolean;
 
   framebufUIState: {[framebufIndex: number]: FramebufUIState};
 }

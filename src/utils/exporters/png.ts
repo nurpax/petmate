@@ -1,9 +1,8 @@
 
 import { FramebufWithFont, FileFormatPng, RgbPalette } from '../../redux/types'
 import { framebufToPixels, scalePixels, computeOutputImageDims } from './util'
-import { electron, fs } from '../electronImports'
-
-const nativeImage = electron.nativeImage
+import { fs } from '../electronImports'
+import { PNG } from 'pngjs'
 
 export function savePNG(filename: string, fb: FramebufWithFont, palette: RgbPalette, fmt: FileFormatPng): void {
   try {
@@ -18,10 +17,15 @@ export function savePNG(filename: string, fb: FramebufWithFont, palette: RgbPale
       // TODO is this enough to fool png->jpeg transcoders heuristics?
       pixBuf[3] = 254;
     }
-    const img = nativeImage.createFromBuffer(pixBuf, {
-      width: scale*imgWidth, height: scale*imgHeight
-    })
-    fs.writeFileSync(filename, img.toPNG(), null);
+    // pixBuf is BGRA, PNG wants RGBA.
+    for (let i = 0; i < pixBuf.length; i += 4) {
+      const b = pixBuf[i];
+      pixBuf[i] = pixBuf[i+2];
+      pixBuf[i+2] = b;
+    }
+    const img = new PNG({ width: scale*imgWidth, height: scale*imgHeight });
+    img.data = pixBuf;
+    fs.writeFileSync(filename, PNG.sync.write(img), null);
   }
   catch(e) {
     alert(`Failed to save file '${filename}'!`);

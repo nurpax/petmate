@@ -5,15 +5,20 @@ import {
   rowColFromScreencode,
   systemFontData,
   systemFontDataLower,
+  petFontData,
+  petFontDataLower,
   charOrderUpper,
   charOrderLower } from '../utils'
 
 import { RootState, Font, Framebuf, Coord2, Transform, Brush, FramebufUIState } from './types'
 import { mirrorBrush, findTransformedChar } from './brush'
-import { CHARSET_UPPER, CHARSET_LOWER } from './editor'
+import { CHARSET_UPPER, CHARSET_LOWER, CHARSET_PET_UPPER, CHARSET_PET_LOWER } from './editor'
 
 import { getCurrentScreenFramebufIndex } from './screensSelectors'
 import { CustomFonts } from './customFonts'
+
+
+const ROM_CHARSETS = [CHARSET_UPPER, CHARSET_LOWER, CHARSET_PET_UPPER, CHARSET_PET_LOWER]
 
 export const getFramebufByIndex = (state: RootState, idx: number | null) => {
   if (idx !== null && idx < state.framebufList.length) {
@@ -27,8 +32,16 @@ export const getCurrentFramebuf = (state: RootState) => {
 }
 
 export const getROMFontBits = (charset: string): Font => {
-  if (charset !== CHARSET_UPPER && charset !== CHARSET_LOWER) {
+  if (!ROM_CHARSETS.includes(charset)) {
     throw new Error(`unknown charset ${charset}`);
+  }
+  // The PET ROM uses the same screencode layout as the C64, so the
+  // C64 char orders apply.
+  if (charset === CHARSET_PET_LOWER) {
+    return { bits: petFontDataLower, charOrder: charOrderLower };
+  }
+  if (charset === CHARSET_PET_UPPER) {
+    return { bits: petFontData, charOrder: charOrderUpper };
   }
   if (charset === CHARSET_LOWER) {
     return {
@@ -50,7 +63,7 @@ export const getROMFontBits = (charset: string): Font => {
 const getROMFontBitsMemoized = memoize(getROMFontBits)
 
 export const getFramebufFont = (state: RootState, framebuf: Framebuf): { charset: string, font: Font } => {
-  if (framebuf.charset === CHARSET_UPPER || framebuf.charset === CHARSET_LOWER) {
+  if (ROM_CHARSETS.includes(framebuf.charset)) {
     return {
       charset: framebuf.charset,
       font: getROMFontBitsMemoized(framebuf.charset)

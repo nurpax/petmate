@@ -52,8 +52,13 @@ export function saveGIF(filename: string, fbs: FramebufWithFont[], palette: RgbP
       console.error('invalid loop mode', options.loopMode)
     }
 
-    let file = fs.createWriteStream(filename);
-    encoder.pipe(file);
+    // Collect the encoded bytes and write them out in one go, the
+    // browser build has no write streams.
+    const chunks: Buffer[] = [];
+    encoder.on('data', (chunk: Buffer) => chunks.push(chunk));
+    encoder.on('end', () => {
+      fs.writeFileSync(filename, Buffer.concat(chunks), null);
+    });
 
     encoder.writeHeader();
     if (options.animMode !== 'anim' || fbs.length == 1) {

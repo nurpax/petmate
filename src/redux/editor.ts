@@ -16,6 +16,8 @@ import { ActionsUnion, updateField } from './typeUtils'
 
 export const CHARSET_UPPER = 'upper'
 export const CHARSET_LOWER = 'lower'
+export const CHARSET_PET_UPPER = 'petUpper'
+export const CHARSET_PET_LOWER = 'petLower'
 
 export const DEFAULT_BACKGROUND_COLOR = 6
 export const DEFAULT_BORDER_COLOR = 14
