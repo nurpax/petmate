@@ -2,6 +2,8 @@
 interface FileFormatBase {
   name: string;
   ext: string;
+  // File extension for the save dialog, if different from ext
+  fileExt?: string;
   commonExportParams: {
     selectedFramebufIndex: number;
   };
@@ -78,6 +80,10 @@ export interface FileFormatPet extends FileFormatBase {
   ext: 'pet';
 }
 
+export interface FileFormatPetPrg extends FileFormatBase {
+  ext: 'petprg';
+}
+
 export type FileFormat =
     FileFormatAsm
   | FileFormatD64
@@ -89,3 +95,4 @@ export type FileFormat =
   | FileFormatJson
   | FileFormatSeq
   | FileFormatPet
+  | FileFormatPetPrg

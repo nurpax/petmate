@@ -1,0 +1,73 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.55) 0px,
+    rgba(0, 0, 0, 0.55) 1px,
+    rgba(0, 0, 0, 0) 1px,
+    rgba(0, 0, 0, 0) 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0) 42%,
+      rgba(0, 0, 0, 0.28) 68%,
+      rgba(0, 0, 0, 0.62) 100%
+    );
+  box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.38);
+}
+
+.vignetteGreen {
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0) 42%,
+      rgba(0, 18, 6, 0.22) 68%,
+      rgba(0, 0, 0, 0.62) 100%
+    );
+  box-shadow:
+    inset 0 0 70px rgba(0, 0, 0, 0.38),
+    inset 0 0 18px rgba(80, 255, 120, 0.06);
+}
+
+.glass {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.04) 16%,
+    rgba(0, 0, 0, 0) 34%
+  );
+  mix-blend-mode: screen;
+}
+
+.glassGreen {
+  background: linear-gradient(
+    168deg,
+    rgba(220, 255, 230, 0.16) 0%,
+    rgba(180, 255, 200, 0.04) 16%,
+    rgba(0, 0, 0, 0) 34%
+  );
+}

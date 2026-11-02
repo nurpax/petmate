@@ -119,6 +119,7 @@ export interface Toolbar {
   showImport: { show: boolean, fmt?: FileFormat}; // fmt undefined only when show=false
   selectedPaletteRemap: number;
   canvasGrid: boolean;
+  crtEffect: boolean;
   shortcutsActive: boolean;
 
   newScreenSize: { width: number, height: number };

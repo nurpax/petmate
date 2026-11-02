@@ -9,7 +9,8 @@ import {
   saveGIF,
   saveJSON,
   saveSEQ,
-  savePET
+  savePET,
+  savePetPrg
 } from './exporters'
 
 import {
@@ -36,6 +37,12 @@ const { ipcRenderer } = electron
 
 const defaultExportCommon = {
   selectedFramebufIndex: 0
+}
+
+// The 80-column PET uses the same physical screen width as the 40-column
+// models. Glyphs are still 8 dots wide; each dot is just half as wide.
+export function screenPixelAspectX(columns: number): number {
+  return columns === 80 ? 0.5 : 1;
 }
 
 // TODO ts use FileFormat type
@@ -113,6 +120,12 @@ export const formats: { [index: string]: FileFormat } = {
     exportOptions: {
       currentScreenOnly: true
     }
+  },
+  petprg: {
+    name: 'Commodore PET screen RAM .prg',
+    ext: 'petprg',
+    fileExt: 'prg',
+    commonExportParams: defaultExportCommon,
   },
   pet: {
     name: 'C64 Raster Effect Editor .pet',
@@ -198,6 +211,8 @@ const saveFramebufs = (fmt: FileFormat, filename: string, framebufs: FramebufWit
     return saveJSON(filename, framebufs, fonts, fmt);
   } else if (fmt.ext === 'pet') {
     return savePET(filename, framebufs, fmt);
+  } else if (fmt.ext === 'petprg') {
+    return savePetPrg(filename, selectedFramebuf);
   }
   throw new Error("shouldn't happen");
 }
@@ -310,6 +325,8 @@ export const loadAppFile = (filename: string) => {
 
 export const systemFontData = loadAppFile('assets/system-charset.bin')
 export const systemFontDataLower = loadAppFile('assets/system-charset-lower.bin')
+export const petFontData = loadAppFile('assets/pet-charset-upper.bin')
+export const petFontDataLower = loadAppFile('assets/pet-charset-lower.bin')
 export const executablePrgTemplate = loadAppFile('assets/template.prg')
 
 export function setWorkspaceFilenameWithTitle(setWorkspaceFilename: (fname: string) => void, filename: string) {
@@ -368,7 +385,7 @@ export function dialogExportFile(fmt: FileFormat, framebufs: FramebufWithFont[],
   const {dialog} = electron.remote
   const window = electron.remote.getCurrentWindow();
   const filters = [
-    {name: fmt.name, extensions: [fmt.ext]}
+    {name: fmt.name, extensions: [fmt.fileExt || fmt.ext]}
   ]
   const filename = dialog.showSaveDialogSync(window, {properties: ['openFile'], filters})
   if (filename === undefined) {

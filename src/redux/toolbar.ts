@@ -180,6 +180,7 @@ const actionCreators = {
   setShowImport: (show: {show:boolean, fmt?:FileFormat}) => createAction('Toolbar/SET_SHOW_IMPORT', show),
   setSelectedPaletteRemap: (remapIdx: number) => createAction('Toolbar/SET_SELECTED_PALETTE_REMAP', remapIdx),
   setCanvasGrid: (flag: boolean) => createAction('Toolbar/SET_CANVAS_GRID', flag),
+  setCrtEffect: (flag: boolean) => createAction('Toolbar/SET_CRT_EFFECT', flag),
   setShortcutsActive: (flag: boolean) => createAction('Toolbar/SET_SHORTCUTS_ACTIVE', flag),
   setNewScreenSize: (dims: { width: number, height: number }) => createAction('Toolbar/SET_NEW_SCREEN_SIZE', dims)
 };
@@ -294,6 +295,9 @@ export class Toolbar {
                 const { canvasGrid } = getState().toolbar
                 dispatch(Toolbar.actions.setCanvasGrid(!canvasGrid))
               })
+            } else if (key === 'p') {
+              dispatch(Toolbar.actions.setCrtEffect(!state.toolbar.crtEffect))
+              return
             }
           }
         }
@@ -550,6 +554,7 @@ export class Toolbar {
       showImport: { show: false },
       selectedPaletteRemap: 0,
       canvasGrid: false,
+      crtEffect: false,
       shortcutsActive: true,
       newScreenSize: { width: DEFAULT_FB_WIDTH, height: DEFAULT_FB_HEIGHT },
       framebufUIState: {}
@@ -681,6 +686,8 @@ export class Toolbar {
         return updateField(state, 'selectedPaletteRemap', action.data);
       case 'Toolbar/SET_CANVAS_GRID':
         return updateField(state, 'canvasGrid', action.data);
+      case 'Toolbar/SET_CRT_EFFECT':
+        return updateField(state, 'crtEffect', action.data);
       case 'Toolbar/SET_SHORTCUTS_ACTIVE':
         return updateField(state, 'shortcutsActive', action.data);
       case 'Toolbar/SET_NEW_SCREEN_SIZE':

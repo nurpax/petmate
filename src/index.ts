@@ -139,6 +139,9 @@ electron.ipcRenderer.on('menu', (_event: Event, message: string) => {
     case 'export-pet':
       dispatchExport(formats.pet)
       return
+    case 'export-pet-prg':
+      dispatchExport(formats.petprg)
+      return
     case 'import-d64':
       store.dispatch(ReduxRoot.actions.fileImportAppend(formats.d64))
       return

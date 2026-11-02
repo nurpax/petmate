@@ -17,7 +17,8 @@ const exporters = [
   { label: 'PETSCII (.c)', cmd: 'export-marq-c' },
   { label: 'PNG (.png)', cmd: 'export-png' },
   { label: 'SEQ (.seq)', cmd: 'export-seq' },
-  { label: 'PET (.pet)', cmd: 'export-pet' }
+  { label: 'PET (.pet)', cmd: 'export-pet' },
+  { label: 'Commodore PET screen RAM (.prg)', cmd: 'export-pet-prg' }
 ]
 
 module.exports = class MenuBuilder {
